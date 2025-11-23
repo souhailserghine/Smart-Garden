@@ -6,16 +6,14 @@ class Historique {
     private $tache;
     private $duree;
     private $idUtilisateur;
-    private $id_dosage;
 
-    public function __construct($idHistorique = null, $dateConnexion = "", $dateDeconnexion = "", $tache = "", $duree = "", $idUtilisateur = null, $id_dosage = null) {
+    public function __construct($idHistorique = null, $dateConnexion = "", $dateDeconnexion = "", $tache = "", $duree = "", $idUtilisateur = null) {
         $this->idHistorique = $idHistorique;
         $this->dateConnexion = $dateConnexion;
         $this->dateDeconnexion = $dateDeconnexion;
         $this->tache = $tache;
         $this->duree = $duree;
         $this->idUtilisateur = $idUtilisateur;
-        $this->id_dosage = $id_dosage;
     }
 
     // === Getters ===
@@ -25,7 +23,6 @@ class Historique {
     public function getTache() { return $this->tache; }
     public function getDuree() { return $this->duree; }
     public function getIdUtilisateur() { return $this->idUtilisateur; }
-    public function getIdDosage() { return $this->id_dosage; }
 
     // === Setters ===
     public function setIdHistorique($idHistorique) { $this->idHistorique = $idHistorique; }
@@ -34,6 +31,5 @@ class Historique {
     public function setTache($tache) { $this->tache = $tache; }
     public function setDuree($duree) { $this->duree = $duree; }
     public function setIdUtilisateur($idUtilisateur) { $this->idUtilisateur = $idUtilisateur; }
-    public function setIdDosage($id_dosage) { $this->id_dosage = $id_dosage; }
 }
 ?>

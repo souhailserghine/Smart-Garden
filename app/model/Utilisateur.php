@@ -8,8 +8,9 @@ class Utilisateur {
     private $dateInscription;
     private $role;
     private $statut;
-
-    public function __construct($idUtilisateur = null, $nom = "", $email = "", $motDePasse = "", $localisation = "", $dateInscription = "", $role = "", $statut = "actif") {
+    private $verified;
+    
+    public function __construct($idUtilisateur = null, $nom = "", $email = "", $motDePasse = "", $localisation = "", $dateInscription = "", $role = "", $statut = "actif", $verified = 0) {
         $this->idUtilisateur = $idUtilisateur;
         $this->nom = $nom;
         $this->email = $email;
@@ -18,6 +19,7 @@ class Utilisateur {
         $this->dateInscription = $dateInscription;
         $this->role = $role;
         $this->statut = $statut;
+        $this->verified = $verified;
     }
 
     // === Getters ===
@@ -29,6 +31,7 @@ class Utilisateur {
     public function getDateInscription() { return $this->dateInscription; }
     public function getRole() { return $this->role; }
     public function getStatut() { return $this->statut; }
+    public function getVerified() { return $this->verified; }
 
     // === Setters ===
     public function setIdUtilisateur($idUtilisateur) { $this->idUtilisateur = $idUtilisateur; }
@@ -39,6 +42,7 @@ class Utilisateur {
     public function setDateInscription($dateInscription) { $this->dateInscription = $dateInscription; }
     public function setRole($role) { $this->role = $role; }
     public function setStatut($statut) { $this->statut = $statut; }
+    public function setVerified($verified) { $this->verified = $verified; }
 
 }
 ?>
