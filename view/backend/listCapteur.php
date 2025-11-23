@@ -1,25 +1,68 @@
 <?php
 session_start();
 
-include '../../controller/CategorieC.php';
+include '../../controller/CapteurC.php';
 
-$categorieC = new CategorieC();
-$listeCategories = $categorieC->showCategorieWithDetails();
-
-// Statistiques
-$totalCategories = count($listeCategories);
-$totalCapteurs = array_sum(array_column($listeCategories, 'nombre_capteurs'));
+$capteurC = new CapteurC();
+$listeCapteurs = [];
+$filteredCategoryName = "";
 
 // Gestion des messages de session
 $success_message = $_SESSION['success_message'] ?? '';
 $error_message = $_SESSION['error_message'] ?? '';
 unset($_SESSION['success_message'], $_SESSION['error_message']);
 
+// Statistiques
+$totalCapteurs = 0;
+$capteursActifs = 0;
+$capteursMaintenance = 0;
+$capteursDefectueux = 0;
+
+// Gestion du filtre par catégorie
+try {
+    if (isset($_GET['id_categorie']) && !empty($_GET['id_categorie'])) {
+        $id_categorie = (int)$_GET['id_categorie'];
+        $listeCapteurs = $capteurC->showCapteurByCategorie($id_categorie);
+        
+        if (!empty($listeCapteurs)) {
+            $filteredCategoryName = $listeCapteurs[0]['nom_categorie'];
+        }
+    } else {
+        $listeCapteurs = $capteurC->showCapteurWithDetails();
+    }
+
+    // Calculer les statistiques
+    $totalCapteurs = count($listeCapteurs);
+    foreach ($listeCapteurs as $capteur) {
+        $etat = $capteur['etatCapteur'] ?? 'inactif';
+        switch ($etat) {
+            case 'actif':
+                $capteursActifs++;
+                break;
+            case 'maintenance':
+                $capteursMaintenance++;
+                break;
+            case 'defectueux':
+                $capteursDefectueux++;
+                break;
+        }
+    }
+} catch (Exception $e) {
+    $error_message = "Erreur lors du chargement des capteurs : " . $e->getMessage();
+}
+
 // Recherche
 $searchQuery = $_GET['search'] ?? '';
 if ($searchQuery) {
-    $listeCategories = array_filter($listeCategories, function($cat) use ($searchQuery) {
-        return stripos($cat['nom_categorie'], $searchQuery) !== false;
+    $listeCapteurs = array_filter($listeCapteurs, function($capteur) use ($searchQuery) {
+        $searchIn = strtolower(
+            $capteur['nom_categorie'] . ' ' . 
+            $capteur['uniteCapteur'] . ' ' . 
+            $capteur['etatCapteur'] . ' ' . 
+            $capteur['emplacement'] . ' ' . 
+            ($capteur['nom_plante'] ?? '')
+        );
+        return stripos($searchIn, strtolower($searchQuery)) !== false;
     });
 }
 ?>
@@ -27,7 +70,7 @@ if ($searchQuery) {
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Gestion Catégories - SmartGarden</title>
+    <title>Gestion Capteurs - SmartGarden</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- Google Fonts -->
@@ -45,7 +88,7 @@ if ($searchQuery) {
         <!-- ========== SIDEBAR ========== -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h3 style="font-size: 1.2rem;padding-left: 20px; color: #2ecc71;">
+               <h3 style="font-size: 1.2rem;padding-left: 20px; color: #2ecc71;">
                         <img src="img/logo-64x64.png" alt="Logo" class="me-2" style="width: 32px; height: 32px; vertical-align: middle;">SmartGarden
                     </h3>
             </div>
@@ -128,19 +171,17 @@ if ($searchQuery) {
                 </div>
             <?php endif; ?>
 
+            <!-- Bandeau de filtre -->
+            <?php if ($filteredCategoryName): ?>
+                <div class="alert" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af; border: 2px solid #60a5fa; margin: 20px 30px;">
+                    <i class="fas fa-filter"></i>
+                    <span>Affichage des capteurs de la catégorie : <strong><?= htmlspecialchars($filteredCategoryName) ?></strong></span>
+                </div>
+            <?php endif; ?>
+
             <!-- Statistics Cards -->
             <div class="stats-container">
                 <div class="stat-card stat-primary">
-                    <div class="stat-icon">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
-                    <div class="stat-content">
-                        <p class="stat-label">Total Catégories</p>
-                        <h3 class="stat-value"><?= $totalCategories ?></h3>
-                    </div>
-                </div>
-
-                <div class="stat-card stat-info">
                     <div class="stat-icon">
                         <i class="fas fa-microchip"></i>
                     </div>
@@ -155,41 +196,65 @@ if ($searchQuery) {
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stat-content">
-                        <p class="stat-label">Catégories Actives</p>
-                        <h3 class="stat-value"><?= count(array_filter($listeCategories, fn($c) => $c['nombre_capteurs'] > 0)) ?></h3>
+                        <p class="stat-label">Capteurs Actifs</p>
+                        <h3 class="stat-value"><?= $capteursActifs ?></h3>
                     </div>
                 </div>
 
                 <div class="stat-card stat-warning">
                     <div class="stat-icon">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                    <div class="stat-content">
+                        <p class="stat-label">En Maintenance</p>
+                        <h3 class="stat-value"><?= $capteursMaintenance ?></h3>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-danger">
+                    <div class="stat-icon">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
                     <div class="stat-content">
-                        <p class="stat-label">Sans Capteurs</p>
-                        <h3 class="stat-value"><?= count(array_filter($listeCategories, fn($c) => $c['nombre_capteurs'] == 0)) ?></h3>
+                        <p class="stat-label">Défectueux</p>
+                        <h3 class="stat-value"><?= $capteursDefectueux ?></h3>
                     </div>
                 </div>
             </div>
 
-            <!-- Category Management Section -->
+            <!-- Sensor Management Section -->
             <div class="content-card">
                 <div class="card-header">
-                    <h2 class="card-title">Gestion des Catégories</h2>
+                    <h2 class="card-title">
+                        Gestion des Capteurs
+                        <?php if ($filteredCategoryName): ?>
+                            <span style="font-size: 0.7em; color: #0ea5e9;"> - <?= htmlspecialchars($filteredCategoryName) ?></span>
+                        <?php endif; ?>
+                    </h2>
                     <div class="card-actions">
-                        <a href="addCategorie.php" class="btn btn-primary">
+                        <?php if ($filteredCategoryName): ?>
+                            <a href="listCapteur.php" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Tous les capteurs</span>
+                            </a>
+                        <?php endif; ?>
+                        <a href="addCapteur.php" class="btn btn-primary">
                             <i class="fas fa-plus"></i>
-                            <span>Ajouter Catégorie</span>
+                            <span>Ajouter Capteur</span>
                         </a>
                     </div>
                 </div>
 
                 <!-- Search Section -->
-                <form method="GET" action="categories.php" class="search-form" id="searchForm">
+                <form method="GET" action="listCapteur.php" class="search-form" id="searchForm">
+                    <?php if (isset($_GET['id_categorie'])): ?>
+                        <input type="hidden" name="id_categorie" value="<?= htmlspecialchars($_GET['id_categorie']) ?>">
+                    <?php endif; ?>
                     <div class="search-grid-single">
                         <input type="text" 
                                class="form-input search-input" 
                                name="search" 
-                               placeholder="🔍 Rechercher une catégorie..." 
+                               placeholder="🔍 Rechercher un capteur..." 
                                value="<?= htmlspecialchars($searchQuery) ?>">
                         
                         <button type="submit" class="btn btn-search">
@@ -199,30 +264,36 @@ if ($searchQuery) {
                     </div>
                 </form>
 
-                <!-- Categories Table -->
+                <!-- Sensors Table -->
                 <div class="table-container">
-                    <?php if (empty($listeCategories)): ?>
+                    <?php if (empty($listeCapteurs)): ?>
                         <div class="no-data">
                             <i class="fas fa-inbox fa-3x"></i>
-                            <p>Aucune catégorie trouvée</p>
-                            <a href="addCategorie.php" class="btn btn-primary btn-sm">
-                                <i class="fas fa-plus"></i> Ajouter une catégorie
-                            </a>
+                            <p>Aucun capteur trouvé<?= $filteredCategoryName ? ' pour cette catégorie' : '' ?></p>
+                            <?php if (!$filteredCategoryName): ?>
+                                <a href="addCapteur.php" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus"></i> Ajouter un capteur
+                                </a>
+                            <?php endif; ?>
                         </div>
                     <?php else: ?>
                         <table class="data-table">
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Nom de la Catégorie</th>
-                                    <th>Nombre de Capteurs</th>
+                                    <th>Catégorie</th>
+                                    <th>Unité</th>
+                                    <th>État</th>
+                                    <th>Emplacement</th>
+                                    <th>Plante</th>
+                                    <th>Date Installation</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php 
                                 $index = 1;
-                                foreach ($listeCategories as $categorie):
+                                foreach ($listeCapteurs as $capteur):
                                     // Icônes par catégorie
                                     $categoryIcons = [
                                         'Température' => 'fa-temperature-high',
@@ -234,45 +305,76 @@ if ($searchQuery) {
                                         'CO2' => 'fa-smog'
                                     ];
                                     
-                                    $icon = 'fa-layer-group';
+                                    $categorieName = $capteur['nom_categorie'] ?? 'Non défini';
+                                    $icon = 'fa-microchip';
                                     foreach ($categoryIcons as $key => $iconClass) {
-                                        if (stripos($categorie['nom_categorie'], $key) !== false) {
+                                        if (stripos($categorieName, $key) !== false) {
                                             $icon = $iconClass;
                                             break;
                                         }
                                     }
+
+                                    // Classes de statut
+                                    $etat = $capteur['etatCapteur'] ?? 'inactif';
+                                    $statutClass = match($etat) {
+                                        'actif' => 'badge-success',
+                                        'maintenance' => 'badge-warning',
+                                        'defectueux' => 'badge-danger',
+                                        default => 'badge-secondary'
+                                    };
                                 ?>
                                 <tr>
                                     <td><?= $index ?></td>
                                     <td>
                                         <div class="category-name">
                                             <i class="fas <?= $icon ?> category-icon"></i>
-                                            <strong><?= htmlspecialchars($categorie['nom_categorie']) ?></strong>
+                                            <strong><?= htmlspecialchars($categorieName) ?></strong>
                                         </div>
                                     </td>
+                                    <td><strong><?= htmlspecialchars($capteur['uniteCapteur'] ?? 'N/A') ?></strong></td>
                                     <td>
-                                        <span class="badge <?= $categorie['nombre_capteurs'] == 0 ? 'badge-warning' : 'badge-info' ?>">
-                                            <i class="fas fa-microchip"></i>
-                                            <?= $categorie['nombre_capteurs'] ?> capteur<?= $categorie['nombre_capteurs'] > 1 ? 's' : '' ?>
+                                        <span class="badge <?= $statutClass ?>">
+                                            <?php
+                                            $statusIcons = [
+                                                'actif' => 'fa-check',
+                                                'inactif' => 'fa-times',
+                                                'maintenance' => 'fa-wrench',
+                                                'defectueux' => 'fa-exclamation-triangle'
+                                            ];
+                                            ?>
+                                            <i class="fas <?= $statusIcons[$etat] ?? 'fa-circle' ?>"></i>
+                                            <?= ucfirst($etat) ?>
                                         </span>
                                     </td>
                                     <td>
+                                        <i class="fas fa-map-marker-alt" style="color: #10b981; margin-right: 5px;"></i>
+                                        <?= htmlspecialchars($capteur['emplacement'] ?? 'Non défini') ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($capteur['nom_plante'])): ?>
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-leaf"></i>
+                                                <?= htmlspecialchars($capteur['nom_plante']) ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span style="color: #999; font-style: italic;">Aucune plante</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-calendar-alt" style="color: #10b981; margin-right: 5px;"></i>
+                                        <?= !empty($capteur['dateInstallation']) ? date('d/m/Y', strtotime($capteur['dateInstallation'])) : 'N/A' ?>
+                                    </td>
+                                    <td>
                                         <div class="action-buttons">
-                                            <button class="btn-action btn-view" 
-                                                    title="Voir les capteurs"
-                                                    onclick="window.location.href='listCapteur.php?id_categorie=<?= $categorie['id_categorie'] ?>'">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            
                                             <button class="btn-action btn-edit" 
                                                     title="Modifier"
-                                                    onclick="window.location.href='updateCategorie.php?id=<?= $categorie['id_categorie'] ?>'">
+                                                    onclick="window.location.href='updateCapteur.php?id=<?= $capteur['id_capteur'] ?>'">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             
                                             <button class="btn-action btn-delete" 
                                                     title="Supprimer"
-                                                    onclick="confirmDelete(<?= $categorie['id_categorie'] ?>, '<?= htmlspecialchars($categorie['nom_categorie']) ?>', <?= $categorie['nombre_capteurs'] ?>)">
+                                                    onclick="confirmDeleteCapteur(<?= $capteur['id_capteur'] ?>, '<?= htmlspecialchars($categorieName) ?>')">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -295,14 +397,11 @@ if ($searchQuery) {
     <script src="js/capteur.js"></script>
     
     <script>
-    function confirmDelete(id, name, nbCapteurs) {
-        let message = `⚠️ Êtes-vous sûr de vouloir supprimer la catégorie "${name}" ?`;
-        if (nbCapteurs > 0) {
-            message += `\n\nAttention : ${nbCapteurs} capteur(s) sont associés à cette catégorie !`;
-        }
+    function confirmDeleteCapteur(id, categorie) {
+        const message = `⚠️ Êtes-vous sûr de vouloir supprimer le capteur "${categorie}" ?\n\nCette action est irréversible.`;
         
         if (confirm(message)) {
-            window.location.href = 'deleteCategorie.php?id=' + id;
+            window.location.href = 'deleteCapteur.php?id=' + id;
         }
     }
     </script>

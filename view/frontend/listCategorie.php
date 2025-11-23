@@ -1,40 +1,14 @@
 <?php
 session_start();
+include '../../controller/CategorieC.php';
 
-include '../../controller/CapteurC.php';
-
-$capteurC = new CapteurC();
-$listeCapteurs = [];
-$error = "";
-$filteredCategoryName = "";
+$categorieC = new CategorieC();
+$listeCategories = $categorieC->showCategorieWithDetails();
 
 // Gestion des messages de session
-$success = "";
-if (isset($_SESSION['success_message'])) {
-    $success = $_SESSION['success_message'];
-    unset($_SESSION['success_message']);
-}
-
-if (isset($_SESSION['error_message'])) {
-    $error = $_SESSION['error_message'];
-    unset($_SESSION['error_message']);
-}
-
-// Gestion du filtre par catégorie
-try {
-    if (isset($_GET['id_categorie']) && !empty($_GET['id_categorie'])) {
-        $id_categorie = (int)$_GET['id_categorie'];
-        $listeCapteurs = $capteurC->showCapteurByCategorie($id_categorie);
-        
-        if (!empty($listeCapteurs)) {
-            $filteredCategoryName = $listeCapteurs[0]['nom_categorie'];
-        }
-    } else {
-        $listeCapteurs = $capteurC->showCapteurWithDetails();
-    }
-} catch (Exception $e) {
-    $error = "Erreur lors du chargement des capteurs : " . $e->getMessage();
-}
+$success_message = isset($_SESSION['success_message']) ? $_SESSION['success_message'] : '';
+$error_message = isset($_SESSION['error_message']) ? $_SESSION['error_message'] : '';
+unset($_SESSION['success_message'], $_SESSION['error_message']);
 ?>
 
 <!DOCTYPE html>
@@ -44,11 +18,10 @@ try {
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" type="image/png" href="./assets/images/logo-16x16.png" />
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Capteurs - SmartGarden</title>
+    <link rel="icon" type="image/png" href="../public/assets/images/logo.jpg" />
+    <title>Catégories - SmartGarden</title>
 
-    <!-- Fonts -->
+       <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display" rel="stylesheet">
     <link href="./assets/css/boxicons.min.css" rel="stylesheet">
 
@@ -107,17 +80,56 @@ try {
             border: 1px solid #cfc;
         }
 
-        .alert-info {
-            background: #e7f3ff;
-            color: #0866ff;
-            border: 1px solid #b3d9ff;
-        }
-
         .dashboard-actions {
             margin-bottom: 20px;
             display: flex;
+            justify-content: space-between;
             gap: 12px;
             flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: #0866ff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #0052cc;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-info {
+            background: #0866ff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-info:hover {
+            background: #0052cc;
+            color: white;
+            text-decoration: none;
         }
 
         .search-box-wrapper {
@@ -134,6 +146,7 @@ try {
             font-size: 15px;
             background: #f0f2f5;
             outline: none;
+            transition: all 0.3s ease;
         }
 
         .search-box:focus {
@@ -148,25 +161,6 @@ try {
             transform: translateY(-50%);
             color: #65676b;
             font-size: 16px;
-        }
-
-        .btn-secondary {
-            background: #e4e6eb;
-            color: #050505;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .btn-secondary:hover {
-            background: #d8dadf;
         }
 
         .table-wrapper {
@@ -199,6 +193,7 @@ try {
 
         tbody tr {
             border-bottom: 1px solid #e4e6eb;
+            transition: background 0.2s ease;
         }
 
         tbody tr:hover {
@@ -211,56 +206,10 @@ try {
             color: #050505;
         }
 
-        .status {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .status-actif {
-            background: #d3f9d8;
-            color: #00a400;
-        }
-
-        .status-inactif {
-            background: #fee;
-            color: #c00;
-        }
-
-        .status-maintenance {
-            background: #fff3cd;
-            color: #997404;
-        }
-
-        .status-defectueux {
-            background: #ffe0b2;
-            color: #e65100;
-        }
-
-        .plant-badge {
-            background: #d3f9d8;
-            color: #00a400;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .no-plant {
-            color: #65676b;
-            font-style: italic;
-        }
-
-        .category-icon, .location-icon, .date-icon {
+        td i.category-icon {
+            margin-right: 8px;
             color: #0866ff;
-            margin-right: 4px;
+            font-size: 20px;
         }
 
         .no-data {
@@ -277,8 +226,115 @@ try {
             margin: 0;
         }
 
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .badge {
+            background: #0866ff;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge.zero {
+            background: #65676b;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #e7f3ff 0%, #b3d9ff 100%);
+            border: 1px solid #80b3ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-item i {
+            font-size: 32px;
+            color: #0866ff;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #050505;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #003a75;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Ligne verte de sélection dans le sidebar */
         .sd-active {
             background-color: #f0f2f5 !important;
+        }
+
+        /* Personnalisation des flèches du sidebar */
+        .newsfeed-left-sidebar .badge-primary {
+            background-color: #0866ff !important;
+            font-size: 10px !important;
+            padding: 2px 6px !important;
+        }
+
+        .newsfeed-left-sidebar .badge-primary i {
+            font-size: 12px !important;
+        }
+
+        /* Navbar minimaliste */
+        #navbar-main {
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-link:hover {
+            opacity: 0.7;
+        }
+
+        /* Réduction de la taille des badges de notification et message */
+        #navbar-main .badge-pill {
+            font-size: 9px !important;
+            padding: 2px 5px !important;
+            min-width: 16px !important;
+            height: 16px !important;
+            line-height: 12px !important;
+        }
+
+        /* Highlight for search results */
+        .highlight-row {
+            background-color: #fef3c7 !important;
+            animation: highlight-fade 2s ease-in-out;
+        }
+
+        @keyframes highlight-fade {
+            0% {
+                background-color: #fef3c7;
+            }
+            100% {
+                background-color: transparent;
+            }
         }
     </style>
 </head>
@@ -319,7 +375,6 @@ try {
                                         <button class="btn search-button" type="button"><i class='bx bx-search'></i></button>
                                     </div>
                                 </div>
-                                
                             </form>
                             <li class="nav-item s-nav dropdown d-mobile">
                                 <a href="#" class="nav-link nav-icon nav-links drop-w-tooltip" data-toggle="dropdown" data-placement="bottom" data-title="Create" role="button" aria-haspopup="true" aria-expanded="false">
@@ -668,70 +723,70 @@ try {
                         <div class="dashboard-content">
                             <div class="dashboard-header">
                                 <h1>
-                                    <i class='bx bx-chip'></i> Gestion des Capteurs
-                                    <?php if ($filteredCategoryName): ?>
-                                        <span style="font-size: 0.6em; color: #0866ff;"> - <?= htmlspecialchars($filteredCategoryName) ?></span>
-                                    <?php endif; ?>
+                                    <i class='bx bx-category'></i> Gestion des Catégories
                                 </h1>
                                 <div class="header-divider"></div>
                             </div>
 
-                            <?php if ($filteredCategoryName): ?>
-                                <div class="alert alert-info">
-                                    <i class='bx bx-filter'></i>
-                                    <span>Affichage des capteurs de la catégorie : <strong><?= htmlspecialchars($filteredCategoryName) ?></strong></span>
-                                </div>
-                            <?php endif; ?>
-
-                            <?php if ($error): ?>
-                                <div class="alert alert-error">
-                                    <i class='bx bx-error-circle'></i>
-                                    <span><?= htmlspecialchars($error) ?></span>
-                                </div>
-                            <?php endif; ?>
-
-                            <?php if ($success): ?>
+                            <?php if ($success_message): ?>
                                 <div class="alert alert-success">
                                     <i class='bx bx-check-circle'></i>
-                                    <span><?= htmlspecialchars($success) ?></span>
+                                    <span><?= htmlspecialchars($success_message) ?></span>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if ($error_message): ?>
+                                <div class="alert alert-error">
+                                    <i class='bx bx-error-circle'></i>
+                                    <span><?= htmlspecialchars($error_message) ?></span>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if (!empty($listeCategories)): ?>
+                                <div class="stats-card">
+                                    <div class="stat-item">
+                                        <i class='bx bx-category-alt'></i>
+                                        <div class="stat-value"><?= count($listeCategories) ?></div>
+                                        <div class="stat-label">Catégories</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <i class='bx bx-chip'></i>
+                                        <div class="stat-value"><?= array_sum(array_column($listeCategories, 'nombre_capteurs')) ?></div>
+                                        <div class="stat-label">Capteurs Total</div>
+                                    </div>
                                 </div>
                             <?php endif; ?>
                             
                             <div class="dashboard-actions">
-                                <?php if ($filteredCategoryName): ?>
-                                    <a href="listCategorie.php" class="btn-secondary">
-                                        <i class='bx bx-arrow-back'></i> Retour aux catégories
-                                    </a>
-                                <?php endif; ?>
-                                
                                 <div class="search-box-wrapper">
-                                    <input type="text" id="searchBox" class="search-box" placeholder="🔍 Rechercher un capteur...">
+                                    <input type="text" id="searchBox" class="search-box" placeholder="🔍 Rechercher une catégorie...">
                                     <i class='bx bx-search search-icon'></i>
                                 </div>
+                                
+                                <a href="listCapteur.php" class="btn-primary">
+                                    <i class='bx bx-chip'></i> Tous les capteurs
+                                </a>
                             </div>
 
-                            <?php if (empty($listeCapteurs)): ?>
+                            <?php if (empty($listeCategories)): ?>
                                 <div class="no-data">
-                                    <p>📊 Aucun capteur trouvé<?= $filteredCategoryName ? ' pour cette catégorie' : '' ?>.</p>
+                                    <p>📊 Aucune catégorie trouvée.</p>
                                 </div>
                             <?php else: ?>
                                 <div class="table-wrapper">
-                                    <table id="capteurTable">
+                                    <table id="categorieTable">
                                         <thead>
                                             <tr>
                                                 <th><i class='bx bx-hash'></i> ID</th>
-                                                <th><i class='bx bx-category'></i> Catégorie</th>
-                                                <th><i class='bx bx-ruler'></i> Unité</th>
-                                                <th><i class='bx bx-radio-circle-marked'></i> État</th>
-                                                <th><i class='bx bx-map-pin'></i> Emplacement</th>
-                                                <th><i class='bx bx-leaf'></i> Plante</th>
-                                                <th><i class='bx bx-calendar'></i> Date Installation</th>
+                                                <th><i class='bx bx-category'></i> Nom de la Catégorie</th>
+                                                <th><i class='bx bx-chip'></i> Nombre de Capteurs</th>
+                                                <th style="text-align: center;"><i class='bx bx-show'></i> Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($listeCapteurs as $capteur): ?>
+                                            <?php foreach ($listeCategories as $categorie): ?>
                                                 <tr>
-                                                    <td><strong>#<?= $capteur['id_capteur'] ?></strong></td>
+                                                    <td><strong>#<?= $categorie['id_categorie'] ?></strong></td>
                                                     <td>
                                                         <?php 
                                                         $categoryIcons = [
@@ -739,43 +794,36 @@ try {
                                                             'Humidité' => 'bx-droplet',
                                                             'Luminosité' => 'bx-sun',
                                                             'Pression' => 'bx-wind',
-                                                            'pH' => 'bx-test-tube'
+                                                            'pH' => 'bx-test-tube',
+                                                            'Débit' => 'bx-water',
+                                                            'CO2' => 'bx-gas-pump'
                                                         ];
-                                                        $categorieName = $capteur['nom_categorie'] ?? 'Non défini';
-                                                        $icon = $categoryIcons[$categorieName] ?? 'bx-chip';
+                                                        $categorieName = $categorie['nom_categorie'];
+                                                        $icon = 'bx-category-alt';
+                                                        foreach ($categoryIcons as $key => $iconClass) {
+                                                            if (stripos($categorieName, $key) !== false) {
+                                                                $icon = $iconClass;
+                                                                break;
+                                                            }
+                                                        }
                                                         ?>
                                                         <i class='bx <?= $icon ?> category-icon'></i>
-                                                        <?= htmlspecialchars($categorieName) ?>
+                                                        <strong><?= htmlspecialchars($categorieName) ?></strong>
                                                     </td>
-                                                    <td><strong><?= htmlspecialchars($capteur['uniteCapteur'] ?? 'N/A') ?></strong></td>
                                                     <td>
-                                                        <?php $etat = $capteur['etatCapteur'] ?? 'inactif'; ?>
-                                                        <span class="status status-<?= $etat ?>">
-                                                            <?php
-                                                            $statusIcons = [
-                                                                'actif' => '✓',
-                                                                'inactif' => '✕',
-                                                                'maintenance' => '⚙',
-                                                                'defectueux' => '⚠'
-                                                            ];
-                                                            echo $statusIcons[$etat] ?? '•';
-                                                            ?>
-                                                            <?= ucfirst($etat) ?>
+                                                        <span class="badge <?= $categorie['nombre_capteurs'] == 0 ? 'zero' : '' ?>">
+                                                            <i class='bx bx-chip'></i>
+                                                            <?= $categorie['nombre_capteurs'] ?> capteur<?= $categorie['nombre_capteurs'] > 1 ? 's' : '' ?>
                                                         </span>
                                                     </td>
-                                                    <td><i class='bx bx-map location-icon'></i><?= htmlspecialchars($capteur['emplacement'] ?? 'Non défini') ?></td>
                                                     <td>
-                                                        <?php if (!empty($capteur['nom_plante'])): ?>
-                                                            <span class="plant-badge">
-                                                                <i class='bx bx-leaf'></i> <?= htmlspecialchars($capteur['nom_plante']) ?>
-                                                            </span>
-                                                        <?php else: ?>
-                                                            <span class="no-plant">Aucune plante</span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td>
-                                                        <i class='bx bx-time date-icon'></i>
-                                                        <?= !empty($capteur['dateInstallation']) ? date('d/m/Y', strtotime($capteur['dateInstallation'])) : 'N/A' ?>
+                                                        <div class="actions-cell">
+                                                            <a href="listCapteur.php?id_categorie=<?= $categorie['id_categorie'] ?>" 
+                                                               class="btn-info" 
+                                                               title="Consulter les capteurs de cette catégorie">
+                                                               <i class='bx bx-show'></i> Consulter les capteurs
+                                                            </a>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
@@ -801,12 +849,36 @@ try {
             e.preventDefault();
             $("#wrapper").toggleClass("toggled");
         });
+
+        // Search functionality for categories table
+        $(document).ready(function() {
+            $("#searchBox").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#categorieTable tbody tr").filter(function() {
+                    var isMatch = $(this).text().toLowerCase().indexOf(value) > -1;
+                    $(this).toggle(isMatch);
+                    
+                    // Add highlight effect when match is found
+                    if (isMatch && value.length > 0) {
+                        $(this).addClass('highlight-row');
+                        setTimeout(() => {
+                            $(this).removeClass('highlight-row');
+                        }, 2000);
+                    }
+                });
+            });
+
+            // Clear search on escape key
+            $("#searchBox").on("keydown", function(e) {
+                if (e.key === "Escape") {
+                    $(this).val('');
+                    $("#categorieTable tbody tr").show();
+                }
+            });
+        });
     </script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/components/components.js"></script>
-
-    <script type="text/javascript">
-
 </body>
 
 </html>
