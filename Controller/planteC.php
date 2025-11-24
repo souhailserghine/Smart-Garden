@@ -5,26 +5,26 @@ include '../../config.php';
 class planteC {
 
     public function ajouterPlante($plante) {
-        $db = config::getConnexion();
+    $db = config::getConnexion();
 
-        try {  
-            // INSERT corrigé
-            $req = $db->prepare('
-                INSERT INTO plante (nom_plante, date_ajout, niveau_humidite, besoin_eau, etat_sante)
-                VALUES (:nom, :date, :niveau_humidite, :besoin_eau, :etat_sante)
-            ');
+    try {  
+        $req = $db->prepare('
+            INSERT INTO plante (nom_plante, date_ajout, niveau_humidite, besoin_eau, etat_sante, idUtilisateur)
+            VALUES (:nom, :date, :niveau_humidite, :besoin_eau, :etat_sante, :idUser)
+        ');
 
-            $req->execute([
-                'nom' => $plante->getNomPlante(),
-                'date' => $plante->getDateAjout(),
-                'niveau_humidite' => $plante->getNiveauHumidite(),
-                'besoin_eau' => $plante->getBesoinEau(),
-                'etat_sante' => $plante->getEtatSante()
-            ]);
-        } catch (Exception $e) {
-            echo 'Erreur: '.$e->getMessage();
-        }
+        $req->execute([
+            'nom' => $plante->getNomPlante(),
+            'date' => $plante->getDateAjout(),
+            'niveau_humidite' => $plante->getNiveauHumidite(),
+            'besoin_eau' => $plante->getBesoinEau(),
+            'etat_sante' => $plante->getEtatSante(),
+            'idUser' => $plante->getIdUtilisateur()
+        ]);
+    } catch (Exception $e) {
+        echo 'Erreur: '.$e->getMessage();
     }
+}
 
     public function listPlantes(){
         $db = config::getConnexion();
@@ -48,8 +48,7 @@ class planteC {
                 date_ajout = :date, 
                 niveau_humidite = :niveau_humidite, 
                 besoin_eau = :besoin_eau,
-                etat_sante = :etat_sante,
-                idUtilisateur = :idUtilisateur
+                etat_sante = :etat_sante
             WHERE id_plante = :id
         ');
 
@@ -59,14 +58,21 @@ class planteC {
             'niveau_humidite' => $plante->getNiveauHumidite(),
             'besoin_eau' => $plante->getBesoinEau(),
             'etat_sante' => $plante->getEtatSante(),
-            'idUtilisateur' => $plante->getIdUtilisateur(),
             'id' => $id
         ]);
 
+    if ($req->rowCount() > 0) {
+            return true;
+        } else {
+            return false; 
+    }
+
     } catch (Exception $e) {
         echo 'Erreur: '.$e->getMessage();
+        return false;
     }
 }
+
 
 
    public function supprimerPlante($id){
@@ -105,8 +111,6 @@ public function listPlantesByUser($idUtilisateur){
         echo 'Erreur : '.$e->getMessage();
     }
 }
-
-
 
 }
 ?>

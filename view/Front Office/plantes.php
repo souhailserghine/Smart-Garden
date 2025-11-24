@@ -1,3 +1,15 @@
+<?php 
+session_start();
+// À des fins de test: simuler l'ID utilisateur 18 connecté
+if (!isset($_SESSION['idUtilisateur'])) {
+    $_SESSION['idUtilisateur'] = 18;
+}
+
+include '../../Controller/planteC.php';
+$planteC = new planteC();
+$userId = $_SESSION['idUtilisateur']; 
+$mesPlantes = $planteC->listPlantesByUser($userId);
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -58,13 +70,13 @@
                                 </form>
                             </li>
                             <li class="nav-item">
-                                <a href="messages.html" class="nav-link nav-icon nav-links message-drop drop-w-tooltip" data-placement="bottom" data-title="Messages">
+                                <a href="messages.php" class="nav-link nav-icon nav-links message-drop drop-w-tooltip" data-placement="bottom" data-title="Messages">
                                     <img src="./assets/images/icons/navbar/message.png" class="message-dropdown f-nav-icon" alt="navbar icon">
                                 </a>
                             </li>
                         </ul>
                         <ul class="navbar-nav mr-5 flex-row" id="main_menu">
-                            <a class="navbar-brand nav-item mr-lg-5" href="index.html"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
+                            <a class="navbar-brand nav-item mr-lg-5" href="index.php"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
                             <!-- Collect the nav links, forms, and other content for toggling -->
                             <form class="w-30 mx-2 my-auto d-inline form-inline mr-5">
                                 <div class="input-group">
@@ -348,20 +360,20 @@
                                     <img src="./assets/images/icons/navbar/flag.png" alt="navbar icon">
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right nav-drop">
-                                    <a class="dropdown-item" href="publications.html">Publications</a>
-                                    <a class="dropdown-item" href="sign-in.html">Sign in</a>
-                                    <a class="dropdown-item" href="sign-up.html">Sign up</a>
+                                    <a class="dropdown-item" href="publications.php">Publications</a>
+                                    <a class="dropdown-item" href="sign-in.php">Sign in</a>
+                                    <a class="dropdown-item" href="sign-up.php">Sign up</a>
                                 </div>
                             </li>
                             <li class="nav-item s-nav">
-                                <a href="profile.html" class="nav-link nav-links">
+                                <a href="profile.php" class="nav-link nav-links">
                                     <div class="menu-user-image">
                                         <img src="./assets/images/users/user-4.jpg" class="menu-user-img ml-1" alt="Menu Image">
                                     </div>
                                 </a>
                             </li>
                             <li class="nav-item s-nav nav-icon dropdown">
-                                <a href="settings.html" data-toggle="dropdown" data-placement="bottom" data-title="Settings" class="nav-link settings-link rm-drop-mobile drop-w-tooltip" id="settings-dropdown"><img src="./assets/images/icons/navbar/settings.png" class="nav-settings" alt="navbar icon"></a>
+                                <a href="settings.php" data-toggle="dropdown" data-placement="bottom" data-title="Settings" class="nav-link settings-link rm-drop-mobile drop-w-tooltip" id="settings-dropdown"><img src="./assets/images/icons/navbar/settings.png" class="nav-settings" alt="navbar icon"></a>
                                 <div class="dropdown-menu dropdown-menu-right settings-dropdown shadow-sm" aria-labelledby="settings-dropdown">
                                     <a class="dropdown-item" href="#">
                                         <img src="./assets/images/icons/navbar/help.png" alt="Navbar icon"> Help Center</a>
@@ -371,9 +383,9 @@
                                             <div class="handle"></div>
                                         </button>
                                     </a>
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" href="settings.php">
                                         <img src="./assets/images/icons/navbar/gear-1.png" alt="Navbar icon"> Settings</a>
-                                    <a class="dropdown-item logout-btn" href="#">
+                                    <a class="dropdown-item logout-btn" href="logout.php">
                                         <img src="./assets/images/icons/navbar/logout.png" alt="Navbar icon"> Log Out</a>
                                 </div>
                             </li>
@@ -391,65 +403,91 @@
                                     <h6>Home</h6>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="profile.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/newsfeed.png" alt="profile"> Profile</a>
+                                    <a href="profile.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/newsfeed.png" alt="profile"> Profile</a>
                                     <a href="#" class="newsfeedListicon"><i class='bx bx-dots-horizontal-rounded'></i></a>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="publications.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/message.png" alt="publications"> Publications</a>
+                                    <a href="publications.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/message.png" alt="publications"> Publications</a>
                                     <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center sd-active">
-                                    <a href="plantes.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/group.png" alt="plantes"> Plantes</a>
+                                    <a href="plantes.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/group.png" alt="plantes"> Plantes</a>
                                     <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="evenements.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/event.png" alt="evenements"> Evenements</a>
+                                    <a href="evenements.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/event.png" alt="evenements"> Evenements</a>
                                     <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="capteurs.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/saved.png" alt="capteurs"> Capteurs</a>
+                                    <a href="capteurs.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/saved.png" alt="capteurs"> Capteurs</a>
                                     <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
                                 </li>
                             </ul>
                         </div>
                     </div>
-                    
+                    <div class="col-md-10 second-section" id="page-content-wrapper">
                         
 
-                        
-                        
-                                
+                        <!-- Mes Plantes Section -->
+                        <div class="bg-white shadow-sm rounded p-4 mt-3 mb-4">
+                            <div class="mb-4">
+                                <h4 class="mb-2"><i class='bx bx-leaf mr-2' style="color: #2ecc71;"></i>Mes Plantes</h4>
+                                <p class="text-muted small">Consultez vos plantes et leurs informations.</p>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm">
+                                    <thead class="table-light">
+                                        <tr class="border-bottom">
+                                            <th scope="col" class="text-muted">#</th>
+                                            <th scope="col" class="text-muted">Nom</th>
+                                            <th scope="col" class="text-muted">Date d'ajout</th>
+                                            <th scope="col" class="text-muted">Humidité</th>
+                                            <th scope="col" class="text-muted">Eau</th>
+                                            <th scope="col" class="text-muted">État</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        if (count($mesPlantes) == 0) {
+                                            echo '<tr><td colspan="6" class="text-center py-5">';
+                                            echo '<div>';
+                                            echo '<i class="bx bx-leaf" style="font-size: 3rem; color: #e0e0e0;"></i>';
+                                            echo '<p class="text-muted mt-3 mb-0">Vous n\'avez pas encore de plantes</p>';
+                                            echo '</div>';
+                                            echo '</td></tr>';
+                                        } else {
+                                            $idx = 1;
+                                            foreach($mesPlantes as $plante) {
+                                                echo '<tr class="align-middle border-bottom">';
+                                                echo '<td class="text-muted small">'.$idx.'</td>';
+                                                echo '<td><strong class="text-dark">'.htmlspecialchars($plante['nom_plante']).'</strong></td>';
+                                                echo '<td><small class="text-muted">'.htmlspecialchars($plante['date_ajout']).'</small></td>';
+                                                echo '<td>';
+                                                $hum = $plante['niveau_humidite'];
+                                                $humColor = ($hum > 70) ? 'success' : (($hum > 40) ? 'warning' : 'danger');
+                                                echo '<span class="badge badge-'.$humColor.'">'.$hum.'%</span>';
+                                                echo '</td>';
+                                                echo '<td><small class="text-muted">'.$plante['besoin_eau'].' ml</small></td>';
+                                                echo '<td>';
+                                                if ($plante['etat_sante'] == 'Bon état') {
+                                                    echo '<span class="badge badge-success"><i class="bx bx-check-circle"></i> Bon</span>';
+                                                } else if ($plante['etat_sante'] == 'Moyen') {
+                                                    echo '<span class="badge badge-warning"><i class="bx bx-minus"></i> Moyen</span>';
+                                                } else {
+                                                    echo '<span class="badge badge-danger"><i class="bx bx-x-circle"></i> Mauvais</span>';
+                                                }
+                                                echo '</td>';
+                                                echo '</tr>';
+                                                $idx++;
+                                            }
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        
-                                <div class="col-md-2 col-sm-4">
-                                    <div class="collapse multi-collapse group-collapse" id="group-category-1">
-                                        <div class="card group-card shadow-sm text-white">
-                                            <a href="#" class="group-category">
-                                                <img src="./assets/images/groups/category-5.jpg" class="card-img group-category-img" alt="Category type">
-                                                <div class="card-img-overlay group-cat-overlay d-flex align-items-end">
-                                                    <h5 class="card-title">Dating</h5>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2 col-sm-4">
-                                    <div class="collapse multi-collapse group-collapse" id="group-category-1">
-                                        <div class="card group-card shadow-sm text-white">
-                                            <a href="#" class="group-category">
-                                                <img src="./assets/images/groups/category-6.jpg" class="card-img group-category-img" alt="Category type">
-                                                <div class="card-img-overlay group-cat-overlay d-flex align-items-end">
-                                                    <h5 class="card-title">Business</h5>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <hr class="my-5">
-                        <hr class="my-5">
+
                     </div>
                 </div>
             </div>

@@ -1,27 +1,29 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
+session_start();
 include '../../Controller/planteC.php';
 include '../../Model/plante.php';
 
-$pl = new planteC();
+$planteC = new planteC();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
+        $userId = $_SESSION['idUtilisateur'];
+        
         // Création de l'objet Plante
         $plante = new Plante(
-            null, // id_plante auto-incrémenté
+            null,
             $_POST['nom_plante'],
             $_POST['date_ajout'],
             $_POST['niveau_humidite'],
             $_POST['besoin_eau'],
             $_POST['etat_sante'],
-            $_POST['idUtilisateur']
+            $userId
         );
 
         // Ajout dans la base
-        $result = $pl->ajouterPlante($plante);
+        $result = $planteC->ajouterPlante($plante);
 
-        // Retour JSON au lieu de redirection
         echo json_encode(['success' => true, 'message' => 'Plante ajoutée avec succès']);
         exit;
     } catch (Exception $e) {
