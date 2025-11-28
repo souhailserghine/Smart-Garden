@@ -9,6 +9,9 @@ include '../../Controller/planteC.php';
 $planteC = new planteC();
 $userId = $_SESSION['idUtilisateur']; 
 $mesPlantes = $planteC->listPlantesByUser($userId);
+
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -487,6 +490,81 @@ $mesPlantes = $planteC->listPlantesByUser($userId);
                                 </table>
                             </div>
                         </div>
+<!-----Plantees------->
+
+
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-light text-center rounded p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h6 class="mb-0">Gestion des Tâches</h6>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTacheModal">
+                <i class="fa fa-plus me-2"></i>Ajouter Tâche
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table text-start align-middle table-bordered table-hover mb-0">
+                <thead class="table-info">
+                    <tr class="text-dark">
+                        <th>ID Tâche</th>
+                        <th>Type de Dosage</th>
+                        <th>Quantité</th>
+                        <th>Mode</th>
+                        <th>Date</th>
+                        <th>Dernière Exécution</th>
+                        <th>Prochaine Exécution</th>
+                        <th>État</th>
+                        <th>Priorité</th>
+                        <th>ID Plante</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($listeTaches as $dosage) { ?>
+                        <tr>
+                            <td><?php echo $dosage['id_dosage']; ?></td>
+                            <td><?php echo htmlspecialchars($dosage['type_dosage']); ?></td>
+                            <td><?php echo $dosage['quantite']; ?></td>
+                            <td><?php echo htmlspecialchars($dosage['mode_dosage']); ?></td>
+                            <td><?php echo $dosage['date_dosage']; ?></td>
+                            <td><?php echo $dosage['derniereExecution']; ?></td>
+                            <td><?php echo $dosage['prochaineExecution']; ?></td>
+                            <td>
+                                <?php 
+                                    if($dosage['estComplete'] == 0) echo 'Non commencé';
+                                    elseif($dosage['estComplete'] == 1) echo 'En cours';
+                                    else echo 'Complète';
+                                ?>
+                            </td>
+                            <td>
+                                <?php 
+                                    if($dosage['priorite'] == 1) echo 'Basse';
+                                    elseif($dosage['priorite'] == 2) echo 'Moyenne';
+                                    else echo 'Haute';
+                                ?>
+                            </td>
+                            <td><?php echo $dosage['id_plante']; ?></td>
+                            <td>
+                                <a href="plantes.php?editTache=<?php echo $dosage['id_dosage']; ?>" 
+                                   class="btn btn-warning btn-sm" title="Modifier">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                                <a href="supprimerTache.php?id=<?php echo $dosage['id_dosage']; ?>" 
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Voulez-vous vraiment supprimer ce dosage ?');">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
 
                     </div>
                 </div>

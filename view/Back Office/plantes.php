@@ -1,6 +1,8 @@
 <?php 
-include '../../Controller/planteC.php';
-include '../../Controller/tacheC.php';
+// Utiliser require_once pour éviter la redéclaration de classes
+require_once '../../Controller/planteC.php';
+require_once '../../Controller/tacheC.php';
+
 $pl = new planteC();
 $tacheController = new tacheC();
 
@@ -15,18 +17,42 @@ if (isset($_GET['edit'])) {
         }
     }
 }
+
+// Gestion de la modification tâche
 $editTache = null;
 if (isset($_GET['editTache'])) {
     $editTacheId = $_GET['editTache'];
     foreach ($tacheController->listTaches() as $t) {
-        if ($t['id_tache'] == $editTacheId) {
+        if ($t['id_dosage'] == $editTacheId) { // corrige le nom de l'id ici
             $editTache = $t;
             break;
         }
     }
 }
+
+// Gestion des listes
 $listePlantes = $pl->listPlantes();
 $listeTaches = $tacheController->listTaches();
+
+// Suppression d'une tâche
+if (isset($_GET['deleteTache'])) {
+    $id = intval($_GET['deleteTache']);
+    $tacheController->supprimerTache($id);
+    header('Location: plantes.php'); // ou taches.php selon ta logique
+    exit();
+}
+
+// Suppression d'une plante
+if (isset($_GET['deletePlante'])) {
+    $id = intval($_GET['deletePlante']);
+    $pl->supprimerPlante($id);
+    header('Location: plantes.php');
+    exit();
+}
+?>
+
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -278,35 +304,55 @@ $listeTaches = $tacheController->listTaches();
                 <thead class="table-info">
                     <tr class="text-dark">
                         <th>ID Tâche</th>
-                        <th>Nom Tâche</th>
-                        <th>ID Plante</th>
+                        <th>Type de Dosage</th>
+                        <th>Quantité</th>
+                        <th>Mode</th>
                         <th>Date</th>
                         <th>Dernière Exécution</th>
                         <th>Prochaine Exécution</th>
                         <th>État</th>
+                        <th>Priorité</th>
+                        <th>ID Plante</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach($listeTaches as $tache) { ?>
-                    <tr>
-                        <td><?php echo $tache['id_tache']; ?></td>
-                        <td><?php echo htmlspecialchars($tache['type_tache']); ?></td>
-                        <td><?php echo $tache['id_plante']; ?></td>
-                        <td><?php echo $tache['date_tache']; ?></td>
-                        <td><?php echo $tache['derniereExecution']; ?></td>
-                        <td><?php echo $tache['prochaineExecution']; ?></td>
-                        <td><?php echo $tache['estComplete'] ? 'Complète' : 'En cours'; ?></td>
-                        <td>
-                            <a href="plantes.php?editTache=<?php echo $tache['id_tache']; ?>" class="btn btn-warning btn-sm" title="Modifier">
-                                <i class="fa fa-edit"></i>
-                            </a>
-                            <a href="supprimerTache.php?id=<?php echo $tache['id_tache']; ?>" class="btn btn-danger btn-sm"
-                               onclick="return confirm('Voulez-vous vraiment supprimer cette tâche ?');">
-                                <i class="fa fa-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
+                    <?php foreach($listeTaches as $dosage) { ?>
+                        <tr>
+                            <td><?php echo $dosage['id_dosage']; ?></td>
+                            <td><?php echo htmlspecialchars($dosage['type_dosage']); ?></td>
+                            <td><?php echo $dosage['quantite']; ?></td>
+                            <td><?php echo htmlspecialchars($dosage['mode_dosage']); ?></td>
+                            <td><?php echo $dosage['date_dosage']; ?></td>
+                            <td><?php echo $dosage['derniereExecution']; ?></td>
+                            <td><?php echo $dosage['prochaineExecution']; ?></td>
+                            <td>
+                                <?php 
+                                    if($dosage['estComplete'] == 0) echo 'Non commencé';
+                                    elseif($dosage['estComplete'] == 1) echo 'En cours';
+                                    else echo 'Complète';
+                                ?>
+                            </td>
+                            <td>
+                                <?php 
+                                    if($dosage['priorite'] == 1) echo 'Basse';
+                                    elseif($dosage['priorite'] == 2) echo 'Moyenne';
+                                    else echo 'Haute';
+                                ?>
+                            </td>
+                            <td><?php echo $dosage['id_plante']; ?></td>
+                            <td>
+                                <a href="plantes.php?editTache=<?php echo $dosage['id_dosage']; ?>" 
+                                   class="btn btn-warning btn-sm" title="Modifier">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                                <a href="supprimerTache.php?id=<?php echo $dosage['id_dosage']; ?>" 
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Voulez-vous vraiment supprimer ce dosage ?');">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
                     <?php } ?>
                 </tbody>
             </table>
@@ -314,58 +360,230 @@ $listeTaches = $tacheController->listTaches();
     </div>
 </div>
 
-<!-- Add Tache Modal -->
+
+
+<!-- Add Dosage Modal -->
 <div class="modal fade" id="addTacheModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content bg-light">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fa fa-plus"></i> Ajouter une Tâche</h5>
+                <h5 class="modal-title"><i class="fa fa-plus"></i> Ajouter un Dosage</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-<form id="addTacheForm" method="POST" action="ajoutT.php">
 
-
+            <form id="addTacheForm" method="POST" action="ajouT.php">
 
                 <div class="modal-body">
                     <div id="addTacheError" style="display:none;" class="alert alert-danger"></div>
+
                     <div class="row">
+
+                        <!-- Type de dosage -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Nom Tâche</label>
-                            <input type="text" class="form-control" name="type_tache" required>
+                            <label class="form-label">Type de dosage</label>
+                            <select class="form-select" name="type_dosage">
+                                <option value="Arrosage">Arrosage</option>
+                                <option value="Fertilisation">Fertilisation</option>
+                                <option value="Taille">Taille</option>
+                            </select>
                         </div>
+
+                        <!-- Quantité -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">ID Plante</label>
-                            <input type="number" class="form-control" name="id_plante" required>
+                            <label class="form-label">Quantité</label>
+                            <input type="number" class="form-control" name="quantite">
                         </div>
+
+                        <!-- Mode dosage -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Date Tâche</label>
-                            <input type="date" class="form-control" name="date_tache" required>
+                            <label class="form-label">Mode dosage</label>
+                            <select class="form-select" name="mode_dosage">
+                                <option value="Automatique">Automatique</option>
+                                <option value="Manuel">Manuel</option>
+                                <option value="Semi-automatique">Semi-automatique</option>
+                            </select>
                         </div>
+
+                        <!-- Date dosage -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Dernière Exécution</label>
+                            <label class="form-label">Date dosage</label>
+                            <input type="date" class="form-control" name="date_dosage">
+                        </div>
+
+                        <!-- Dernière exécution -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Dernière exécution</label>
                             <input type="date" class="form-control" name="derniereExecution">
                         </div>
+
+                        <!-- Prochaine exécution -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Prochaine Exécution</label>
+                            <label class="form-label">Prochaine exécution</label>
                             <input type="date" class="form-control" name="prochaineExecution">
                         </div>
+
+                        <!-- État -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">État</label>
                             <select class="form-select" name="estComplete">
-                                <option value="0">En cours</option>
-                                <option value="1">Complète</option>
+                                <option value="0">Non commencé</option>
+                                <option value="1">En cours</option>
+                                <option value="2">Complète</option>
                             </select>
                         </div>
+
+                        <!-- Priorité -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Priorité</label>
+                            <select class="form-select" name="priorite">
+                                <option value="1">Basse</option>
+                                <option value="2">Moyenne</option>
+                                <option value="3">Haute</option>
+                            </select>
+                        </div>
+
+                        <!-- ID Plante -->
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Plante associée</label>
+                            <select name="id_plante" class="form-select">
+                                <?php foreach($listePlantes as $plante): ?>
+                                    <option value="<?= $plante['id_plante'] ?>">
+                                        <?= htmlspecialchars($plante['id_plante']) ?> - <?= htmlspecialchars($plante['nom_plante']) ?>
+                                    </option>  
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
                     </div>
+
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="submit" class="btn btn-success">Ajouter</button>
                 </div>
+                                
             </form>
         </div>
     </div>
 </div>
+
+<!-- Edit Dosage Modal -->
+
+<?php if ($editTache): ?>
+<div class="modal fade show" id="editTacheModal" tabindex="-1" 
+     style="display:block; background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-light">
+
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa fa-edit"></i> Modifier le Dosage</h5>
+                <a href="plantes.php" class="btn-close"></a>
+            </div>
+
+            <form method="POST" action="modifierTache.php">
+                <input type="hidden" name="id_dosage" value="<?= $editTache['id_dosage'] ?>">
+
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Type dosage</label>
+                            <select class="form-select" name="type_dosage">
+                                <option value="Arrosage" 
+                                    <?= $editTache['type_dosage']=='Arrosage'?'selected':'' ?>>Arrosage</option>
+
+                                <option value="Fertilisation" 
+                                    <?= $editTache['type_dosage']=='Fertilisation'?'selected':'' ?>>Fertilisation</option>
+
+                                <option value="Taille" 
+                                    <?= $editTache['type_dosage']=='Taille'?'selected':'' ?>>Taille</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Quantité</label>
+                            <input type="number" class="form-control" name="quantite"
+                                   value="<?= $editTache['quantite'] ?>">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Mode dosage</label>
+                            <select class="form-select" name="mode_dosage">
+                                <option value="Automatique" 
+                                    <?= $editTache['mode_dosage']=='Automatique'?'selected':'' ?>>Automatique</option>
+                                <option value="Manuel" 
+                                    <?= $editTache['mode_dosage']=='Manuel'?'selected':'' ?>>Manuel</option>
+                                <option value="Semi-automatique" 
+                                    <?= $editTache['mode_dosage']=='Semi-automatique'?'selected':'' ?>>Semi-auto</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Date dosage</label>
+                            <input type="date" class="form-control" name="date_dosage"
+                                   value="<?= $editTache['date_dosage'] ?>">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Dernière exécution</label>
+                            <input type="date" class="form-control" name="derniereExecution"
+                                   value="<?= $editTache['derniereExecution'] ?>">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Prochaine exécution</label>
+                            <input type="date" class="form-control" name="prochaineExecution"
+                                   value="<?= $editTache['prochaineExecution'] ?>">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>État</label>
+                            <select class="form-select" name="estComplete">
+                                <option value="0" <?= $editTache['estComplete']==0?'selected':'' ?>>Non commencé</option>
+                                <option value="1" <?= $editTache['estComplete']==1?'selected':'' ?>>En cours</option>
+                                <option value="2" <?= $editTache['estComplete']==2?'selected':'' ?>>Complète</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Priorité</label>
+                            <select class="form-select" name="priorite">
+                                <option value="1" <?= $editTache['priorite']==1?'selected':'' ?>>Basse</option>
+                                <option value="2" <?= $editTache['priorite']==2?'selected':'' ?>>Moyenne</option>
+                                <option value="3" <?= $editTache['priorite']==3?'selected':'' ?>>Haute</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label>Plante associée</label>
+                            <select class="form-select" name="id_plante">
+                                <?php foreach($listePlantes as $pl): ?>
+                                    <option value="<?= $pl['id_plante'] ?>"
+                                        <?= $pl['id_plante']==$editTache['id_plante']?'selected':'' ?>>
+                                        <?= $pl['id_plante'] ?> - <?= htmlspecialchars($pl['nom_plante']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <a href="taches.php" class="btn btn-secondary">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+
+<!-- Edit Dosage Modal -->
 <script>
     (function() {
         const addTacheForm = document.getElementById('addTacheForm');
@@ -375,7 +593,7 @@ $listeTaches = $tacheController->listTaches();
             e.preventDefault();
             const formData = new FormData(addTacheForm);
 
-            fetch('ajoutTache.php', {
+            fetch('ajoutT.php', {
                 method: 'POST',
                 body: formData
             })
