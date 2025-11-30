@@ -12,6 +12,26 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/evenements.css" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+    <!-- Style pour la carte -->
+    <style>
+ #mapPreview {
+        height: 320px !important;
+        width: 100%;
+        border-radius: 12px;
+        border: 3px solid #28a745;
+        margin-top: 10px;
+        background: #f8f9fa; /* fond gris clair en attendant le chargement */
+    }
+    /* Force Leaflet à recalculer la taille quand le modal s'ouvre */
+    .modal.show #mapPreview {
+        height: 320px !important;
+    }
+    </style>
 </head>
 <body>
 <div class="container-fluid position-relative bg-white d-flex p-0">
@@ -170,32 +190,59 @@
         </div>
     </div>
 </div>
-
-<!-- Modal -->
+<!-- MODAL AVEC CARTE QUI MARCHE -->
 <div class="modal fade" id="eventModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <form id="eventForm" class="modal-content">
-            <div class="modal-header bg-gradient-primary text-white">
+            <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="eventModalTitle">Nouvel événement</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="edit_id">
-                <div class="mb-3"><label class="form-label fw-bold">Titre</label><input id="title" class="form-control" required></div>
-                <div class="mb-3"><label class="form-label fw-bold">Date</label><input id="date" type="date" class="form-control" required></div>
-                <div class="mb-3"><label class="form-label fw-bold">Type</label><input id="type" class="form-control" required></div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Catégorie</label>
-                    <select id="id_categorie" class="form-select" required>
-                        <option value="">-- Choisir une catégorie --</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3"><label class="form-label fw-bold">Titre</label><input id="title" class="form-control" required></div>
+                        <div class="mb-3"><label class="form-label fw-bold">Date</label><input id="date" type="date" class="form-control" required></div>
+                        <div class="mb-3"><label class="form-label fw-bold">Type</label><input id="type" class="form-control" required></div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Catégorie</label>
+                            <select id="id_categorie" class="form-select" required>
+                                <option value="">-- Choisir une catégorie --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Lieu de l'événement</label>
+                            <div class="input-group">
+                                <input type="text" id="location" class="form-control" placeholder="Recherchez un lieu...">
+                                <button class="btn btn-outline-success" type="button" id="btnMyLocation" title="Ma position">
+                                    <i class="fa fa-location-arrow"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- LA CARTE QUI S'AFFICHE MAINTENANT -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Cliquez sur la carte pour placer le marqueur</label>
+                            <div id="mapPreview"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Description</label>
+                            <textarea id="description" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3"><label class="form-label fw-bold">Description</label><textarea id="description" class="form-control" rows="3"></textarea></div>
+
+                <input type="hidden" id="latitude">
+                <input type="hidden" id="longitude">
             </div>
             <div class="modal-footer">
                 <button id="btnDeleteModal" type="button" class="btn btn-outline-danger" style="display:none;">Supprimer</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="submit" class="btn btn-theme shadow">Enregistrer</button>
+                <button type="submit" class="btn btn-success">Enregistrer</button>
             </div>
         </form>
     </div>
@@ -210,12 +257,17 @@
         </div>
     </div>
 </div>
-
-<!-- JS Libraries -->
+<!-- À la fin de ton <body>, juste avant </body> -->
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="lib/chart/chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<!-- LEAFLET D'ABORD (obligatoire) -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<!-- TON JS EN DERNIER -->
 <script src="js/evenements.js"></script>
 </body>
 </html>

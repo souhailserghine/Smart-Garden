@@ -181,7 +181,7 @@
     // Récupère les événements déjà réservés par l'utilisateur 999
     async function getReservedEvents() {
         try {
-            const response = await fetch('/view/Backend/public/index.php?action=getReservedByUser', {
+            const response = await fetch('/view/Backend/public/index.php?action=myReservations', { // ✅ Updated to match backend
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ idUtilisateur: CURRENT_USER_ID })
@@ -215,7 +215,7 @@
         button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Réservation...';
 
         try {
-            const response = await fetch('/view/Backend/public/index.php?action=reserve', {
+            const response = await fetch('/view/Backend/public/index.php?action=reserveEvent', { // ✅ Updated to match backend
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -251,7 +251,7 @@
         const empty = document.getElementById('eventsEmpty');
 
         try {
-            const response = await fetch('/view/Backend/public/index.php?action=list');
+            const response = await fetch('/view/Backend/public/index.php?action=listEvents'); // ✅ Updated to match backend
             if (!response.ok) throw new Error("Erreur serveur");
 
             const json = await response.json();
