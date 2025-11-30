@@ -1,7 +1,5 @@
 <?php
-// view/Backend/app/controllers/EventC.php
 
-// CE CHEMIN EST MAINTENANT 100 % CORRECT
 include_once __DIR__ . '/../core/config.php';
 include_once __DIR__ . '/../models/Event.php';
 
