@@ -33,6 +33,12 @@
                     <input type="date" class="form-control" id="date_event" name="date_event" required>
                 </div>
                 <div class="col-md-4">
+                    <label for="id_categorie" class="form-label">Catégorie</label>
+                    <select id="id_categorie" name="id_categorie" class="form-select">
+                        <option value="">-- Aucune --</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
                     <label for="etat" class="form-label">Status</label>
                     <select class="form-select" id="etat" name="etat">
                         <option value="active">Active</option>
@@ -58,6 +64,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Type</th>
+                            <th>Catégorie</th>
                         <th>Date</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -145,6 +152,7 @@ const loadEvents = () => {
                     tr.innerHTML = `
                         <td>${event.event_id}</td>
                         <td>${event.type_event}</td>
+                        <td>${event.categorie_nom || ''}</td>
                         <td>${event.date_event}</td>
                         <td>${event.etat}</td>
                         <td>
@@ -170,7 +178,8 @@ document.getElementById('addEventForm').addEventListener('submit', function(e){
     const data = {
         type_event: this.type_event.value,
         date_event: this.date_event.value,
-        etat: this.etat.value
+        etat: this.etat.value,
+        id_categorie: this.id_categorie.value || null
     };
     fetch("index.php?action=add", {
         method: "POST",
@@ -207,6 +216,7 @@ const editEvent = (id) => {
                 document.getElementById("edit_type_event").value = res.data.type_event;
                 document.getElementById("edit_date_event").value = res.data.date_event;
                 document.getElementById("edit_etat").value = res.data.etat;
+                document.getElementById("edit_id_categorie").value = res.data.id_categorie || '';
                 editModal.show();
             }
         });
@@ -219,11 +229,12 @@ document.getElementById("editEventForm").addEventListener("submit", function(e){
     const type_event = document.getElementById("edit_type_event").value;
     const date_event = document.getElementById("edit_date_event").value;
     const etat = document.getElementById("edit_etat").value;
+            const id_categorie = document.getElementById("edit_id_categorie").value || null;
 
     fetch(`index.php?action=update&id=${id}`, {
         method: "POST",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({type_event, date_event, etat})
+                body: JSON.stringify({type_event, date_event, etat, id_categorie})
     })
     .then(res => res.json())
     .then(res => {
@@ -234,6 +245,35 @@ document.getElementById("editEventForm").addEventListener("submit", function(e){
 });
 
 window.onload = loadEvents;
+// Load categories and populate selects
+const loadCategories = () => {
+    fetch('index.php?action=categories')
+        .then(r => r.json())
+        .then(r => {
+            if(r.status === 'success'){
+                const sel = document.getElementById('id_categorie');
+                const editSel = document.createElement('select');
+                // ensure edit select exists in modal
+                let editExists = document.getElementById('edit_id_categorie');
+                if(!editExists){
+                    const div = document.createElement('div');
+                    div.className = 'col-12';
+                    div.innerHTML = '<label class="form-label">Catégorie</label><select id="edit_id_categorie" class="form-select"></select>';
+                    document.getElementById('editEventForm').insertBefore(div, document.getElementById('editEventForm').lastElementChild);
+                }
+                const editSelect = document.getElementById('edit_id_categorie');
+                sel.innerHTML = '<option value="">-- Aucune --</option>';
+                editSelect.innerHTML = '<option value="">-- Aucune --</option>';
+                r.data.forEach(c => {
+                    const opt = `<option value="${c.id_categorie}">${c.nom}</option>`;
+                    sel.insertAdjacentHTML('beforeend', opt);
+                    editSelect.insertAdjacentHTML('beforeend', opt);
+                });
+            }
+        }).catch(err=>console.error(err));
+};
+
+loadCategories();
 </script>
 
 </body>

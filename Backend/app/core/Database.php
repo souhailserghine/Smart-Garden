@@ -1,21 +1,29 @@
 <?php
-class Database {
-    private $host = "localhost";
-    private $dbname = "project";
-    private $username = "root";
-    private $password = "";
 
-    public function connect() {
+class Database
+{
+    private $host = 'localhost';
+    private $dbname = 'project';   
+    private $username = 'root';
+    private $password = '';
+
+    public function connect()
+    {
         try {
             $pdo = new PDO(
-                "mysql:host={$this->host};dbname={$this->dbname}",
+                "mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4",
                 $this->username,
-                $this->password
+                $this->password,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
             );
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $pdo;
         } catch (PDOException $e) {
-            die("DB Error: " . $e->getMessage());
+            header('Content-Type: application/json');
+            die(json_encode([
+                "status" => "error",
+                "message" => "Connexion à la base de données échouée",
+                "detail" => $e->getMessage()
+            ]));
         }
     }
 }

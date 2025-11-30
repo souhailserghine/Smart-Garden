@@ -309,6 +309,31 @@
 
 
             <!-- Widgets Start -->
+            <!-- Latest Events Start -->
+            <div class="container-fluid pt-4 px-4">
+                <div class="bg-light text-center rounded p-4 mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h6 class="mb-0">Latest Events</h6>
+                        <a href="evenements.html">Manage Events</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table text-start align-middle table-bordered table-hover mb-0">
+                            <thead>
+                                <tr class="text-dark">
+                                    <th scope="col">#</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Etat</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboardEventsBody">
+                                <tr><td colspan="4">Loading events...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Latest Events End -->
             <div class="container-fluid pt-4 px-4">
                 <div class="row g-4">
                     <div class="col-sm-12 col-md-6 col-xl-4">
@@ -451,6 +476,36 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
+    <!-- Dashboard events loader -->
+    <script>
+    (function(){
+        const tbody = document.getElementById('dashboardEventsBody');
+        if(!tbody) return;
+        function setEmpty(msg){ tbody.innerHTML = `<tr><td colspan="4">${msg}</td></tr>`; }
+        setEmpty('Loading events...');
+        fetch('index.php?action=getAll')
+        .then(r=>r.json())
+        .then(j=>{
+            if(j.status === 'success' && Array.isArray(j.data) && j.data.length){
+                const rows = j.data.slice(0,8).map((ev, i)=>{
+                    return `<tr>
+                        <td>${i+1}</td>
+                        <td>${(ev.type_event||'').replace(/</g,'&lt;')}</td>
+                        <td>${ev.date_event||''}</td>
+                        <td>${ev.etat||''}</td>
+                    </tr>`;
+                }).join('');
+                tbody.innerHTML = rows;
+            } else {
+                setEmpty('No events available.');
+            }
+        }).catch(err=>{
+            console.error('Failed to load events for dashboard', err);
+            setEmpty('Unable to load events (server error)');
+        });
+    })();
+    </script>
 </body>
 
 </html>

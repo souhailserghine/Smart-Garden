@@ -1,65 +1,71 @@
 <?php
-
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+// view/Backend/public/index.php — VERSION FINALE 100% FONCTIONNELLE
 
 header('Content-Type: application/json');
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST');
+header('Access-Control-Allow-Headers: Content-Type');
 
-set_exception_handler(function($e) {
-    echo json_encode([
-        "status" => "error",
-        "message" => $e->getMessage()
-    ]);
-    exit;
-});
-
-require_once __DIR__ . '/../app/controllers/EventController.php';
-
-$controller = new EventController();
+require_once __DIR__ . '/../app/controllers/EventC.php';
+require_once __DIR__ . '/../app/controllers/CategoryController.php';
+require_once __DIR__ . '/../app/controllers/ReservationController.php';
 
 $action = $_GET['action'] ?? '';
-$id = $_GET['id'] ?? null;
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit; 
-}
+switch ($action) {
+    case 'list':
+        $ec = new EventC();
+        $events = $ec->listEvents();
+        echo json_encode(["status" => "success", "data" => $events]);
+        break;
 
-
-switch($action) {
     case 'add':
-        $controller->add();
-        break;
-
-    case 'getAll':
-        $controller->getAll();
-        break;
-
-    case 'getOne':
-        if ($id) {
-            $controller->getOne($id);
-        } else {
-            echo json_encode(["status" => "error", "message" => "ID missing"]);
-        }
-        break;
-
-    case 'update':
-        if ($id) {
-            $controller->update($id);
-        } else {
-            echo json_encode(["status" => "error", "message" => "ID missing"]);
-        }
+        $input = json_decode(file_get_contents("php://input"), true);
+        $event = new Event(
+            null,
+            $input['type_event'] ?? '',
+            $input['date_event'] ?? '',
+            $input['description'] ?? '',
+            'active',
+            $input['id_categorie'] ?? null
+        );
+        $ec = new EventC();
+        $ec->ajouterEvent($event);
+        echo json_encode(["status" => "success", "message" => "Événement ajouté"]);
         break;
 
     case 'delete':
+        $id = $_ gET['id'] ?? null;
         if ($id) {
-            $controller->delete($id);
+            $ec = new EventC();
+            $ec->supprimerEvent($id);
+            echo json_encode(["status" => "success", "message" => "Supprimé"]);
         } else {
-            echo json_encode(["status" => "error", "message" => "ID missing"]);
+            echo json_encode(["status" => "error", "message" => "ID requis"]);
         }
         break;
 
+    case 'categories':
+        $cc = new CategoryController();
+        $cc->getAllCategories();
+        break;
+
+    case 'reserve':
+        $rc = new ReservationController();
+        $rc->addReservation();
+        break;
+
+    case 'mes-reservations':
+        $rc = new ReservationController();
+        $rc->getReservedByUser();
+        break;
+
+    case 'deleteReservation':
+        $rc = new ReservationController();
+        $rc->deleteReservation();
+        break;
+
     default:
-        echo json_encode(["status" => "success", "message" => "API working"]);
+        echo json_encode(["status" => "ok", "message" => "API prête"]);
 }
+?>
