@@ -1,18 +1,31 @@
 <?php 
 session_start();
+
+// Charger config d'abord une seule fois
+include_once '../../config.php';
+include_once '../../Controller/tacheC.php';
+include_once '../../Controller/planteC.php';
+
+
+// Initialisation
+$planteC = new planteC();
+$tacheController = new tacheC();
+
 // À des fins de test: simuler l'ID utilisateur 18 connecté
 if (!isset($_SESSION['idUtilisateur'])) {
     $_SESSION['idUtilisateur'] = 18;
 }
 
-include '../../Controller/planteC.php';
-$planteC = new planteC();
 $userId = $_SESSION['idUtilisateur']; 
+
+// Récupérer les plantes de l'utilisateur
 $mesPlantes = $planteC->listPlantesByUser($userId);
 
-
+// Récupérer toutes les tâches
+$listTaches = $tacheController->listTaches();
 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -432,165 +445,180 @@ $mesPlantes = $planteC->listPlantesByUser($userId);
                         
 
                         <!-- Mes Plantes Section -->
-                        <div class="bg-white shadow-sm rounded p-4 mt-3 mb-4">
-                            <div class="mb-4">
-                                <h4 class="mb-2"><i class='bx bx-leaf mr-2' style="color: #2ecc71;"></i>Mes Plantes</h4>
-                                <p class="text-muted small">Consultez vos plantes et leurs informations.</p>
-                            </div>
+                         <div class="container-fluid shadow-sm rounded-4 p-4 mt-4 mb-4">
 
-                            <div class="table-responsive">
-                                <table class="table table-hover table-sm">
-                                    <thead class="table-light">
-                                        <tr class="border-bottom">
-                                            <th scope="col" class="text-muted">#</th>
-                                            <th scope="col" class="text-muted">Nom</th>
-                                            <th scope="col" class="text-muted">Date d'ajout</th>
-                                            <th scope="col" class="text-muted">Humidité</th>
-                                            <th scope="col" class="text-muted">Eau</th>
-                                            <th scope="col" class="text-muted">État</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        if (count($mesPlantes) == 0) {
-                                            echo '<tr><td colspan="6" class="text-center py-5">';
-                                            echo '<div>';
-                                            echo '<i class="bx bx-leaf" style="font-size: 3rem; color: #e0e0e0;"></i>';
-                                            echo '<p class="text-muted mt-3 mb-0">Vous n\'avez pas encore de plantes</p>';
-                                            echo '</div>';
-                                            echo '</td></tr>';
-                                        } else {
-                                            $idx = 1;
-                                            foreach($mesPlantes as $plante) {
-                                                echo '<tr class="align-middle border-bottom">';
-                                                echo '<td class="text-muted small">'.$idx.'</td>';
-                                                echo '<td><strong class="text-dark">'.htmlspecialchars($plante['nom_plante']).'</strong></td>';
-                                                echo '<td><small class="text-muted">'.htmlspecialchars($plante['date_ajout']).'</small></td>';
-                                                echo '<td>';
-                                                $hum = $plante['niveau_humidite'];
-                                                $humColor = ($hum > 70) ? 'success' : (($hum > 40) ? 'warning' : 'danger');
-                                                echo '<span class="badge badge-'.$humColor.'">'.$hum.'%</span>';
-                                                echo '</td>';
-                                                echo '<td><small class="text-muted">'.$plante['besoin_eau'].' ml</small></td>';
-                                                echo '<td>';
-                                                if ($plante['etat_sante'] == 'Bon état') {
-                                                    echo '<span class="badge badge-success"><i class="bx bx-check-circle"></i> Bon</span>';
-                                                } else if ($plante['etat_sante'] == 'Moyen') {
-                                                    echo '<span class="badge badge-warning"><i class="bx bx-minus"></i> Moyen</span>';
-                                                } else {
-                                                    echo '<span class="badge badge-danger"><i class="bx bx-x-circle"></i> Mauvais</span>';
-                                                }
-                                                echo '</td>';
-                                                echo '</tr>';
-                                                $idx++;
-                                            }
-                                        }
-                                        ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                        
+    <div class="mb-4">
+        <h4 class="mb-2"><i class='bx bx-leaf me-2' style="color: #2575fc;"></i>Mes Plantes</h4>
+        <p class="text-muted small">Consultez vos plantes et leurs informations.</p>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle mb-0" style="border-radius: 12px; overflow: hidden;">
+            <thead style="background-color: #e0f0ff; color: #1a1a1a; font-weight: 600;">
+                <tr>
+                    <th scope="col" class="text-center">#</th>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Date d'ajout</th>
+                    <th scope="col" class="text-center">Humidité</th>
+                    <th scope="col" class="text-center">Eau</th>
+                    <th scope="col" class="text-center">État</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                if (count($mesPlantes) == 0) {
+                    echo '<tr><td colspan="6" class="text-center py-5">';
+                    echo '<div>';
+                    echo '<i class="bx bx-leaf" style="font-size: 3rem; color: #cfd8e0;"></i>';
+                    echo '<p class="text-muted mt-3 mb-0">Vous n\'avez pas encore de plantes</p>';
+                    echo '</div>';
+                    echo '</td></tr>';
+                } else {
+                    $idx = 1;
+                    foreach($mesPlantes as $plante) {
+                        $hum = $plante['niveau_humidite'];
+                        $humColor = ($hum > 70) ? 'bg-success text-dark' : (($hum > 40) ? 'bg-warning text-dark' : 'bg-danger text-white');
+
+                        if ($plante['etat_sante'] == 'Bon état') {
+                            $etatBadge = '<span class="badge bg-primary"><i class="bx bx-check-circle"></i> Bon</span>';
+                        } else if ($plante['etat_sante'] == 'Moyen') {
+                            $etatBadge = '<span class="badge bg-warning text-dark"><i class="bx bx-minus"></i> Moyen</span>';
+                        } else {
+                            $etatBadge = '<span class="badge bg-danger"><i class="bx bx-x-circle"></i> Mauvais</span>';
+                        }
+
+                        echo '<tr class="align-middle border-bottom">';
+                        echo '<td class="text-center text-muted small">'.$idx.'</td>';
+                        echo '<td><strong class="text-dark">'.htmlspecialchars($plante['nom_plante']).'</strong></td>';
+                        echo '<td><small class="text-muted">'.htmlspecialchars($plante['date_ajout']).'</small></td>';
+                        echo '<td class="text-center"><span class="badge '.$humColor.'">'.$hum.'%</span></td>';
+                        echo '<td class="text-center"><small class="text-muted">'.$plante['besoin_eau'].' ml</small></td>';
+                        echo '<td class="text-center">'.$etatBadge.'</td>';
+                        echo '</tr>';
+                        $idx++;
+                    }
+                }
+                ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    table.table-hover tbody tr:hover {
+        background-color: rgba(37, 117, 252, 0.1);
+    }
+</style>
+
 <!-----Plantees------->
 
 
 <div class="container-fluid pt-4 px-4">
-    <div class="bg-light text-center rounded p-4">
+    <div class="bg-light rounded-4 shadow-sm p-4">
         <div class="d-flex align-items-center justify-content-between mb-4">
-            <h6 class="mb-0">Gestion des Tâches</h6>
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTacheModal">
-                <i class="fa fa-plus me-2"></i>Ajouter Tâche
-            </button>
+            <h5 class="fw-bold mb-0">Gestion des Tâches</h5>
         </div>
 
         <div class="table-responsive">
-            <table class="table text-start align-middle table-bordered table-hover mb-0">
-                <thead class="table-info">
-                    <tr class="text-dark">
-                        <th>ID Tâche</th>
-                        <th>Type de Dosage</th>
-                        <th>Quantité</th>
-                        <th>Mode</th>
-                        <th>Date</th>
-                        <th>Dernière Exécution</th>
-                        <th>Prochaine Exécution</th>
-                        <th>État</th>
-                        <th>Priorité</th>
-                        <th>ID Plante</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+            <table class="table align-middle table-hover mb-0">
+                <thead style="background: #e0f0ff; color: #1a1a1a; font-weight: 600;">
+    <tr>
+        <th>ID Tâche</th>
+        <th>Type de Dosage</th>
+        <th>Quantité</th>
+        <th>Mode</th>
+        <th>Date</th>
+        <th>Dernière Exécution</th>
+        <th>Prochaine Exécution</th>
+        <th>État</th>
+        <th>Priorité</th>
+        <th>ID Plante</th>
+    </tr>
+</thead>
+
                 <tbody>
-                    <?php foreach($listeTaches as $dosage) { ?>
+                    <?php if(!empty($listTaches)): ?>
+                        <?php foreach($listTaches as $dosage): ?>
+                            <tr class="align-middle">
+                                <td><?= $dosage['id_dosage'] ?></td>
+                                <td><?= htmlspecialchars($dosage['type_dosage']) ?></td>
+                                <td><?= $dosage['quantite'] ?></td>
+                                <td><?= htmlspecialchars($dosage['mode_dosage']) ?></td>
+                                <td><?= $dosage['date_dosage'] ?></td>
+                                <td><?= $dosage['derniereExecution'] ?></td>
+                                <td><?= $dosage['prochaineExecution'] ?></td>
+                                <td>
+                                    <?php 
+                                        if($dosage['estComplete'] == 0) echo '<span class="badge bg-secondary">Non commencé</span>';
+                                        elseif($dosage['estComplete'] == 1) echo '<span class="badge bg-warning text-dark">En cours</span>';
+                                        else echo '<span class="badge bg-success">Complète</span>';
+                                    ?>
+                                </td>
+                                <td>
+                                    <?php 
+                                        if($dosage['priorite'] == 1) echo '<span class="text-success">Basse</span>';
+                                        elseif($dosage['priorite'] == 2) echo '<span class="text-warning">Moyenne</span>';
+                                        else echo '<span class="text-danger fw-bold">Haute</span>';
+                                    ?>
+                                </td>
+                                <td><?= $dosage['id_plante'] ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
                         <tr>
-                            <td><?php echo $dosage['id_dosage']; ?></td>
-                            <td><?php echo htmlspecialchars($dosage['type_dosage']); ?></td>
-                            <td><?php echo $dosage['quantite']; ?></td>
-                            <td><?php echo htmlspecialchars($dosage['mode_dosage']); ?></td>
-                            <td><?php echo $dosage['date_dosage']; ?></td>
-                            <td><?php echo $dosage['derniereExecution']; ?></td>
-                            <td><?php echo $dosage['prochaineExecution']; ?></td>
-                            <td>
-                                <?php 
-                                    if($dosage['estComplete'] == 0) echo 'Non commencé';
-                                    elseif($dosage['estComplete'] == 1) echo 'En cours';
-                                    else echo 'Complète';
-                                ?>
-                            </td>
-                            <td>
-                                <?php 
-                                    if($dosage['priorite'] == 1) echo 'Basse';
-                                    elseif($dosage['priorite'] == 2) echo 'Moyenne';
-                                    else echo 'Haute';
-                                ?>
-                            </td>
-                            <td><?php echo $dosage['id_plante']; ?></td>
-                            <td>
-                                <a href="plantes.php?editTache=<?php echo $dosage['id_dosage']; ?>" 
-                                   class="btn btn-warning btn-sm" title="Modifier">
-                                    <i class="fa fa-edit"></i>
-                                </a>
-                                <a href="supprimerTache.php?id=<?php echo $dosage['id_dosage']; ?>" 
-                                   class="btn btn-danger btn-sm"
-                                   onclick="return confirm('Voulez-vous vraiment supprimer ce dosage ?');">
-                                    <i class="fa fa-trash"></i>
-                                </a>
-                            </td>
+                            <td colspan="10" class="text-center text-muted">Aucune tâche trouvée</td>
                         </tr>
-                    <?php } ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-
-
-
-                    </div>
-                </div>
+<!-- Modal stylé -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Modal Title</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Contenu de la modal ici...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-gradient btn-sm rounded-pill">Enregistrer</button>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog mobile-modal" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    ...
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
+<style>
+    /* Bouton gradient personnalisé */
+    .btn-gradient {
+        background: linear-gradient(45deg, #6a11cb, #2575fc);
+        color: white;
+        border: none;
+        transition: all 0.2s;
+    }
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+    }
+
+    /* Table hover */
+    table.table-hover tbody tr:hover {
+        background-color: rgba(37, 117, 252, 0.1);
+    }
+
+    /* Modal gradient header */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+    }
+</style>
+
 
     <!-- Core -->
     <script src="./assets/js/jquery/jquery-3.3.1.min.js"></script>

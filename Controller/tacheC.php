@@ -123,5 +123,18 @@ class tacheC {
         }
     }
 
+
+public function getTachesByPlante($id_plante){
+    $db = config::getConnexion();
+    try {
+        $query = $db->prepare("SELECT * FROM tache WHERE id_plante = :id_plante");
+        $query->bindValue(':id_plante', $id_plante, PDO::PARAM_INT);
+        $query->execute();
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        echo 'Erreur : '.$e->getMessage();
+        return [];
+    }
+}
 }
 ?>

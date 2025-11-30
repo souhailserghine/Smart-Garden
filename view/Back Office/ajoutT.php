@@ -1,72 +1,44 @@
 <?php
-// On s'assure qu'aucune erreur PHP ne soit affichée au client.
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
-error_reporting(0);
+session_start();
+require_once '../../Controller/tacheC.php';
+require_once '../../Model/tache.php';
 
-// Définir l'en-tête pour indiquer que la réponse est au format JSON
-header('Content-Type: application/json; charset=utf-8');
+$tacheController = new tacheC();
 
-include '../../Controller/tacheC.php';
-include '../../Model/tache.php';
+// Récupération des champs et conversion types
+$type_dosage = $_POST['type_dosage'];
+$quantite = isset($_POST['quantite']) ? (int)$_POST['quantite'] : 0;
+$mode_dosage = $_POST['mode_dosage'];
+$date_dosage = $_POST['date_dosage'];
+$derniereExecution = $_POST['derniereExecution'];
+$prochaineExecution = $_POST['prochaineExecution'];
+$estComplete = isset($_POST['estComplete']) ? (int)$_POST['estComplete'] : 0;
+$priorite = isset($_POST['priorite']) ? (int)$_POST['priorite'] : 1;
+$id_plante = isset($_POST['id_plante']) ? (int)$_POST['id_plante'] : 0;
 
-$tacheC = new tacheC();
+// Création de l’objet tâche (10 arguments, ID tache = null)
+$tache = new tache(
+    null,               // id_tache
+    $type_dosage,       // string
+    $quantite,          // float
+    $mode_dosage,       // string
+    $date_dosage,       // date
+    $derniereExecution, // date
+    $prochaineExecution,// date
+    $estComplete,       // int
+    $priorite,          // int
+    $id_plante          // int
+);
 
-// Fonction utilitaire pour envoyer une réponse JSON et arrêter le script
-function sendJsonResponse($success, $message, $data = []) {
-    echo json_encode(['success' => $success, 'message' => $message, 'data' => $data]);
-    exit;
+
+// Ajout en base
+try {
+    $tacheController->ajouterTache($tache);
+    $_SESSION['successMsg'] = "La tâche a été ajoutée avec succès";
+} catch (Exception $e) {
+    $_SESSION['errorMsg'] = "Erreur : " . $e->getMessage();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        // --- 1. VALIDATION DES DONNÉES D'ENTRÉE ---
-        $required_fields = ['type_dosage', 'quantite', 'mode_dosage', 'date_dosage',
-                            'derniereExecution', 'prochaineExecution', 'estComplete',
-                            'priorite', 'id_plante'];
-                            
-        foreach ($required_fields as $field) {
-            if (!isset($_POST[$field]) || empty($_POST[$field])) {
-                sendJsonResponse(false, "Le champ '{$field}' est manquant ou vide.");
-            }
-        }
-        
-        // Validation basique des types
-        if (!is_numeric($_POST['quantite']) || !is_numeric($_POST['estComplete']) || !is_numeric($_POST['priorite']) || !is_numeric($_POST['id_plante'])) {
-             sendJsonResponse(false, "Les valeurs 'quantité', 'état' (estComplete), 'priorité' et 'ID Plante' doivent être numériques.");
-        }
-        // ------------------------------------------
-
-        // Création de l'objet Tache
-        $tache = new Tache(
-            null, // L'ID Tâche est null car il sera auto-incrémenté
-            $_POST['type_dosage'],
-            (float)$_POST['quantite'],
-            $_POST['mode_dosage'],
-            $_POST['date_dosage'],
-            $_POST['derniereExecution'],
-            $_POST['prochaineExecution'],
-            (int)$_POST['estComplete'], // Convertir en entier
-            (int)$_POST['priorite'],    // Convertir en entier
-            (int)$_POST['id_plante']    // Convertir en entier
-        );
-
-        // --- 2. EXÉCUTION DE L'AJOUT EN BASE DE DONNÉES ---
-        $result = $tacheC->ajouterTache($tache);
-
-        // --- 3. VÉRIFICATION DU RÉSULTAT ET RÉPONSE ---
-        if ($result !== false) {
-             sendJsonResponse(true, 'Tâche ajoutée avec succès');
-        } else {
-             sendJsonResponse(false, 'Erreur inconnue lors de l\'insertion de la tâche en base de données.');
-        }
-
-    } catch (Exception $e) {
-        // Gestion des erreurs internes
-        sendJsonResponse(false, "Erreur serveur interne lors de l'ajout de la tâche : " . $e->getMessage());
-    }
-} else {
-    // Si la requête n'est pas POST (méthode incorrecte)
-    sendJsonResponse(false, 'Méthode de requête non autorisée.', [], 405);
-}
-?>
+// Redirection
+header("Location: plantes.php");
+exit();

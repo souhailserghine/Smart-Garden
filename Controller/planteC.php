@@ -1,5 +1,6 @@
 <?php
-include '../../config.php';
+require_once '../../config.php';
+
 //include '../../View/Back Office/list.php';
 
 class planteC {

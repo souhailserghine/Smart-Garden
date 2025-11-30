@@ -1,34 +1,81 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
+session_start(); // Démarre la session
+
 include '../../Controller/planteC.php';
 include '../../Model/plante.php';
 
 $pl = new planteC();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        // Création de l'objet Plante
-        $plante = new Plante(
-            null, // id_plante auto-incrémenté
-            $_POST['nom_plante'],
-            $_POST['date_ajout'],
-            $_POST['niveau_humidite'],
-            $_POST['besoin_eau'],
-            $_POST['etat_sante'],
-            $_POST['idUtilisateur']
-        );
 
-        // Ajout dans la base
-        $result = $pl->ajouterPlante($plante);
+    $nom = trim($_POST['nom_plante']);
+    $date = $_POST['date_ajout'];
+    $humidite = $_POST['niveau_humidite'];
+    $eau = $_POST['besoin_eau'];
+    $etat = $_POST['etat_sante'];
+    $user = $_POST['idUtilisateur'];
 
-        // Retour JSON au lieu de redirection
-        echo json_encode(['success' => true, 'message' => 'Plante ajoutée avec succès']);
+    // Stocker les données du formulaire pour réaffichage en cas d'erreur
+    $_SESSION['formData'] = $_POST;
+
+    // Validation serveur
+    if ($nom === "" || strlen($nom) < 3) {
+        $_SESSION['errorMsg'] = "Nom invalide";
+        header("Location: plantes.php");
         exit;
+    }
+
+    if ($date === "") {
+        $_SESSION['errorMsg'] = "Date invalide";
+        header("Location: plantes.php");
+        exit;
+    }
+
+    if (!is_numeric($humidite) || $humidite < 0 || $humidite > 100) {
+        $_SESSION['errorMsg'] = "Humidité invalide (0-100)";
+        header("Location: plantes.php");
+        exit;
+    }
+
+    if (!is_numeric($eau) || $eau <= 0) {
+        $_SESSION['errorMsg'] = "Besoin en eau incorrect";
+        header("Location: plantes.php");
+        exit;
+    }
+
+    if ($etat === "") {
+        $_SESSION['errorMsg'] = "État de santé requis";
+        header("Location: plantes.php");
+        exit;
+    }
+
+    if (!is_numeric($user) || $user <= 0) {
+        $_SESSION['errorMsg'] = "Utilisateur invalide";
+        header("Location: plantes.php");
+        exit;
+    }
+
+    // Si toutes les validations passent, on peut supprimer les données stockées en session
+    unset($_SESSION['formData']);
+
+    // Ajout plante
+    try {
+        $plante = new Plante(null, $nom, $date, $humidite, $eau, $etat, $user);
+        $pl->ajouterPlante($plante);
+
+        $_SESSION['successMsg'] = "Plante ajoutée avec succès !";
+        header("Location: plantes.php");
+        exit;
+
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        $_SESSION['errorMsg'] = $e->getMessage();
+        header("Location: plantes.php");
         exit;
     }
 }
 
-echo json_encode(['success' => false, 'message' => 'Méthode non autorisée']);
+// Mauvaise méthode
+$_SESSION['errorMsg'] = "Méthode non autorisée";
+header("Location: plantes.php");
+exit;
 ?>
