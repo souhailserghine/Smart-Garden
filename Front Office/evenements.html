@@ -175,137 +175,162 @@
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/components/components.js"></script>
 
-    <script type="text/javascript">
-        const CURRENT_USER_ID = 999;
+<script type="text/javascript">
+    const CURRENT_USER_ID = 999;
 
-        async function getReservedEvents() {
-            try {
-                const res = await fetch('/view/Backend/public/index.php?action=getReservedByUser');
-                if (!res.ok) return [];
-                const data = await res.json();
-                return data.status === "success" ? data.data.map(r => parseInt(r.id_event)) : [];
-            } catch (e) {
-                console.error("Erreur réservations:", e);
-                return [];
+    // Récupère les événements déjà réservés par l'utilisateur 999
+    async function getReservedEvents() {
+        try {
+            const response = await fetch('/view/Backend/public/index.php?action=getReservedByUser', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idUtilisateur: CURRENT_USER_ID })
+            });
+
+            if (!response.ok) return [];
+            const data = await response.json();
+
+            return data.status === "success" 
+                ? data.data.map(item => parseInt(item))  // data.data est déjà un tableau d'id_event
+                : [];
+        } catch (e) {
+            console.error("Erreur lors du chargement des réservations :", e);
+            return [];
+        }
+    }
+
+    // Échappement HTML pour sécurité
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    }
+
+    // Fonction de réservation (CORRIGÉE : envoi du bon champ + idUtilisateur)
+    async function reserveEvent(eventId, button) {
+        if (!confirm("Réserver cet événement ?")) return;
+
+        // Désactiver le bouton immédiatement pour éviter le double clic
+        button.disabled = true;
+        button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Réservation...';
+
+        try {
+            const response = await fetch('/view/Backend/public/index.php?action=reserve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id_event: eventId,           // ← Nom EXACT attendu par le PHP
+                    idUtilisateur: CURRENT_USER_ID  // ← On envoie aussi l'user (même si fallback à 999 côté serveur)
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.status === "success") {
+                alert("Réservé avec succès !");
+                button.classList.remove('btn-success');
+                button.classList.add('btn-secondary');
+                button.innerHTML = "<i class='bx bx-check-double'></i> Déjà réservé";
+            } else {
+                alert(result.message || "Erreur lors de la réservation");
+                button.disabled = false;
+                button.innerHTML = "<i class='bx bx-check-circle'></i> Réserver ma place";
             }
+        } catch (err) {
+            console.error("Erreur réseau :", err);
+            alert("Erreur de connexion. Réessayez plus tard.");
+            button.disabled = false;
+            button.innerHTML = "<i class='bx bx-check-circle'></i> Réserver ma place";
         }
+    }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+    // Chargement des événements avec affichage par catégorie
+    async function loadEventsByCategory() {
+        const container = document.getElementById('eventsByCategory');
+        const loading = document.getElementById('eventsLoading');
+        const empty = document.getElementById('eventsEmpty');
 
-        async function reserveEvent(eventId, button) {
-            if (!confirm("Réserver cet événement ?")) return;
+        try {
+            const response = await fetch('/view/Backend/public/index.php?action=list');
+            if (!response.ok) throw new Error("Erreur serveur");
 
-            try {
-                const res = await fetch('/view/Backend/public/index.php?action=reserve', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ event_id: eventId })
-                });
-                const result = await res.json();
+            const json = await response.json();
+            const events = json.data || [];
 
-                if (result.status === "success") {
-                    alert("Réservé avec succès !");
-                    button.disabled = true;
-                    button.classList.remove('btn-success');
-                    button.classList.add('btn-secondary');
-                    button.innerHTML = "<i class='bx bx-check-double'></i> Déjà réservé";
-                } else {
-                    alert(result.message || "Erreur de réservation");
-                }
-            } catch (err) {
-                alert("Erreur réseau");
+            const reservedEventIds = await getReservedEvents();
+
+            if (events.length === 0) {
+                loading.style.display = 'none';
+                empty.style.display = 'block';
+                return;
             }
-        }
 
-        async function loadEventsByCategory() {
-            const container = document.getElementById('eventsByCategory');
-            const loading = document.getElementById('eventsLoading');
-            const empty = document.getElementById('eventsEmpty');
+            // Grouper par catégorie
+            const grouped = {};
+            events.forEach(e => {
+                const cat = e.nom_categorie || "Autres";
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(e);
+            });
 
-            try {
-                const res = await fetch('/view/Backend/public/index.php?action=list');
-                if (!res.ok) throw new Error("Erreur serveur");
-                const json = await res.json();
-                const events = json.data || [];
-
-                const reservedEventIds = await getReservedEvents();
-
-                if (events.length === 0) {
-                    loading.style.display = 'none';
-                    empty.style.display = 'block';
-                    return;
-                }
-
-                // Regrouper par catégorie
-                const grouped = {};
-                events.forEach(e => {
-                    const cat = e.nom_categorie || "Autres";
-                    if (!grouped[cat]) grouped[cat] = [];
-                    grouped[cat].push(e);
-                });
-
-                let html = '';
-                Object.keys(grouped).sort().forEach(category => {
-                    const list = grouped[category];
-                    html += `
-                        <div class="category-section">
-                            <h2 class="category-title">
-                                <i class='bx bxs-category'></i> ${escapeHtml(category)}
-                                <small class="text-muted ml-3">(${list.length} événement${list.length > 1 ? 's' : ''})</small>
-                            </h2>
-                            <div class="row">
-                                ${list.map(e => {
-                                    const id = parseInt(e.id_event);
-                                    const isReserved = reservedEventIds.includes(id);
-                                    return `
-                                        <div class="col-md-6 col-lg-4 mb-4">
-                                            <div class="card h-100 event-card shadow-sm">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">${escapeHtml(e.type_event || 'Événement')}</h5>
-                                                    <p class="text-muted small mb-2">
-                                                        <i class='bx bx-calendar'></i> ${escapeHtml(e.date_event || 'Date non définie')}
-                                                    </p>
-                                                    <p class="card-text text-dark">${escapeHtml(e.description || 'Aucune description')}</p>
-                                                    <span class="badge badge-category">${escapeHtml(category)}</span>
-                                                </div>
-                                                <div class="card-footer bg-white border-0 text-center pt-3">
-                                                    <button 
-                                                        ${isReserved ? 'disabled' : `onclick="reserveEvent(${id}, this)"`}
-                                                        class="btn ${isReserved ? 'btn-secondary' : 'btn-success'} btn-block">
-                                                        <i class='bx ${isReserved ? 'bx-check-double' : 'bx-check-circle'}'></i>
-                                                        ${isReserved ? 'Déjà réservé' : 'Réserver ma place'}
-                                                    </button>
-                                                </div>
+            let html = '';
+            Object.keys(grouped).sort().forEach(category => {
+                const list = grouped[category];
+                html += `
+                    <div class="category-section">
+                        <h2 class="category-title">
+                            <i class='bx bxs-category'></i> ${escapeHtml(category)}
+                            <small class="text-muted ml-3">(${list.length} événement${list.length > 1 ? 's' : ''})</small>
+                        </h2>
+                        <div class="row">
+                            ${list.map(e => {
+                                const id = parseInt(e.id_event);
+                                const isReserved = reservedEventIds.includes(id);
+                                return `
+                                    <div class="col-md-6 col-lg-4 mb-4">
+                                        <div class="card h-100 event-card shadow-sm">
+                                            <div class="card-body">
+                                                <h5 class="card-title">${escapeHtml(e.type_event || 'Événement')}</h5>
+                                                <p class="text-muted small mb-2">
+                                                    <i class='bx bx-calendar'></i> ${escapeHtml(e.date_event || 'Date non définie')}
+                                                </p>
+                                                <p class="card-text text-dark">${escapeHtml(e.description || 'Aucune description')}</p>
+                                                <span class="badge badge-category">${escapeHtml(category)}</span>
+                                            </div>
+                                            <div class="card-footer bg-white border-0 text-center pt-3">
+                                                <button 
+                                                    ${isReserved ? 'disabled' : `onclick="reserveEvent(${id}, this)"`}
+                                                    class="btn ${isReserved ? 'btn-secondary' : 'btn-success'} btn-block">
+                                                    <i class='bx ${isReserved ? 'bx-check-double' : 'bx-check-circle'}'></i>
+                                                    ${isReserved ? 'Déjà réservé' : 'Réserver ma place'}
+                                                </button>
                                             </div>
                                         </div>
-                                    `;
-                                }).join('')}
-                            </div>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
-                    `;
-                });
+                    </div>
+                `;
+            });
 
-                container.innerHTML = html;
-                loading.style.display = 'none';
+            container.innerHTML = html;
+            loading.style.display = 'none';
 
-            } catch (err) {
-                console.error(err);
-                loading.innerHTML = '<p class="text-danger text-center">Impossible de charger les événements.</p>';
-            }
+        } catch (err) {
+            console.error("Erreur chargement événements :", err);
+            loading.innerHTML = '<p class="text-danger text-center">Impossible de charger les événements.</p>';
         }
+    }
 
-        // Lancement au chargement
-        window.addEventListener('load', loadEventsByCategory);
+    // Lancement au chargement de la page
+    window.addEventListener('load', loadEventsByCategory);
 
-        // Menu mobile
-        $("#menu-toggle").click(function(e) {
-            e.preventDefault();
-            $("#wrapper").toggleClass("toggled");
-        });
-    </script>
+    // Menu mobile (inchangé)
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+</script>
 </body>
 </html>
