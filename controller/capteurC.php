@@ -21,11 +21,11 @@ class CapteurC {
                 'id_plante' => $capteur->getIdPlante()
             ]);
 
-            return $result; // Retourne true en cas de succès
+            return $result;
 
         } catch (Exception $e) {
             error_log('Erreur addCapteur: ' . $e->getMessage());
-            throw $e; // Relance l'exception pour gestion dans la vue
+            throw $e;
         }
     }
 
@@ -63,6 +63,29 @@ class CapteurC {
         }
     }
 
+    // Afficher les capteurs filtrés par catégorie
+    public function showCapteurByCategorie($id_categorie) {
+        $db = config::getConnexion();
+
+        try {
+            $query = 'SELECT c.*, 
+                             cat.nom_categorie, 
+                             p.nom_plante 
+                      FROM capteur c
+                      LEFT JOIN categorie cat ON c.id_categorie = cat.id_categorie
+                      LEFT JOIN plante p ON c.id_plante = p.id_plante
+                      WHERE c.id_categorie = :id_categorie
+                      ORDER BY c.id_capteur';
+            
+            $req = $db->prepare($query);
+            $req->execute(['id_categorie' => $id_categorie]);
+            return $req->fetchAll();
+        } catch (Exception $e) {
+            error_log('Erreur showCapteurByCategorie: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
     // Supprimer un capteur
     public function deleteCapteur($id) {
         $db = config::getConnexion();
@@ -71,7 +94,6 @@ class CapteurC {
             $req = $db->prepare('DELETE FROM capteur WHERE id_capteur = :id');
             $result = $req->execute(['id' => $id]);
             
-            // Retourner le nombre de lignes affectées
             return $req->rowCount();
             
         } catch (Exception $e) {
@@ -93,8 +115,6 @@ class CapteurC {
             throw $e;
         }
     }
-
-
 
     // Modifier un capteur
     public function updateCapteur($capteur, $id) {
@@ -120,7 +140,6 @@ class CapteurC {
                 'id_plante' => $capteur->getIdPlante()
             ]);
 
-            // Retourner le nombre de lignes affectées
             return $req->rowCount();
             
         } catch (Exception $e) {
@@ -129,7 +148,31 @@ class CapteurC {
         }
     }
 
+    // Récupérer toutes les catégories
+    public function getAllCategories() {
+        $db = config::getConnexion();
 
+        try {
+            $req = $db->query('SELECT id_categorie, nom_categorie FROM categorie ORDER BY nom_categorie');
+            return $req->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log('Erreur getAllCategories: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    // Récupérer toutes les plantes
+    public function getAllPlantes() {
+        $db = config::getConnexion();
+
+        try {
+            $req = $db->query('SELECT id_plante, nom_plante FROM plante ORDER BY nom_plante');
+            return $req->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log('Erreur getAllPlantes: ' . $e->getMessage());
+            throw $e;
+        }
+    }
 
 }
 
