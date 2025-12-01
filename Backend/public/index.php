@@ -1,8 +1,12 @@
 <?php
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+
+// Désactiver l'affichage des erreurs
+error_reporting(0);
+ini_set('display_errors', 0);
 
 require_once __DIR__ . '/../app/controllers/EventC.php';
 require_once __DIR__ . '/../app/controllers/CategoryController.php';
@@ -36,6 +40,28 @@ switch ($action) {
         echo json_encode($result);
         break;
 
+    case 'updateEvent':
+        $input = json_decode(file_get_contents("php://input"), true);
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            $ec = new EventC();
+            $data = [
+                'id_event' => $id,
+                'type_event' => $input['type_event'] ?? '',
+                'date_event' => $input['date_event'] ?? '',
+                'description' => $input['description'] ?? '',
+                'id_categorie' => $input['id_categorie'] ?? null,
+                'lieu' => $input['lieu'] ?? '',
+                'latitude' => $input['latitude'] ?? null,
+                'longitude' => $input['longitude'] ?? null
+            ];
+            $result = $ec->modifierEvent($data);
+            echo json_encode($result);
+        } else {
+            echo json_encode(["status" => "error", "message" => "ID requis"]);
+        }
+        break;
+
     case 'deleteEvent':
         $id = $_GET['id'] ?? null;
         if ($id) {
@@ -47,10 +73,10 @@ switch ($action) {
         }
         break;
 
-case 'listCategories':
-    $cc = new CategoryController();
-    $cc->getAllCategories(); // This already echoes JSON, so don't wrap it
-    break;
+    case 'listCategories':
+        $cc = new CategoryController();
+        $cc->getAllCategories(); // Cette méthode echo déjà le JSON
+        break;
 
     case 'reserveEvent':
         $rc = new ReservationController();
@@ -60,6 +86,11 @@ case 'listCategories':
     case 'myReservations':
         $rc = new ReservationController();
         $rc->getReservedByUser();
+        break;
+
+    case 'cancelReservation':
+        $rc = new ReservationController();
+        $rc->cancelUserReservation();
         break;
 
     case 'deleteReservation':

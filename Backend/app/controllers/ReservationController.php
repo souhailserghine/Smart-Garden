@@ -1,26 +1,45 @@
 <?php
 // view/Backend/app/controllers/ReservationController.php
 
-// ON UTILISE LA MÊME CONFIG QUE TOUT LE RESTE DU PROJET
 include_once __DIR__ . '/../core/config.php';
 
 class ReservationController
 {
-    // RÉSERVER UN ÉVÉNEMENT (user_id statique = 999)
+    // RÉSERVER UN ÉVÉNEMENT AVEC INFOS PERSONNELLES
     public function addReservation()
     {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: POST');
+        header('Access-Control-Allow-Methods: POST, OPTIONS');
         header('Access-Control-Allow-Headers: Content-Type');
+
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            exit(0);
+        }
 
         $input = json_decode(file_get_contents('php://input'), true);
 
         $event_id = $input['id_event'] ?? null;
-        $user_id  = $input['idUtilisateur'] ?? 999; // fallback
+        $user_id  = $input['idUtilisateur'] ?? 999;
+        $nom = $input['nom'] ?? '';
+        $prenom = $input['prenom'] ?? '';
+        $email = $input['email'] ?? '';
+        $telephone = $input['telephone'] ?? '';
 
+        // VALIDATION DES CHAMPS OBLIGATOIRES
         if (!$event_id || !is_numeric($event_id)) {
             echo json_encode(["status" => "error", "message" => "ID événement requis"]);
+            return;
+        }
+
+        if (empty($nom) || empty($prenom) || empty($email)) {
+            echo json_encode(["status" => "error", "message" => "Nom, prénom et email sont obligatoires"]);
+            return;
+        }
+
+        // Validation email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(["status" => "error", "message" => "Format d'email invalide"]);
             return;
         }
 
@@ -35,12 +54,60 @@ class ReservationController
                 return;
             }
 
-            $stmt = $db->prepare("INSERT INTO reservation (id_event, idUtilisateur, date_reservation) VALUES (?, ?, NOW())");
-            $stmt->execute([$event_id, $user_id]);
+            // Insérer la réservation avec TOUTES les informations
+            $stmt = $db->prepare("INSERT INTO reservation (id_event, idUtilisateur, nom, prenom, email, telephone, date_reservation) VALUES (?, ?, ?, ?, ?, ?, NOW())");
+            $stmt->execute([$event_id, $user_id, $nom, $prenom, $email, $telephone]);
 
-            echo json_encode(["status" => "success", "message" => "Réservé avec succès !"]);
+            echo json_encode(["status" => "success", "message" => "Réservation confirmée avec succès !"]);
         } catch (Exception $e) {
             echo json_encode(["status" => "error", "message" => "Erreur DB : " . $e->getMessage()]);
+        }
+    }
+
+    // ANNULER UNE RÉSERVATION (pour l'utilisateur)
+    public function cancelUserReservation()
+    {
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
+
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            exit(0);
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        $event_id = $input['id_event'] ?? null;
+        $user_id = $input['idUtilisateur'] ?? 999;
+
+        if (!$event_id || !is_numeric($event_id)) {
+            echo json_encode(["status" => "error", "message" => "ID événement requis"]);
+            return;
+        }
+
+        try {
+            $db = config::getConnexion();
+            
+            $stmt = $db->prepare("DELETE FROM reservation WHERE id_event = ? AND idUtilisateur = ?");
+            $success = $stmt->execute([$event_id, $user_id]);
+
+            if ($success && $stmt->rowCount() > 0) {
+                echo json_encode([
+                    "status" => "success", 
+                    "message" => "Réservation annulée avec succès"
+                ]);
+            } else {
+                echo json_encode([
+                    "status" => "error", 
+                    "message" => "Réservation non trouvée ou déjà annulée"
+                ]);
+            }
+        } catch (Exception $e) {
+            echo json_encode([
+                "status" => "error", 
+                "message" => "Erreur DB : " . $e->getMessage()
+            ]);
         }
     }
 
@@ -49,6 +116,12 @@ class ReservationController
     {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
+
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            exit(0);
+        }
 
         $input = json_decode(file_get_contents('php://input'), true);
         $user_id = $input['idUtilisateur'] ?? 999;
@@ -64,7 +137,7 @@ class ReservationController
                 "data"   => array_map('intval', $results)
             ]);
         } catch (Exception $e) {
-            echo json_encode(["status" => "error", "message" => "DB Error"]);
+            echo json_encode(["status" => "error", "message" => "DB Error: " . $e->getMessage()]);
         }
     }
 
@@ -73,6 +146,12 @@ class ReservationController
     {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
+
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            exit(0);
+        }
 
         try {
             $db = config::getConnexion();
@@ -95,6 +174,12 @@ class ReservationController
     {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
+
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            exit(0);
+        }
 
         $input = json_decode(file_get_contents('php://input'), true);
 
@@ -122,11 +207,17 @@ class ReservationController
         }
     }
 
-    // ADMIN : Supprimer une réservation
+    // ADMIN : Supprimer une réservation (par ID réservation)
     public function deleteReservation()
     {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
+
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            exit(0);
+        }
 
         $input = json_decode(file_get_contents('php://input'), true);
         $id = $input['id_reservation'] ?? null;
@@ -151,3 +242,4 @@ class ReservationController
         }
     }
 }
+?>
