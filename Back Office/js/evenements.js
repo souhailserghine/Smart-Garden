@@ -146,7 +146,12 @@ const renderTable = () => {
                     }
                 </td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editEvent(${e.id})"><i class="fa fa-edit"></i></button>
+<button class="btn btn-sm me-1"
+        style="background-color: yellow; border-color: yellow; color: black;"
+        onclick="editEvent(${e.id})">
+    <i class="fa fa-edit"></i>
+</button>
+
                     <button class="btn btn-sm btn-outline-danger me-1" onclick="deleteEvent(${e.id})"><i class="fa fa-trash"></i></button>
                     <button class="btn btn-sm btn-success" onclick="reserveEvent(${e.id})">
                         <i class="fa fa-ticket-alt"></i> Réserver

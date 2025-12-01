@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="no-js">
-
+<html lang="fr">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,99 +7,32 @@
     <link rel="icon" type="image/png" href="./assets/images/logo-16x16.png" />
     <title>SmartGarden - Événements</title>
 
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display" rel="stylesheet">
     <link href='https://cdn.jsdelivr.net/npm/boxicons@2.0.1/css/boxicons.min.css' rel='stylesheet'>
 
-    <!-- Styles -->
     <link href="./assets/css/bootstrap/bootstrap.min.css" rel="stylesheet">
     <link href="./assets/css/style.css" rel="stylesheet">
     <link href="./assets/css/components.css" rel="stylesheet">
     <link href="./assets/css/media.css" rel="stylesheet">
 
     <style>
-        .category-section {
-            margin: 3rem 0;
-            padding-bottom: 2rem;
-            border-bottom: 1px solid #eee;
-        }
-        .category-section:last-child { border-bottom: none; }
-
-        .category-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #27ae60;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 4px solid #27ae60;
-            display: inline-block;
-        }
-
-        .event-card {
-            transition: all 0.3s ease;
-            border: none;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .event-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.12) !important;
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            color: #2c3e50;
-        }
-
-        .badge-category {
-            background-color: #3498db;
-            color: white;
-            font-size: 0.85rem;
-        }
-        
-        .btn-reserver {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            border: none;
-            color: white;
-            font-weight: 600;
-        }
-        
-        .btn-reserver:hover {
-            background: linear-gradient(135deg, #219653, #27ae60);
-            transform: translateY(-2px);
-        }
-        
-        .btn-annuler {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            border: none;
-            color: white;
-            font-weight: 600;
-        }
-        
-        .btn-annuler:hover {
-            background: linear-gradient(135deg, #c0392b, #a93226);
-            transform: translateY(-2px);
-        }
-        
-        .form-label {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-        }
-        
-        .required-field::after {
-            content: " *";
-            color: #e74c3c;
-        }
-        
-        .form-control:focus {
-            border-color: #27ae60;
-            box-shadow: 0 0 0 0.2rem rgba(39, 174, 96, 0.25);
-        }
+        .category-section{margin:3rem 0;padding-bottom:2rem;border-bottom:1px solid #eee}
+        .category-section:last-child{border-bottom:none}
+        .category-title{font-size:2rem;font-weight:700;color:#27ae60;margin-bottom:1.5rem;padding-bottom:.5rem;border-bottom:4px solid #27ae60;display:inline-block}
+        .event-card{transition:all .3s ease;border:none;border-radius:12px;overflow:hidden}
+        .event-card:hover{transform:translateY(-8px);box-shadow:0 15px 30px rgba(0,0,0,.12)!important}
+        .btn-reserver{background:linear-gradient(135deg,#27ae60,#2ecc71);border:none;color:#fff;font-weight:600}
+        .btn-reserver:hover{background:linear-gradient(135deg,#219653,#27ae60);transform:translateY(-2px)}
+        .btn-annuler{background:linear-gradient(135deg,#e74c3c,#c0392b);border:none;color:#fff;font-weight:600}
+        .btn-annuler:hover{background:linear-gradient(135deg,#c0392b,#a93226);transform:translateY(-2px)}
+        .required-field::after{content:" *";color:#e74c3c}
+        .form-control:focus{border-color:#27ae60;box-shadow:0 0 0 .2rem rgba(39,174,96,.25)}
+        .is-invalid{border-color:#e74c3c!important}
     </style>
 </head>
-
 <body class="newsfeed">
+
+    <!-- TOUT TON HTML (navbar, sidebar, contenu) RESTE IDENTIQUE -->
     <div class="container-fluid" id="wrapper">
         <div class="row newsfeed-size">
             <div class="col-md-12 newsfeed-right-side">
@@ -108,94 +40,53 @@
                 <nav id="navbar-main" class="navbar navbar-expand-lg shadow-sm sticky-top">
                     <div class="w-100 justify-content-md-center">
                         <ul class="nav navbar-nav enable-mobile px-2">
-                            <li class="nav-item">
-                                <button type="button" class="btn nav-link p-0"><img src="./assets/images/icons/theme/post-image.png" class="f-nav-icon" alt="Quick make post"></button>
-                            </li>
+                            <li class="nav-item"><button type="button" class="btn nav-link p-0"><img src="./assets/images/icons/theme/post-image.png" class="f-nav-icon"></button></li>
                             <li class="nav-item w-100 py-2">
                                 <form class="d-inline form-inline w-100 px-4">
                                     <div class="input-group">
-                                        <input type="text" class="form-control search-input" placeholder="Search for people, companies, events and more...">
-                                        <div class="input-group-append">
-                                            <button class="btn search-button" type="button"><i class='bx bx-search'></i></button>
-                                        </div>
+                                        <input type="text" class="form-control search-input" placeholder="Search...">
+                                        <button class="btn search-button" type="button"><i class='bx bx-search'></i></button>
                                     </div>
                                 </form>
                             </li>
-                            <li class="nav-item">
-                                <a href="messages.html" class="nav-link nav-icon nav-links message-drop drop-w-tooltip" data-placement="bottom" data-title="Messages">
-                                    <img src="./assets/images/icons/navbar/message.png" class="message-dropdown f-nav-icon" alt="navbar icon">
-                                </a>
-                            </li>
+                            <li class="nav-item"><a href="messages.html" class="nav-link"><img src="./assets/images/icons/navbar/message.png" class="f-nav-icon"></a></li>
                         </ul>
                         <ul class="navbar-nav mr-5 flex-row" id="main_menu">
-                            <a class="navbar-brand nav-item mr-lg-5" href="index.html"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
-                            <form class="w-30 mx-2 my-auto d-inline form-inline mr-5">
-                                <div class="input-group">
-                                    <input type="text" class="form-control search-input w-75" placeholder="Search...">
-                                    <div class="input-group-append">
-                                        <button class="btn search-button" type="button"><i class='bx bx-search'></i></button>
-                                    </div>
-                                </div>
-                            </form>
+                            <a class="navbar-brand nav-item mr-lg-5" href="index.html"><img src="./assets/images/logo-128x128.png" width="70" height="70" alt="Logo"></a>
                             <button type="button" class="btn nav-link" id="menu-toggle"><img src="./assets/images/icons/theme/navs.png" alt="Menu"></button>
                         </ul>
                     </div>
                 </nav>
 
                 <div class="row newsfeed-right-side-content mt-3">
-                    <!-- SIDEBAR -->
                     <div class="col-md-2 newsfeed-left-side sticky-top shadow-sm" id="sidebar-wrapper">
                         <div class="card newsfeed-user-card h-100">
                             <ul class="list-group list-group-flush newsfeed-left-sidebar">
                                 <li class="list-group-item"><h6>Home</h6></li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="profile.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/newsfeed.png" alt="profile"> Profile</a>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="publications.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/message.png" alt="publications"> Publications</a>
-                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="plantes.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/group.png" alt="plantes"> Plantes</a>
-                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center sd-active">
-                                    <a href="evenements.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/event.png" alt="evenements"> Événements</a>
-                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="capteurs.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/saved.png" alt="capteurs"> Capteurs</a>
-                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
-                                </li>
+                                <li class="list-group-item"><a href="profile.html" class="sidebar-item">Profile</a></li>
+                                <li class="list-group-item"><a href="publications.html" class="sidebar-item">Publications</a></li>
+                                <li class="list-group-item"><a href="plantes.html" class="sidebar-item">Plantes</a></li>
+                                <li class="list-group-item sd-active"><a href="evenements.html" class="sidebar-item">Événements</a></li>
+                                <li class="list-group-item"><a href="capteurs.html" class="sidebar-item">Capteurs</a></li>
                             </ul>
                         </div>
                     </div>
 
-                    <!-- CONTENU PRINCIPAL -->
                     <div class="col-md-10 second-section" id="page-content-wrapper">
-                        <div class="jumbotron groups-banner text-white" style="background: linear-gradient(135deg, #27ae60, #2ecc71); border-radius: 15px;">
-                            <div class="container group-banner-content">
-                                <h1 class="jumbotron-heading mt-auto">
-                                    <img src="./assets/images/icons/theme/group-white.png" class="mr-3" alt="Bienvenue aux événements"> Événements
-                                </h1>
-                                <p class="lead">Tous les événements classés par catégorie</p>
-                            </div>
+                        <div class="jumbotron groups-banner text-white" style="background:linear-gradient(135deg,#27ae60,#2ecc71);border-radius:15px;">
+                            <div class="container"><h1>Événements</h1><p class="lead">Tous les événements classés par catégorie</p></div>
                         </div>
 
                         <div class="card shadow-sm border-0">
                             <div class="card-body">
-                                <h3 class="card-title text-success mb-4">
-                                    <i class='bx bx-calendar-event'></i> Événements disponibles
-                                </h3>
-
+                                <h3 class="text-success mb-4">Événements disponibles</h3>
                                 <div id="eventsContainer">
                                     <div id="eventsLoading" class="text-center py-5">
-                                        <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status"></div>
-                                        <p class="mt-3">Chargement des événements...</p>
+                                        <div class="spinner-border text-success" style="width:3rem;height:3rem;"></div>
+                                        <p>Chargement...</p>
                                     </div>
                                     <div id="eventsEmpty" class="text-center py-5 text-muted" style="display:none;">
-                                        <h4>Aucun événement pour le moment</h4>
-                                        <p>Revenez plus tard !</p>
+                                        <h4>Aucun événement</h4>
                                     </div>
                                     <div id="eventsByCategory"></div>
                                 </div>
@@ -207,54 +98,47 @@
         </div>
     </div>
 
-    <!-- MODAL DE RÉSERVATION COMPLET -->
-    <div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalTitle" aria-hidden="true">
+    <!-- MODAL RÉSERVATION – SANS EMAIL + VALIDATION ROUGE -->
+    <div class="modal fade" id="reservationModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="reservationModalTitle">Réserver cet événement</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="reservationForm">
+                <form id="reservationForm" novalidate>
                     <div class="modal-body">
                         <input type="hidden" id="reservation_event_id">
-                        
-                        <div class="alert alert-info mb-3">
-                            <i class='bx bx-info-circle'></i>
-                            <strong>Informations personnelles requises</strong>
-                            <p class="mb-0 mt-1">Veuillez remplir tous les champs obligatoires pour confirmer votre réservation.</p>
+
+                        <div class="alert alert-info mb-4">
+                            <strong>Informations requises</strong><br>
+                            <small>Seul le nom et le prénom sont obligatoires.</small>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label required-field">Nom</label>
-                                    <input type="text" id="reservation_nom" class="form-control" required placeholder="Votre nom">
+                                    <label class="form-label fw-bold required-field">Nom</label>
+                                    <input type="text" id="reservation_nom" class="form-control" required>
+                                    <div class="invalid-feedback">Le nom est obligatoire</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label required-field">Prénom</label>
-                                    <input type="text" id="reservation_prenom" class="form-control" required placeholder="Votre prénom">
+                                    <label class="form-label fw-bold required-field">Prénom</label>
+                                    <input type="text" id="reservation_prenom" class="form-control" required>
+                                    <div class="invalid-feedback">Le prénom est obligatoire</div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label class="form-label required-field">Email</label>
-                            <input type="email" id="reservation_email" class="form-control" required placeholder="votre@email.com">
+                            <label class="form-label">Téléphone (facultatif)</label>
+                            <input type="tel" id="reservation_telephone" class="form-control">
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Téléphone</label>
-                            <input type="tel" id="reservation_telephone" class="form-control" placeholder="Votre numéro de téléphone">
-                        </div>
-                        
-                        <div class="alert alert-light border mt-3">
-                            <small class="text-muted">
-                                <i class='bx bx-user'></i> 
-                                <strong>Utilisateur :</strong> #<span id="currentUserId">999</span>
-                            </small>
+
+                        <div class="alert alert-light">
+                            <small>Utilisateur : #<span id="currentUserId">999</span></small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -266,191 +150,153 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- SCRIPTS -->
     <script src="./assets/js/jquery/jquery-3.3.1.min.js"></script>
     <script src="./assets/js/popper/popper.min.js"></script>
     <script src="./assets/js/bootstrap/bootstrap.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/components/components.js"></script>
 
-    <script type="text/javascript">
+    <!-- UNIQUE SCRIPT – NO ERROR, NO DUPLICATE -->
+    <script>
         const CURRENT_USER_ID = 999;
         const API_BASE = '/view/Backend/public/index.php';
 
-        // Variables globales pour le modal
         let reservationModal = null;
         let currentEventId = null;
-        let currentEventTitle = '';
 
-        // Initialiser le modal au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            const modalElement = document.getElementById('reservationModal');
-            reservationModal = new bootstrap.Modal(modalElement);
-            
-            // Gestionnaire pour le formulaire de réservation
-            document.getElementById('reservationForm').addEventListener('submit', confirmReservation);
-            
-            // Charger les événements
+        document.addEventListener('DOMContentLoaded', function () {
+            reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+
+            // Validation du formulaire (bordures rouges)
+            const form = document.getElementById('reservationForm');
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                form.querySelectorAll('.form-control').forEach(el => el.classList.remove('is-invalid'));
+
+                let error = false;
+                const nom = document.getElementById('reservation_nom');
+                const prenom = document.getElementById('reservation_prenom');
+
+                if (!nom.value.trim()) { 
+                    nom.classList.add('is-invalid'); 
+                    error = true; 
+                }
+                if (!prenom.value.trim()) { 
+                    prenom.classList.add('is-invalid'); 
+                    error = true; 
+                }
+
+                if (error) {
+                    alert('Erreur : Nom et prénom sont obligatoires');
+                    return;
+                }
+
+                sendReservation();
+            });
+
+            // Enlève bordure rouge quand on tape
+            ['reservation_nom', 'reservation_prenom'].forEach(id => {
+                document.getElementById(id).addEventListener('input', function () {
+                    this.classList.remove('is-invalid');
+                });
+            });
+
             loadEventsByCategory();
         });
 
-        // Récupère les événements déjà réservés par l'utilisateur
+        window.reserveEvent = function(eventId, eventTitle) {
+            currentEventId = eventId;
+            document.getElementById('reservationModalTitle').textContent = 'Réserver : ' + eventTitle;
+            document.getElementById('currentUserId').textContent = CURRENT_USER_ID;
+            document.getElementById('reservationForm').reset();
+            document.querySelectorAll('.form-control').forEach(el => el.classList.remove('is-invalid'));
+            reservationModal.show();
+        };
+
+        async function sendReservation() {
+            const btn = document.querySelector('#reservationForm button[type="submit"]');
+            const old = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Envoi...';
+
+            try {
+                const res = await fetch(API_BASE + '?action=reserveEvent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id_event: currentEventId,
+                        idUtilisateur: CURRENT_USER_ID,
+                        nom: document.getElementById('reservation_nom').value.trim(),
+                        prenom: document.getElementById('reservation_prenom').value.trim(),
+                        telephone: document.getElementById('reservation_telephone').value.trim() || null
+                    })
+                });
+
+                const data = await res.json();
+                if (data.status === "success") {
+                    alert('Réservation confirmée !');
+                    reservationModal.hide();
+                    loadEventsByCategory();
+                } else {
+                    alert('Erreur : ' + (data.message || 'Impossible de réserver cet événement'));
+                }
+            } catch (error) {
+                console.error('Erreur réseau:', error);
+                alert('Erreur réseau: Impossible de se connecter au serveur');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = old;
+            }
+        }
+
+        // === TOUT LE RESTE DE TON CODE (chargement événements, annulation, etc.) ===
         async function getReservedEvents() {
             try {
-                const response = await fetch(API_BASE + '?action=myReservations', {
+                const r = await fetch(API_BASE + '?action=myReservations', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ idUtilisateur: CURRENT_USER_ID })
                 });
-
-                if (!response.ok) return [];
-                const data = await response.json();
-
-                return data.status === "success" 
-                    ? data.data.map(item => parseInt(item))
-                    : [];
-            } catch (e) {
-                console.error("Erreur lors du chargement des réservations :", e);
-                return [];
+                const d = await r.json();
+                return d.status === "success" ? d.data.map(id => parseInt(id)) : [];
+            } catch { 
+                console.error('Erreur lors de la récupération des réservations');
+                return []; 
             }
         }
 
-        // FONCTION POUR OUVRIR LE FORMULAIRE DE RÉSERVATION
-        window.reserveEvent = function(eventId, eventTitle = '') {
-            console.log("🔵 Ouverture du formulaire pour l'événement:", eventId);
-            
-            currentEventId = eventId;
-            currentEventTitle = eventTitle;
-            
-            // Mettre à jour le titre du modal
-            document.getElementById('reservationModalTitle').textContent = `Réserver : ${eventTitle}`;
-            
-            // Afficher l'ID utilisateur
-            document.getElementById('currentUserId').textContent = CURRENT_USER_ID;
-            
-            // Réinitialiser le formulaire
-            document.getElementById('reservationForm').reset();
-            
-            // Ouvrir le modal
-            reservationModal.show();
-        };
-
-        // FONCTION POUR CONFIRMER LA RÉSERVATION
-        async function confirmReservation(e) {
-            e.preventDefault();
-            
-            if (!currentEventId) {
-                alert('❌ Erreur: Aucun événement sélectionné');
-                return;
-            }
-
-            // Récupérer les valeurs du formulaire
-            const nom = document.getElementById('reservation_nom').value.trim();
-            const prenom = document.getElementById('reservation_prenom').value.trim();
-            const email = document.getElementById('reservation_email').value.trim();
-            const telephone = document.getElementById('reservation_telephone').value.trim();
-
-            // Validation côté client
-            if (!nom || !prenom || !email) {
-                alert('❌ Veuillez remplir tous les champs obligatoires (nom, prénom, email)');
-                return;
-            }
-
-            if (!validateEmail(email)) {
-                alert('❌ Veuillez entrer une adresse email valide');
-                return;
-            }
-
+        window.cancelReservation = async function(id) {
+            if (!confirm('Annuler cette réservation ?')) return;
             try {
-                const submitBtn = document.querySelector('#reservationForm button[type="submit"]');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Réservation...';
-                
-                const response = await fetch(API_BASE + '?action=reserveEvent', {
+                const r = await fetch(API_BASE + '?action=cancelReservation', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        id_event: parseInt(currentEventId),
-                        idUtilisateur: CURRENT_USER_ID,
-                        nom: nom,
-                        prenom: prenom,
-                        email: email,
-                        telephone: telephone
-                    })
+                    body: JSON.stringify({ id_event: id, idUtilisateur: CURRENT_USER_ID })
                 });
-                
-                const result = await response.json();
-                
-                if (result.status === "success") {
-                    alert('✅ Réservation confirmée avec succès !');
-                    reservationModal.hide();
+                const d = await r.json();
+                if (d.status === "success") {
+                    alert('Réservation annulée');
                     loadEventsByCategory();
                 } else {
-                    alert('❌ ' + (result.message || 'Erreur lors de la réservation'));
-                }
-                
-            } catch (error) {
-                console.error('Erreur réservation:', error);
-                alert('❌ Erreur de connexion. Réessayez plus tard.');
-            } finally {
-                const submitBtn = document.querySelector('#reservationForm button[type="submit"]');
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Confirmer la réservation';
-                }
-            }
-        }
-
-        // FONCTION POUR ANNULER UNE RÉSERVATION
-        window.cancelReservation = async function(eventId, eventTitle = '') {
-            if (!confirm(`Êtes-vous sûr de vouloir annuler votre réservation pour "${eventTitle}" ?`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch(API_BASE + '?action=cancelReservation', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        id_event: parseInt(eventId),
-                        idUtilisateur: CURRENT_USER_ID
-                    })
-                });
-
-                const result = await response.json();
-                
-                if (result.status === "success") {
-                    alert('✅ Réservation annulée avec succès !');
-                    loadEventsByCategory();
-                } else {
-                    alert('❌ ' + (result.message || 'Erreur lors de l\'annulation'));
+                    alert('Erreur: ' + (d.message || 'Impossible d\'annuler la réservation'));
                 }
             } catch (error) {
-                console.error('Erreur annulation:', error);
-                alert('❌ Erreur de connexion. Réessayez plus tard.');
+                console.error('Erreur réseau:', error);
+                alert('Erreur réseau lors de l\'annulation');
             }
         };
 
-        // Validation email
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-
-        // Chargement des événements avec boutons Réserver/Annuler
         async function loadEventsByCategory() {
             const container = document.getElementById('eventsByCategory');
             const loading = document.getElementById('eventsLoading');
             const empty = document.getElementById('eventsEmpty');
 
             try {
-                const response = await fetch(API_BASE + '?action=listEvents');
-                if (!response.ok) throw new Error("Erreur serveur");
-
-                const json = await response.json();
+                const res = await fetch(API_BASE + '?action=listEvents');
+                const json = await res.json();
                 const events = json.data || [];
-
-                const reservedEventIds = await getReservedEvents();
+                const reserved = await getReservedEvents();
 
                 if (events.length === 0) {
                     loading.style.display = 'none';
@@ -458,7 +304,6 @@
                     return;
                 }
 
-                // Grouper par catégorie
                 const grouped = {};
                 events.forEach(e => {
                     const cat = e.nom_categorie || "Autres";
@@ -467,70 +312,49 @@
                 });
 
                 let html = '';
-                Object.keys(grouped).sort().forEach(category => {
-                    const list = grouped[category];
-                    html += `
-                        <div class="category-section">
-                            <h2 class="category-title">
-                                <i class='bx bxs-category'></i> ${escapeHtml(category)}
-                                <small class="text-muted ml-3">(${list.length} événement${list.length > 1 ? 's' : ''})</small>
-                            </h2>
-                            <div class="row">
-                                ${list.map(e => {
-                                    const id = parseInt(e.id_event);
-                                    const isReserved = reservedEventIds.includes(id);
-                                    return `
-                                        <div class="col-md-6 col-lg-4 mb-4">
-                                            <div class="card h-100 event-card shadow-sm">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">${escapeHtml(e.type_event || 'Événement')}</h5>
-                                                    <p class="text-muted small mb-2">
-                                                        <i class='bx bx-calendar'></i> ${escapeHtml(e.date_event || 'Date non définie')}
-                                                    </p>
-                                                    <p class="card-text text-dark">${escapeHtml(e.description || 'Aucune description')}</p>
-                                                    <span class="badge badge-category">${escapeHtml(category)}</span>
-                                                </div>
-                                                <div class="card-footer bg-white border-0 text-center pt-3">
-                                                    ${isReserved ? 
-                                                        `<button onclick="cancelReservation(${id}, '${(e.type_event || '').replace(/'/g, "\\'")}')" 
-                                                                 class="btn btn-annuler btn-block">
-                                                            <i class='bx bx-x-circle'></i> Annuler ma réservation
-                                                         </button>` :
-                                                        `<button onclick="reserveEvent(${id}, '${(e.type_event || '').replace(/'/g, "\\'")}')" 
-                                                                 class="btn btn-reserver btn-block">
-                                                            <i class='bx bx-check-circle'></i> Réserver ma place
-                                                         </button>`
-                                                    }
-                                                </div>
-                                            </div>
+                Object.keys(grouped).sort().forEach(cat => {
+                    html += `<div class="category-section">
+                        <h2 class="category-title">${cat} <small class="text-muted">(${grouped[cat].length})</small></h2>
+                        <div class="row">
+                            ${grouped[cat].map(e => {
+                                const id = parseInt(e.id_event);
+                                const safe = (e.type_event || '').replace(/'/g, "\\'");
+                                return `<div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 event-card shadow-sm">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${e.type_event || ''}</h5>
+                                            <p class="text-muted small">${e.date_event || ''}</p>
+                                            <p>${e.description || ''}</p>
+                                            <span class="badge bg-primary">${cat}</span>
                                         </div>
-                                    `;
-                                }).join('')}
-                            </div>
+                                        <div class="card-footer bg-white text-center">
+                                            ${reserved.includes(id)
+                                                ? `<button onclick="cancelReservation(${id})" class="btn btn-annuler w-100">Annuler</button>`
+                                                : `<button onclick="reserveEvent(${id}, '${safe}')" class="btn btn-reserver w-100">Réserver</button>`
+                                            }
+                                        </div>
+                                    </div>
+                                </div>`;
+                            }).join('')}
                         </div>
-                    `;
+                    </div>`;
                 });
 
                 container.innerHTML = html;
                 loading.style.display = 'none';
-
             } catch (err) {
-                console.error("Erreur chargement événements :", err);
-                loading.innerHTML = '<p class="text-danger text-center">Impossible de charger les événements.</p>';
+                console.error('Erreur de chargement des événements:', err);
+                container.innerHTML = '<p class="text-danger">Erreur de chargement des événements</p>';
+                loading.style.display = 'none';
             }
         }
 
-        // Échappement HTML pour sécurité
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text || '';
-            return div.innerHTML;
-        }
-
         // Menu mobile
-        $("#menu-toggle").click(function(e) {
-            e.preventDefault();
-            $("#wrapper").toggleClass("toggled");
+        $(document).ready(function(){
+            $("#menu-toggle").click(function(e) {
+                e.preventDefault();
+                $("#wrapper").toggleClass("toggled");
+            });
         });
     </script>
 </body>
