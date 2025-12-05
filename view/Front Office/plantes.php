@@ -21,13 +21,64 @@ $userId = $_SESSION['idUtilisateur'];
 // Récupérer les plantes de l'utilisateur
 $mesPlantes = $planteC->listPlantesByUser($userId);
 
+// Créer une map des plantes pour accès rapide au nom
+$plantesMap = [];
+foreach($mesPlantes as $plante) {
+    $plantesMap[$plante['id_plante']] = $plante['nom_plante'];
+}
+
 // Récupérer toutes les tâches
 $listTaches = $tacheController->listTaches();
+
+// Calculer les statistiques pour l'utilisateur
+$totalPlantes = count($mesPlantes);
+$today = date('Y-m-d');
+$plantesToday = 0;
+foreach($mesPlantes as $p){
+    if($p['date_ajout'] === $today) $plantesToday++;
+}
+
+// Pour les tâches de l'utilisateur (filtrer par ses plantes)
+$plantesIds = array_column($mesPlantes, 'id_plante');
+$tachesUtilisateur = [];
+$tachesToday = 0;
+foreach($listTaches as $t){
+    if(in_array($t['id_plante'], $plantesIds)) {
+        $tachesUtilisateur[] = $t;
+        if($t['date_dosage'] === $today) $tachesToday++;
+    }
+}
+$totalTaches = count($tachesUtilisateur);
+
+// Statistiques avancées
+$tachesCompletees = 0;
+$tachesEnCours = 0;
+$plantes_etat_bon = 0;
+$plantes_etat_moyen = 0;
+$plantes_etat_mauvais = 0;
+$taches_priorite_haute = 0;
+$taches_priorite_moyenne = 0;
+$taches_priorite_basse = 0;
+
+foreach($tachesUtilisateur as $t) {
+    if($t['estComplete'] == 1) $tachesCompletees++;
+    else $tachesEnCours++;
+    
+    if($t['priorite'] == 'Élevée' || $t['priorite'] == 3) $taches_priorite_haute++;
+    elseif($t['priorite'] == 'Moyen' || $t['priorite'] == 2) $taches_priorite_moyenne++;
+    else $taches_priorite_basse++;
+}
+
+foreach($mesPlantes as $p) {
+    if($p['etat_sante'] == 'Bon état') $plantes_etat_bon++;
+    elseif($p['etat_sante'] == 'Moyen') $plantes_etat_moyen++;
+    else $plantes_etat_mauvais++;
+}
 
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en">>
 
 <head>
     <meta charset="utf-8">
@@ -48,7 +99,186 @@ $listTaches = $tacheController->listTaches();
     <link href="./assets/css/media.css" rel="stylesheet">
     <link href="./assets/css/chat.css" rel="stylesheet">
     <link href="https://vjs.zencdn.net/7.4.1/video-js.css" rel="stylesheet">
+    
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
     <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
+    
+    <style>
+        /* Chatbot styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 380px;
+            max-height: 600px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 40px rgba(0,0,0,0.16);
+            display: flex;
+            flex-direction: column;
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .chatbot-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chatbot-header h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+        }
+        
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .chatbot-message {
+            display: flex;
+            gap: 10px;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .message-user {
+            justify-content: flex-end;
+        }
+        
+        .message-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .message-bubble.user {
+            background: #667eea;
+            color: white;
+            border-radius: 12px 12px 2px 12px;
+        }
+        
+        .message-bubble.ai {
+            background: #f0f0f0;
+            color: #333;
+            border-radius: 12px 12px 12px 2px;
+        }
+        
+        .message-bubble.ai strong {
+            color: #667eea;
+        }
+        
+        .chatbot-input-area {
+            padding: 12px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chatbot-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .chatbot-input:focus {
+            border-color: #667eea;
+        }
+        
+        .chatbot-send {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        
+        .chatbot-send:hover {
+            background: #764ba2;
+        }
+        
+        .chatbot-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            z-index: 9998;
+            transition: transform 0.2s;
+        }
+        
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        .chatbot-toggle.hidden {
+            display: none;
+        }
+        
+        @media (max-width: 480px) {
+            .chatbot-container {
+                width: calc(100% - 20px);
+                max-height: 400px;
+            }
+        }
+    </style>
 </head>
 
 <body class="newsfeed">
@@ -444,13 +674,77 @@ $listTaches = $tacheController->listTaches();
                     <div class="col-md-10 second-section" id="page-content-wrapper">
                         
 
+                        <!-- Statistiques Start -->
+                        <div class="container-fluid pt-2 px-0">
+                            <div class="row g-3 mb-4">
+                                <!-- Total Plantes -->
+                                <div class="col-12 col-sm-6 col-md-3">
+                                    <div class="d-flex align-items-center p-3 rounded-3 shadow-sm" 
+                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
+                                        <img src="../image/plant.png" width="40" height="40" class="me-3" alt="Plante">
+                                        <div>
+                                            <h6 class="mb-0" style="font-size: 0.85rem; color: #999;">Total Plantes</h6>
+                                            <h4 class="mb-0" style="font-size: 1.5rem; color: #333;"><?= $totalPlantes ?></h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Plantes ajoutées aujourd'hui -->
+                                <div class="col-12 col-sm-6 col-md-3">
+                                    <div class="d-flex align-items-center p-3 rounded-3 shadow-sm" 
+                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
+                                        <img src="../image/day-to-plant-a-tree-reminder-daily-calendar-page-interface-symbol.png" width="40" height="40" class="me-3" alt="Plante aujourd'hui">
+                                        <div>
+                                            <h6 class="mb-0" style="font-size: 0.85rem; color: #999;">Plantes aujourd'hui</h6>
+                                            <h4 class="mb-0" style="font-size: 1.5rem; color: #333;"><?= $plantesToday ?></h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Total Tâches -->
+                                <div class="col-12 col-sm-6 col-md-3">
+                                    <div class="d-flex align-items-center p-3 rounded-3 shadow-sm" 
+                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
+                                        <img src="../image/clipboard.png" width="40" height="40" class="me-3" alt="Tâches">
+                                        <div>
+                                            <h6 class="mb-0" style="font-size: 0.85rem; color: #999;">Total Tâches</h6>
+                                            <h4 class="mb-0" style="font-size: 1.5rem; color: #333;"><?= $totalTaches ?></h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tâches prévues aujourd'hui -->
+                                <div class="col-12 col-sm-6 col-md-3">
+                                    <div class="d-flex align-items-center p-3 rounded-3 shadow-sm" 
+                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
+                                        <img src="../image/search.png" width="40" height="40" class="me-3" alt="Tâches aujourd'hui">
+                                        <div>
+                                            <h6 class="mb-0" style="font-size: 0.85rem; color: #999;">Tâches aujourd'hui</h6>
+                                            <h4 class="mb-0" style="font-size: 1.5rem; color: #333;"><?= $tachesToday ?></h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Statistiques End -->
+
                         <!-- Mes Plantes Section -->
                          <div class="container-fluid shadow-sm rounded-4 p-4 mt-4 mb-4">
 
                         
-    <div class="mb-4">
-        <h4 class="mb-2"><i class='bx bx-leaf me-2' style="color: #2575fc;"></i>Mes Plantes</h4>
-        <p class="text-muted small">Consultez vos plantes et leurs informations.</p>
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-2"><i class='bx bx-leaf me-2' style="color: #2575fc;"></i>Mes Plantes</h4>
+            <p class="text-muted small">Consultez vos plantes et leurs informations.</p>
+        </div>
+        <div>
+            <button class="btn btn-success rounded-pill px-4 me-2" id="btnSuggestionPlante" title="Suggérer une plante">
+                <i class='bx bx-plus me-2'></i>Suggérer une plante
+            </button>
+            <button class="btn btn-info rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#statsAdvancedModal">
+                <i class='bx bx-bar-chart-alt-2 me-2'></i>Statistiques
+            </button>
+        </div>
     </div>
 
     <div class="table-responsive">
@@ -518,13 +812,15 @@ $listTaches = $tacheController->listTaches();
     <div class="bg-light rounded-4 shadow-sm p-4">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <h5 class="fw-bold mb-0">Gestion des Tâches</h5>
+            <button class="btn btn-info rounded-pill px-4 me-2" id="btnSuggestionTache" title="Suggérer une tâche">
+                <i class='bx bx-plus me-2'></i>Suggérer une tâche
+            </button>
         </div>
 
         <div class="table-responsive">
             <table class="table align-middle table-hover mb-0">
                 <thead style="background: #e0f0ff; color: #1a1a1a; font-weight: 600;">
     <tr>
-        <th>ID Tâche</th>
         <th>Type de Dosage</th>
         <th>Quantité</th>
         <th>Mode</th>
@@ -533,7 +829,8 @@ $listTaches = $tacheController->listTaches();
         <th>Prochaine Exécution</th>
         <th>État</th>
         <th>Priorité</th>
-        <th>ID Plante</th>
+        <th>Plante</th>
+        <th>Action</th>
     </tr>
 </thead>
 
@@ -541,7 +838,6 @@ $listTaches = $tacheController->listTaches();
                     <?php if(!empty($listTaches)): ?>
                         <?php foreach($listTaches as $dosage): ?>
                             <tr class="align-middle">
-                                <td><?= $dosage['id_dosage'] ?></td>
                                 <td><?= htmlspecialchars($dosage['type_dosage']) ?></td>
                                 <td><?= $dosage['quantite'] ?></td>
                                 <td><?= htmlspecialchars($dosage['mode_dosage']) ?></td>
@@ -557,17 +853,27 @@ $listTaches = $tacheController->listTaches();
                                 </td>
                                 <td>
                                     <?php 
-                                        if($dosage['priorite'] == 1) echo '<span class="text-success">Basse</span>';
-                                        elseif($dosage['priorite'] == 2) echo '<span class="text-warning">Moyenne</span>';
-                                        else echo '<span class="text-danger fw-bold">Haute</span>';
+                                        if($dosage['priorite'] == 'Faible' || $dosage['priorite'] == 1) echo '<span class="badge bg-success">Faible</span>';
+                                        elseif($dosage['priorite'] == 'Moyen' || $dosage['priorite'] == 2) echo '<span class="badge bg-warning text-dark">Moyen</span>';
+                                        else echo '<span class="badge bg-danger">Élevée</span>';
                                     ?>
                                 </td>
-                                <td><?= $dosage['id_plante'] ?></td>
+                                <td>
+                                    <?php 
+                                        $planteName = isset($plantesMap[$dosage['id_plante']]) ? htmlspecialchars($plantesMap[$dosage['id_plante']]) : 'N/A';
+                                        echo $dosage['id_plante'] . ' - ' . $planteName;
+                                    ?>
+                                </td>
+                                <td>
+                                    <button class="btn btn-info btn-sm rounded-pill" onclick="afficherDetailsTache(<?= htmlspecialchars(json_encode($dosage)) ?>)">
+                                        <i class='bx bx-show'></i> Voir
+                                    </button>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="10" class="text-center text-muted">Aucune tâche trouvée</td>
+                            <td colspan="9" class="text-center text-muted">Aucune tâche trouvée</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -595,10 +901,679 @@ $listTaches = $tacheController->listTaches();
     </div>
 </div>
 
+<!-- Modal Suggérer une plante -->
+<div class="modal fade" id="addSuggestionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(245,247,255,0.98)); border-radius: 15px; overflow: hidden;">
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px 15px 0 0; padding: 25px; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);">
+                <h5 class="modal-title text-white fw-bold" style="font-size: 1.3rem; margin: 0;">
+                    <i class='bx bx-leaf me-2' style="font-size: 1.5rem;"></i>Suggérer une plante
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-5" style="background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(245,247,255,0.98));">
+                <form id="suggestionForm" enctype="multipart/form-data">
+                    <!-- Nom de la plante -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-leaf' style="color: #667eea; margin-right: 8px; font-size: 1.1rem;"></i>Nom de la plante <span class="text-danger ms-1">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="nomPlante" name="nom_plante" 
+                               placeholder="Rose, Monstera, Orchidée..." required
+                               style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem; background: white;">
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Le nom de la plante que vous souhaitez suggérer</small>
+                    </div>
+                    
+                    <!-- Niveau d'humidité avec slider -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center; margin-bottom: 12px;">
+                            <i class='bx bx-water' style="color: #667eea; margin-right: 8px; font-size: 1.1rem;"></i>Niveau d'humidité
+                        </label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="range" class="form-range" id="niveauHumiditeRange" name="niveau_humidite_range" 
+                                   min="0" max="100" value="50"
+                                   style="flex: 1; height: 8px; cursor: pointer; border-radius: 10px;">
+                            <span id="humiditeValue" style="min-width: 70px; padding: 8px 14px; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; font-size: 0.9rem; text-align: center;">50%</span>
+                        </div>
+                        <input type="hidden" id="niveau_humidite" name="niveau_humidite" value="50">
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.8rem; color: #999;">
+                            <span>🏜️ Sec</span>
+                            <span>💧 Humide</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Besoin en eau -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-droplet' style="color: #667eea; margin-right: 8px; font-size: 1.1rem;"></i>Besoin en eau
+                        </label>
+                        <div class="input-group" style="border-radius: 10px; overflow: hidden;">
+                            <input type="number" class="form-control" id="besoin_eau" name="besoin_eau" 
+                                   min="0" max="50" step="0.5" value="0" placeholder="0.5"
+                                   style="border: 2px solid #e0e0e0; border-radius: 10px 0 0 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem;">
+                            <span class="input-group-text" style="border: 2px solid #e0e0e0; border-radius: 0 10px 10px 0; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); color: #667eea; font-weight: 600; border-left: none;">L/jour</span>
+                        </div>
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Quantité moyenne d'eau par jour</small>
+                    </div>
+                    
+                    <!-- État de santé -->
+                    <div class="mb-3">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-heart' style="color: #667eea; margin-right: 8px; font-size: 1.1rem;"></i>État de santé
+                        </label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px;">
+                            <label style="cursor: pointer; padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 10px; text-align: center; transition: all 0.3s ease; background: white; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                <input type="radio" name="etat_sante" value="Bon état" checked style="accent-color: #667eea; cursor: pointer; transform: scale(1.2);">
+                                <span style="font-size: 0.9rem; color: #333; font-weight: 500;">✓ Bon</span>
+                            </label>
+                            <label style="cursor: pointer; padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 10px; text-align: center; transition: all 0.3s ease; background: white; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                <input type="radio" name="etat_sante" value="Moyen" style="accent-color: #667eea; cursor: pointer; transform: scale(1.2);">
+                                <span style="font-size: 0.9rem; color: #333; font-weight: 500;">~ Moyen</span>
+                            </label>
+                            <label style="cursor: pointer; padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 10px; text-align: center; transition: all 0.3s ease; background: white; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                <input type="radio" name="etat_sante" value="Mauvais état" style="accent-color: #667eea; cursor: pointer; transform: scale(1.2);">
+                                <span style="font-size: 0.9rem; color: #333; font-weight: 500;">✗ Mauvais</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 p-5" style="background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(245,247,255,0.98)); border-radius: 0 0 15px 15px; gap: 10px; border-top: 1px solid #e0e0e0;">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-5" data-bs-dismiss="modal" style="border: 2px solid #ddd; color: #666; transition: all 0.3s; font-weight: 500;">Annuler</button>
+                <button type="button" class="btn rounded-pill px-5" id="submitSuggestion" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                    <i class='bx bx-check me-2'></i>Soumettre
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
-    /* Bouton gradient personnalisé */
-    .btn-gradient {
-        background: linear-gradient(45deg, #6a11cb, #2575fc);
+    #addSuggestionModal .form-control:focus,
+    #addSuggestionModal .form-range:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+        outline: none;
+    }
+    
+    #addSuggestionModal .form-range {
+        accent-color: #667eea;
+    }
+    
+    #addSuggestionModal input[type="radio"] {
+        accent-color: #667eea;
+        cursor: pointer;
+    }
+    
+    #addSuggestionModal label:has(input[type="radio"]:checked) {
+        border-color: #667eea !important;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)) !important;
+        transform: scale(1.02);
+    }
+    
+    #submitSuggestion:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4) !important;
+    }
+    
+    #submitSuggestion:active {
+        transform: translateY(-1px);
+    }
+</style>
+
+<!-- Modal Suggérer une tâche -->
+<div class="modal fade" id="addSuggestionTacheModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(245,247,255,0.98)); border-radius: 15px; overflow: hidden;">
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, #17a2b8 0%, #0c5460 100%); border-radius: 15px 15px 0 0; padding: 25px; box-shadow: 0 5px 15px rgba(23, 162, 184, 0.2);">
+                <h5 class="modal-title text-white fw-bold" style="font-size: 1.3rem; margin: 0;">
+                    <i class='bx bx-task me-2' style="font-size: 1.5rem;"></i>Suggérer une tâche
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-5" style="background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(245,247,255,0.98));">
+                <form id="suggestionTacheForm" enctype="multipart/form-data">
+                    <!-- Type de dosage -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-pill' style="color: #17a2b8; margin-right: 8px; font-size: 1.1rem;"></i>Type de dosage <span class="text-danger ms-1">*</span>
+                        </label>
+                        <input type="text" class="form-control" name="type_dosage" 
+                               placeholder="Arrosage, Fertilisant, Traitement..." required
+                               style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem; background: white;">
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Le type de tâche à effectuer</small>
+                    </div>
+                    
+                    <!-- Sélection de la plante -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-leaf' style="color: #17a2b8; margin-right: 8px; font-size: 1.1rem;"></i>Plante <span class="text-danger ms-1">*</span>
+                        </label>
+                        <select class="form-select" id="id_plante" name="id_plante" required
+                                style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem; background: white;">
+                            <option value="">-- Choisir une plante --</option>
+                        </select>
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Sélectionnez la plante pour laquelle cette tâche s'applique</small>
+                    </div>
+                    
+                    <!-- Quantité -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-package' style="color: #17a2b8; margin-right: 8px; font-size: 1.1rem;"></i>Quantité
+                        </label>
+                        <div class="input-group" style="border-radius: 10px; overflow: hidden;">
+                            <input type="number" class="form-control" name="quantite" 
+                                   min="0" max="1000" value="0" placeholder="0"
+                                   style="border: 2px solid #e0e0e0; border-radius: 10px 0 0 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem;">
+                            <span class="input-group-text" style="border: 2px solid #e0e0e0; border-radius: 0 10px 10px 0; background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(12, 84, 96, 0.1)); color: #17a2b8; font-weight: 600; border-left: none;">ml/g</span>
+                        </div>
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Quantité à utiliser</small>
+                    </div>
+                    
+                    <!-- Mode de dosage -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-water' style="color: #17a2b8; margin-right: 8px; font-size: 1.1rem;"></i>Mode de dosage
+                        </label>
+                        <input type="text" class="form-control" name="mode_dosage" 
+                               placeholder="Par pulvérisation, Par arrosage, Par injection..." 
+                               style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem; background: white;">
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Comment appliquer le dosage</small>
+                    </div>
+                    
+                    <!-- Date dosage -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-calendar' style="color: #17a2b8; margin-right: 8px; font-size: 1.1rem;"></i>Date de dosage
+                        </label>
+                        <input type="date" class="form-control" name="date_dosage" 
+                               style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem; background: white;">
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Date prévue pour la tâche</small>
+                    </div>
+                    
+                    <!-- Prochaine exécution -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-time-five' style="color: #17a2b8; margin-right: 8px; font-size: 1.1rem;"></i>Prochaine exécution
+                        </label>
+                        <input type="datetime-local" class="form-control" name="prochaineExecution" 
+                               style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem; background: white;">
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Quand relancer cette tâche</small>
+                    </div>
+                    
+                    <!-- Priorité -->
+                    <div class="mb-3">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-trending-up' style="color: #17a2b8; margin-right: 8px; font-size: 1.1rem;"></i>Priorité
+                        </label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px;">
+                            <label style="cursor: pointer; padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 10px; text-align: center; transition: all 0.3s ease; background: white; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                <input type="radio" name="priorite" value="Faible" style="accent-color: #17a2b8; cursor: pointer; transform: scale(1.2);">
+                                <span style="font-size: 0.9rem; color: #333; font-weight: 500;">↓ Faible</span>
+                            </label>
+                            <label style="cursor: pointer; padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 10px; text-align: center; transition: all 0.3s ease; background: white; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                <input type="radio" name="priorite" value="Moyen" checked style="accent-color: #17a2b8; cursor: pointer; transform: scale(1.2);">
+                                <span style="font-size: 0.9rem; color: #333; font-weight: 500;">= Moyen</span>
+                            </label>
+                            <label style="cursor: pointer; padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 10px; text-align: center; transition: all 0.3s ease; background: white; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                <input type="radio" name="priorite" value="Élevée" style="accent-color: #17a2b8; cursor: pointer; transform: scale(1.2);">
+                                <span style="font-size: 0.9rem; color: #333; font-weight: 500;">↑ Élevée</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 p-5" style="background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(245,247,255,0.98)); border-radius: 0 0 15px 15px; gap: 10px; border-top: 1px solid #e0e0e0;">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-5" data-bs-dismiss="modal" style="border: 2px solid #ddd; color: #666; transition: all 0.3s; font-weight: 500;">Annuler</button>
+                <button type="button" class="btn rounded-pill px-5" id="submitSuggestionTache" style="background: linear-gradient(135deg, #17a2b8 0%, #0c5460 100%); color: white; border: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);">
+                    <i class='bx bx-check me-2'></i>Soumettre
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #addSuggestionTacheModal .form-control:focus {
+        border-color: #17a2b8 !important;
+        box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25) !important;
+        outline: none;
+    }
+    
+    #addSuggestionTacheModal .form-select:focus {
+        border-color: #17a2b8 !important;
+        box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25) !important;
+        outline: none;
+    }
+    
+    #addSuggestionTacheModal .form-select {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        background: white;
+    }
+    
+    #addSuggestionTacheModal input[type="radio"] {
+        accent-color: #17a2b8;
+        cursor: pointer;
+    }
+    
+    #addSuggestionTacheModal label:has(input[type="radio"]:checked) {
+        border-color: #17a2b8 !important;
+        background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(12, 84, 96, 0.1)) !important;
+        transform: scale(1.02);
+    }
+    
+    #submitSuggestionTache:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(23, 162, 184, 0.4) !important;
+    }
+    
+    #submitSuggestionTache:active {
+        transform: translateY(-1px);
+    }
+</style>
+
+<!-- Modal détails tâche -->
+<div class="modal fade" id="tacheDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 bg-gradient p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="modal-title text-white fw-bold">
+                    <i class='bx bx-check-double' style="font-size: 1.5rem; margin-right: 10px;"></i>
+                    Détails de la tâche
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="detail-card p-3 rounded-3" style="background: #f8f9fa; border-left: 4px solid #667eea;">
+                            <small class="text-muted d-block mb-2">
+                                <i class='bx bx-tag'></i> Type de tâche
+                            </small>
+                            <p id="detailType" class="fw-bold" style="font-size: 1.1rem; color: #333;">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card p-3 rounded-3" style="background: #f8f9fa; border-left: 4px solid #764ba2;">
+                            <small class="text-muted d-block mb-2">
+                                <i class='bx bx-package'></i> Quantité
+                            </small>
+                            <p id="detailQuantite" class="fw-bold" style="font-size: 1.1rem; color: #333;">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="detail-card p-3 rounded-3" style="background: #f8f9fa; border-left: 4px solid #f093fb;">
+                            <small class="text-muted d-block mb-2">
+                                <i class='bx bx-droplet'></i> Mode
+                            </small>
+                            <p id="detailMode" class="fw-bold" style="font-size: 1.1rem; color: #333;">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card p-3 rounded-3" style="background: #f8f9fa; border-left: 4px solid #fa709a;">
+                            <small class="text-muted d-block mb-2">
+                                <i class='bx bx-trending-up'></i> Priorité
+                            </small>
+                            <p id="detailPriorite" class="fw-bold" style="font-size: 1.1rem; color: #333;">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="detail-card p-3 rounded-3" style="background: #f8f9fa; border-left: 4px solid #4facfe;">
+                            <small class="text-muted d-block mb-2">
+                                <i class='bx bx-calendar-alt'></i> Date dosage
+                            </small>
+                            <p id="detailDate" class="fw-bold" style="font-size: 1.1rem; color: #333;">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card p-3 rounded-3" style="background: #f8f9fa;">
+                            <small class="text-muted d-block mb-2">
+                                <i class='bx bx-check-circle'></i> Statut
+                            </small>
+                            <p id="detailStatut" class="fw-bold" style="font-size: 1.1rem; color: #333;">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="detail-card p-3 rounded-3" style="background: #f8f9fa; border-left: 4px solid #43e97b;">
+                            <small class="text-muted d-block mb-2">
+                                <i class='bx bx-time-five'></i> Dernière exécution
+                            </small>
+                            <p id="detailDerniere" class="fw-bold" style="font-size: 0.95rem; color: #333;">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card p-3 rounded-3" style="background: #f8f9fa; border-left: 4px solid #fa709a;">
+                            <small class="text-muted d-block mb-2">
+                                <i class='bx bx-calendar'></i> Prochaine exécution
+                            </small>
+                            <p id="detailProchaine" class="fw-bold" style="font-size: 0.95rem; color: #333;">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4" style="background: #f8f9fa;">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="calendar" style="max-width: 900px; margin: 40px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);"></div>
+
+<!-- Modal Statistiques Avancées -->
+<div class="modal fade" id="statsAdvancedModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="background: rgba(255,255,255,0.98);">
+            <div class="modal-header border-0 bg-gradient p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="modal-title text-white fw-bold">
+                    <i class='bx bx-bar-chart-alt-2' style="font-size: 1.5rem; margin-right: 10px;"></i>
+                    Statistiques Avancées
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <!-- État des plantes -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100" style="background: rgba(255,255,255,0.8);">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3 text-dark">État de santé des plantes</h6>
+                                <canvas id="chartetatPlantes" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Priorité des tâches -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100" style="background: rgba(255,255,255,0.8);">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3 text-dark">Tâches par priorité</h6>
+                                <canvas id="chartePriorite" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mt-2">
+                    <!-- Statut des tâches -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100" style="background: rgba(255,255,255,0.8);">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3 text-dark">Statut des tâches</h6>
+                                <canvas id="charteStatutTaches" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Résumé rapide -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3">Résumé Rapide</h6>
+                                <div class="mb-3">
+                                    <small class="text-light opacity-75">Plantes en bon état</small>
+                                    <p class="mb-2"><strong style="font-size: 1.5rem;"><?= $plantes_etat_bon ?></strong> / <?= $totalPlantes ?></p>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: <?= ($totalPlantes > 0) ? ($plantes_etat_bon / $totalPlantes * 100) : 0 ?>%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-light opacity-75">Tâches complètées</small>
+                                    <p class="mb-2"><strong style="font-size: 1.5rem;"><?= $tachesCompletees ?></strong> / <?= $totalTaches ?></p>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: <?= ($totalTaches > 0) ? ($tachesCompletees / $totalTaches * 100) : 0 ?>%"></div>
+                                    </div>
+                                </div>
+                                <hr style="border-color: rgba(255,255,255,0.3);">
+                                <small class="text-light opacity-75">Tâches haute priorité</small>
+                                <p><strong style="font-size: 1.3rem;"><?= $taches_priorite_haute ?></strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4" style="background: #f8f9fa;">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    /* Background dégradé uniquement sur le contenu principal */
+    body {
+        background-color: #f8f9fa !important;
+    }
+    
+    /* Wrapper principal avec gradient */
+    .wrapper {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
+        background-attachment: fixed !important;
+        min-height: 100vh !important;
+    }
+    
+    /* Sidebar reste normal */
+    .sidebar {
+        background: white !important;
+        z-index: 1000;
+    }
+    
+    /* Contenu principal */
+    #content {
+        background: transparent !important;
+    }
+    
+    /* Tables et sections */
+    .table-responsive {
+        background: rgba(255, 255, 255, 0.98) !important;
+        border-radius: 15px !important;
+        padding: 25px !important;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
+        backdrop-filter: blur(10px) !important;
+        margin-bottom: 30px !important;
+    }
+    
+    .table {
+        margin-bottom: 0 !important;
+        color: #333 !important;
+    }
+    
+    .table thead {
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    }
+    
+    .table thead th {
+        color: white !important;
+        font-weight: 600 !important;
+        border: none !important;
+        padding: 15px !important;
+    }
+    
+    .table tbody tr {
+        transition: all 0.3s ease !important;
+        border-bottom: 1px solid #e0e0e0 !important;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f5f7ff !important;
+        transform: scale(1.01);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1) !important;
+    }
+    
+    .table tbody td {
+        padding: 15px !important;
+        color: #333 !important;
+        vertical-align: middle !important;
+    }
+    
+    /* Boutons */
+    .btn-success {
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        color: white !important;
+        transition: all 0.3s ease !important;
+        font-weight: 500 !important;
+    }
+    
+    .btn-success:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4) !important;
+        color: white !important;
+    }
+    
+    .btn-warning, .btn-info {
+        border-radius: 6px !important;
+        transition: all 0.3s ease !important;
+        border: none !important;
+        color: white !important;
+        font-weight: 500 !important;
+    }
+    
+    .btn-warning:hover, .btn-info:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+        color: white !important;
+    }
+    
+    .btn-danger {
+        border-radius: 6px !important;
+        transition: all 0.3s ease !important;
+        border: none !important;
+        color: white !important;
+    }
+    
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4) !important;
+    }
+    
+    /* Badges */
+    .badge {
+        border-radius: 20px !important;
+        padding: 8px 14px !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+    }
+    
+    /* Calendrier FullCalendar */
+    #calendar {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        border-radius: 15px !important;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
+        backdrop-filter: blur(10px) !important;
+        color: #333 !important;
+    }
+    
+    .fc-button-primary {
+        background-color: #667eea !important;
+        border-color: #667eea !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        transition: all 0.3s ease !important;
+        color: white !important;
+    }
+    
+    .fc-button-primary:hover {
+        background-color: #764ba2 !important;
+        border-color: #764ba2 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4) !important;
+    }
+    
+    .fc-button-primary.fc-button-active {
+        background-color: #764ba2 !important;
+        border-color: #764ba2 !important;
+    }
+    
+    .fc-daygrid-day:hover {
+        background-color: #f5f7ff !important;
+        cursor: pointer;
+    }
+    
+    .fc-event {
+        border-radius: 8px !important;
+        border: none !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        padding: 4px 8px !important;
+    }
+    
+    .fc-event:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+    }
+    
+    .fc-col-header-cell {
+        background-color: #f8f9fa !important;
+        color: #667eea !important;
+        font-weight: 600 !important;
+        padding: 12px 4px !important;
+    }
+    
+    .fc-daygrid-day-number {
+        padding: 8px !important;
+        font-weight: 500 !important;
+        color: #333 !important;
+    }
+    
+    .fc-daygrid-day-frame {
+        min-height: 120px !important;
+    }
+    
+    .fc-toolbar-title {
+        font-size: 1.5rem !important;
+        color: #333 !important;
+        font-weight: 700 !important;
+    }
+    
+    .fc-daygrid-day-bg {
+        background: white !important;
+    }
+    
+    /* Modal */
+    .modal-content {
+        border-radius: 15px !important;
+        border: none !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        color: #333 !important;
+    }
+    
+    .detail-card {
+        transition: all 0.3s ease !important;
+        background: linear-gradient(135deg, #f8f9fa, #f0f2ff) !important;
+        border-radius: 12px !important;
+        color: #333 !important;
+    }
+    
+    .detail-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .detail-card small {
+        color: #666 !important;
+    }
+    
+    .detail-card p {
+        color: #333 !important;
+    }
+
+
+    }
         color: white;
         border: none;
         transition: all 0.2s;
@@ -617,6 +1592,7 @@ $listTaches = $tacheController->listTaches();
     .bg-gradient-primary {
         background: linear-gradient(135deg, #6a11cb, #2575fc);
     }
+    
 </style>
 
 
@@ -626,6 +1602,12 @@ $listTaches = $tacheController->listTaches();
     <script src="./assets/js/bootstrap/bootstrap.min.js"></script>
     <!-- Optional -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <!-- Chart.js -->
+    <script src='https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js'></script>
+    
     <script type="text/javascript">
         $("#menu-toggle").click(function(e) {
             e.preventDefault();
@@ -633,8 +1615,611 @@ $listTaches = $tacheController->listTaches();
         });
 
     </script>
-    <script src="./assets/js/app.js"></script>
-    <script src="./assets/js/components/components.js"></script>
-</body>
+    <script>
+    let chartsCreated = false;
+    let chartInstances = {};
+    
+    // Fonction pour afficher les détails des tâches
+    function afficherDetailsTache(tache) {
+        document.getElementById('detailType').textContent = tache.type_dosage || 'N/A';
+        document.getElementById('detailQuantite').textContent = tache.quantite + ' ' + tache.mode_dosage || 'N/A';
+        document.getElementById('detailMode').textContent = tache.mode_dosage || 'N/A';
+        document.getElementById('detailPriorite').textContent = tache.priorite || 'N/A';
+        document.getElementById('detailDate').textContent = tache.date_dosage || 'N/A';
+        document.getElementById('detailStatut').textContent = (tache.estComplete == 1) ? '✓ Complètée' : '◯ En attente';
+        document.getElementById('detailDerniere').textContent = tache.derniereExecution || 'N/A';
+        document.getElementById('detailProchaine').textContent = tache.prochaineExecution || 'N/A';
+        
+        // Ouvrir le modal
+        const modal = new bootstrap.Modal(document.getElementById('tacheDetailModal'));
+        modal.show();
+    }
 
-</html>
+    // Créer les graphiques
+    function createCharts() {
+        console.log('createCharts appelée');
+        console.log('Chart disponible:', typeof Chart);
+        
+        if (chartsCreated) {
+            console.log('Graphiques déjà créés');
+            return;
+        }
+        
+        // Attendre que Chart soit chargé
+        if (typeof Chart === 'undefined') {
+            console.log('Chart.js n\'est pas encore chargé');
+            return;
+        }
+        
+        // Données PHP
+        const plantesBonEtat = <?= $plantes_etat_bon ?>;
+        const plantesMoyenEtat = <?= $plantes_etat_moyen ?>;
+        const plantessMauvaisEtat = <?= $plantes_etat_mauvais ?>;
+        
+        const tachesPrioriteHaute = <?= $taches_priorite_haute ?>;
+        const tachesPrioriteMoyenne = <?= $taches_priorite_moyenne ?>;
+        const tachesPrioriteBasse = <?= $taches_priorite_basse ?>;
+        
+        const tachesCompletees = <?= $tachesCompletees ?>;
+        const tachesEnCours = <?= $tachesEnCours ?>;
+
+        console.log('Création des graphiques avec données:', { plantesBonEtat, tachesCompletees });
+
+        // Détruire les graphiques précédents s'ils existent
+        Object.values(chartInstances).forEach(chart => {
+            if (chart) chart.destroy();
+        });
+
+        // Graphique État des plantes
+        try {
+            const ctxEtat = document.getElementById('chartetatPlantes');
+            if (ctxEtat) {
+                console.log('Création graphique État des plantes');
+                chartInstances.etat = new Chart(ctxEtat, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Bon état', 'Moyen', 'Mauvais état'],
+                        datasets: [{
+                            data: [plantesBonEtat, plantesMoyenEtat, plantessMauvaisEtat],
+                            backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        } catch(e) {
+            console.error('Erreur graphique État:', e);
+        }
+
+        // Graphique Priorité des tâches
+        try {
+            const ctxPriorite = document.getElementById('chartePriorite');
+            if (ctxPriorite) {
+                console.log('Création graphique Priorité');
+                chartInstances.priorite = new Chart(ctxPriorite, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Élevée', 'Moyen', 'Faible'],
+                        datasets: [{
+                            data: [tachesPrioriteHaute, tachesPrioriteMoyenne, tachesPrioriteBasse],
+                            backgroundColor: ['#dc3545', '#ffc107', '#28a745'],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        } catch(e) {
+            console.error('Erreur graphique Priorité:', e);
+        }
+
+        // Graphique Statut des tâches
+        try {
+            const ctxStatut = document.getElementById('charteStatutTaches');
+            if (ctxStatut) {
+                console.log('Création graphique Statut');
+                chartInstances.statut = new Chart(ctxStatut, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Complètées', 'En cours'],
+                        datasets: [{
+                            label: 'Nombre de tâches',
+                            data: [tachesCompletees, tachesEnCours],
+                            backgroundColor: ['#28a745', '#ffc107'],
+                            borderColor: ['#28a745', '#ffc107'],
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        } catch(e) {
+            console.error('Erreur graphique Statut:', e);
+        }
+        
+        chartsCreated = true;
+        console.log('Graphiques créés avec succès');
+    }
+
+    function initializeStatsModal() {
+        // Écouter l'ouverture du modal stats
+        const btnStats = document.querySelector('[data-bs-target="#statsAdvancedModal"]');
+        const statsModal = document.getElementById('statsAdvancedModal');
+        console.log('Bouton stats trouvé:', btnStats ? 'Oui' : 'Non');
+        console.log('Modal trouvée:', statsModal ? 'Oui' : 'Non');
+        console.log('Bootstrap disponible:', typeof bootstrap !== 'undefined' ? 'Oui' : 'Non');
+        
+        if (btnStats && statsModal && typeof bootstrap !== 'undefined') {
+            btnStats.addEventListener('click', function(e) {
+                console.log('Bouton stats cliqué - affichage du modal');
+                e.preventDefault();
+                
+                // Créer une nouvelle instance de modal à chaque fois
+                let modalInstance = new bootstrap.Modal(statsModal);
+                console.log('Instance modal créée - affichage...');
+                
+                // Afficher le modal
+                modalInstance.show();
+                
+                // Créer les graphiques après affichage
+                setTimeout(createCharts, 350);
+            });
+        } else if (!btnStats || !statsModal) {
+            console.log('Éléments DOM manquants');
+        } else {
+            console.log('Bootstrap pas encore disponible, nouvelle tentative...');
+            setTimeout(initializeStatsModal, 500);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM chargé');
+        setTimeout(initializeStatsModal, 100);
+    
+        // Calendrier FullCalendar
+        var calendarEl = document.getElementById('calendar');
+        if (calendarEl) {
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: 'calendrierP.php',
+                locale: 'fr',
+                eventClick: function(info) {
+                    const event = info.event;
+                    const props = event.extendedProps;
+                    
+                    document.getElementById('detailType').textContent = props.type || 'N/A';
+                    document.getElementById('detailQuantite').textContent = props.quantite + ' ' + props.mode || 'N/A';
+                    document.getElementById('detailMode').textContent = props.mode || 'N/A';
+                    document.getElementById('detailPriorite').textContent = props.priorite || 'N/A';
+                    document.getElementById('detailDate').textContent = props.date_dosage || 'N/A';
+                    document.getElementById('detailStatut').textContent = (props.complete == 1) ? '✓ Complètée' : '◯ En attente';
+                    document.getElementById('detailDerniere').textContent = props.derniere_execution || 'N/A';
+                    document.getElementById('detailProchaine').textContent = props.prochaine_execution || 'N/A';
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('tacheDetailModal'));
+                    modal.show();
+                }
+            });
+            calendar.render();
+        }
+    });
+    </script>
+    
+    <!-- Chatbot Toggle Button -->
+    <button class="chatbot-toggle" id="chatbotToggle" title="Assistant IA">
+        <i class='bx bxs-bot'></i>
+    </button>
+    
+    <!-- Chatbot Container -->
+    <div class="chatbot-container" id="chatbotContainer" style="display: none;">
+        <div class="chatbot-header">
+            <h5>🤖 Assistant Jardin IA</h5>
+            <button class="chatbot-close" id="chatbotClose">&times;</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="chatbot-message">
+                <div class="message-bubble ai">
+                    👋 Bonjour! Je suis votre assistant IA. Je peux vous aider avec vos plantes et tâches. Posez-moi vos questions!
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input-area">
+            <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Tapez votre question...">
+            <button class="chatbot-send" id="chatbotSend">
+                <i class='bx bxs-send' style="font-size: 18px;"></i>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Chatbot functionality
+        const chatbotToggle = document.getElementById('chatbotToggle');
+        const chatbotContainer = document.getElementById('chatbotContainer');
+        const chatbotClose = document.getElementById('chatbotClose');
+        const chatbotInput = document.getElementById('chatbotInput');
+        const chatbotSend = document.getElementById('chatbotSend');
+        const chatbotMessages = document.getElementById('chatbotMessages');
+        
+        // Toggle chatbot
+        chatbotToggle.addEventListener('click', function() {
+            if (chatbotContainer.style.display === 'none') {
+                chatbotContainer.style.display = 'flex';
+                chatbotToggle.classList.add('hidden');
+            }
+        });
+        
+        // Close chatbot
+        chatbotClose.addEventListener('click', function() {
+            chatbotContainer.style.display = 'none';
+            chatbotToggle.classList.remove('hidden');
+        });
+        
+        // Send message
+        function sendChatbotMessage() {
+            const message = chatbotInput.value.trim();
+            if (!message) return;
+            
+            // Add user message to chat
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'chatbot-message message-user';
+            userMessageDiv.innerHTML = `<div class="message-bubble user">${escapeHtml(message)}</div>`;
+            chatbotMessages.appendChild(userMessageDiv);
+            
+            // Clear input
+            chatbotInput.value = '';
+            
+            // Show loading indicator
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'chatbot-message';
+            loadingDiv.innerHTML = `<div class="message-bubble ai">⏳ Réflexion en cours...</div>`;
+            chatbotMessages.appendChild(loadingDiv);
+            
+            // Scroll to bottom
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            
+            // Send to server
+            const formData = new FormData();
+            formData.append('message', message);
+            
+            fetch('chatbotAI.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove loading indicator
+                loadingDiv.remove();
+                
+                // Add AI response
+                const aiMessageDiv = document.createElement('div');
+                aiMessageDiv.className = 'chatbot-message';
+                aiMessageDiv.innerHTML = `<div class="message-bubble ai">${formatMessage(data.response)}</div>`;
+                chatbotMessages.appendChild(aiMessageDiv);
+                
+                // Scroll to bottom
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                loadingDiv.innerHTML = `<div class="message-bubble ai">❌ Une erreur est survenue. Réessayez.</div>`;
+            });
+        }
+        
+        // Send button click
+        chatbotSend.addEventListener('click', sendChatbotMessage);
+        
+        // Enter key to send
+        chatbotInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendChatbotMessage();
+            }
+        });
+        
+        // Helper functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatMessage(text) {
+            // Convertir Markdown simple en HTML
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>')
+                .replace(/- /g, '• ');
+        }
+        
+        // Suggestion Plant Form
+        function initSuggestionForm() {
+            console.log('Initialisation formulaire suggestion');
+            
+            // Bouton pour ouvrir le modal
+            const btnSuggestion = document.getElementById('btnSuggestionPlante');
+            const submitSuggestionBtn = document.getElementById('submitSuggestion');
+            const suggestionForm = document.getElementById('suggestionForm');
+            const suggestionModal = document.getElementById('addSuggestionModal');
+            const niveauHumiditeRange = document.getElementById('niveauHumiditeRange');
+            const humiditeValue = document.getElementById('humiditeValue');
+            const niveauHumiditeInput = document.getElementById('niveau_humidite');
+            
+            console.log('Éléments trouvés - btnSuggestion:', btnSuggestion ? '✓' : '✗', 'submitSuggestionBtn:', submitSuggestionBtn ? '✓' : '✗');
+            
+            // Gestion du slider d'humidité
+            if (niveauHumiditeRange && humiditeValue && niveauHumiditeInput) {
+                niveauHumiditeRange.addEventListener('input', function(e) {
+                    const value = e.target.value;
+                    humiditeValue.textContent = value + '%';
+                    niveauHumiditeInput.value = value;
+                    
+                    // Animation du badge
+                    humiditeValue.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        humiditeValue.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            }
+            
+            // Ouvrir le modal au clic du bouton
+            if (btnSuggestion && suggestionModal) {
+                btnSuggestion.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Bouton suggestion cliqué - ouverture du modal');
+                    const modal = new bootstrap.Modal(suggestionModal);
+                    modal.show();
+                });
+            }
+            
+            // Soumettre le formulaire
+            if (submitSuggestionBtn && suggestionForm) {
+                submitSuggestionBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Bouton suggérer cliqué');
+                    
+                    const formData = new FormData(suggestionForm);
+                    formData.append('action', 'add');
+                    
+                    // Validation simple
+                    const nom = formData.get('nom_plante').trim();
+                    
+                    console.log('Nom:', nom);
+                    
+                    if (!nom) {
+                        alert('⚠️ Veuillez entrer le nom de la plante');
+                        return;
+                    }
+                    
+                    // Désactiver le bouton pendant l'envoi
+                    submitSuggestionBtn.disabled = true;
+                    submitSuggestionBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-2"></i>Envoi...';
+                    
+                    console.log('Envoi de la requête à ajoutSuggestionSimple.php');
+                    
+                    // Submit
+                    fetch('ajoutSuggestionSimple.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        console.log('Réponse reçue, status:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Données reçues:', data);
+                        
+                        // Réactiver le bouton
+                        submitSuggestionBtn.disabled = false;
+                        submitSuggestionBtn.innerHTML = '<i class="bx bx-check me-2"></i>Soumettre';
+                        
+                        if (data.success) {
+                            alert('✅ ' + data.message);
+                            suggestionForm.reset();
+                            niveauHumiditeRange.value = 50;
+                            humiditeValue.textContent = '50%';
+                            niveauHumiditeInput.value = 50;
+                            
+                            // Fermer le modal en supprimant les classes Bootstrap
+                            suggestionModal.classList.remove('show');
+                            suggestionModal.style.display = 'none';
+                            document.body.classList.remove('modal-open');
+                            const backdrop = document.querySelector('.modal-backdrop');
+                            if (backdrop) backdrop.remove();
+                        } else {
+                            alert('❌ ' + (data.message || 'Erreur inconnue'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur complète:', error);
+                        
+                        // Réactiver le bouton en cas d'erreur
+                        submitSuggestionBtn.disabled = false;
+                        submitSuggestionBtn.innerHTML = '<i class="bx bx-check me-2"></i>Soumettre';
+                        
+                        alert('❌ Erreur: ' + error.message);
+                    });
+                });
+            } else {
+                console.warn('Éléments de formulaire pas trouvés');
+            }
+        }
+        
+        // Suggestion Tache Form
+        function initSuggestionTacheForm() {
+            console.log('Initialisation formulaire suggestion tâche');
+            
+            const btnSuggestionTache = document.getElementById('btnSuggestionTache');
+            const submitSuggestionTacheBtn = document.getElementById('submitSuggestionTache');
+            const suggestionTacheForm = document.getElementById('suggestionTacheForm');
+            const suggestionTacheModal = document.getElementById('addSuggestionTacheModal');
+            
+            console.log('Éléments trouvés - btnSuggestionTache:', btnSuggestionTache ? '✓' : '✗', 'submitSuggestionTacheBtn:', submitSuggestionTacheBtn ? '✓' : '✗');
+            
+            // Ouvrir le modal au clic du bouton
+            if (btnSuggestionTache && suggestionTacheModal) {
+                btnSuggestionTache.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Bouton suggestion tâche cliqué - ouverture du modal');
+                    
+                    // Charger les plantes
+                    loadPlantesForTache();
+                    
+                    const modal = new bootstrap.Modal(suggestionTacheModal);
+                    modal.show();
+                });
+            }
+            
+            // Fonction pour charger les plantes
+            function loadPlantesForTache() {
+                const selectPlante = document.getElementById('id_plante');
+                
+                fetch('getPlantes.php')
+                    .then(response => response.json())
+                    .then(plantes => {
+                        console.log('Plantes reçues:', plantes);
+                        
+                        // Réinitialiser le select (garder l'option vide)
+                        selectPlante.innerHTML = '<option value="">-- Choisir une plante --</option>';
+                        
+                        // Ajouter les plantes
+                        if (plantes && plantes.length > 0) {
+                            plantes.forEach(plante => {
+                                const option = document.createElement('option');
+                                option.value = plante.id_plante;
+                                option.textContent = plante.nom_plante;
+                                selectPlante.appendChild(option);
+                            });
+                        } else {
+                            const option = document.createElement('option');
+                            option.disabled = true;
+                            option.textContent = 'Aucune plante trouvée';
+                            selectPlante.appendChild(option);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors du chargement des plantes:', error);
+                        selectPlante.innerHTML = '<option value="" disabled>Erreur de chargement</option>';
+                    });
+            }
+            
+            // Soumettre le formulaire
+            if (submitSuggestionTacheBtn && suggestionTacheForm) {
+                submitSuggestionTacheBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Bouton suggérer tâche cliqué');
+                    
+                    const formData = new FormData(suggestionTacheForm);
+                    formData.append('action', 'add');
+                    
+                    // Validation simple
+                    const typeDosage = formData.get('type_dosage').trim();
+                    const idPlante = formData.get('id_plante');
+                    
+                    console.log('Type dosage:', typeDosage, 'ID Plante:', idPlante);
+                    
+                    if (!typeDosage) {
+                        alert('⚠️ Veuillez entrer le type de dosage');
+                        return;
+                    }
+                    
+                    if (!idPlante) {
+                        alert('⚠️ Veuillez sélectionner une plante');
+                        return;
+                    }
+                    
+                    // Désactiver le bouton pendant l'envoi
+                    submitSuggestionTacheBtn.disabled = true;
+                    submitSuggestionTacheBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-2"></i>Envoi...';
+                    
+                    console.log('Envoi de la requête à ajoutSuggestionTache.php');
+                    
+                    // Submit
+                    fetch('ajoutSuggestionTache.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        console.log('Réponse reçue, status:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Données reçues:', data);
+                        
+                        // Réactiver le bouton
+                        submitSuggestionTacheBtn.disabled = false;
+                        submitSuggestionTacheBtn.innerHTML = '<i class="bx bx-check me-2"></i>Soumettre';
+                        
+                        if (data.success) {
+                            alert('✅ ' + data.message);
+                            suggestionTacheForm.reset();
+                            
+                            // Fermer le modal
+                            suggestionTacheModal.classList.remove('show');
+                            suggestionTacheModal.style.display = 'none';
+                            document.body.classList.remove('modal-open');
+                            const backdrop = document.querySelector('.modal-backdrop');
+                            if (backdrop) backdrop.remove();
+                        } else {
+                            alert('❌ ' + (data.message || 'Erreur inconnue'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur complète:', error);
+                        
+                        // Réactiver le bouton en cas d'erreur
+                        submitSuggestionTacheBtn.disabled = false;
+                        submitSuggestionTacheBtn.innerHTML = '<i class="bx bx-check me-2"></i>Soumettre';
+                        
+                        alert('❌ Erreur: ' + error.message);
+                    });
+                });
+            } else {
+                console.warn('Éléments de formulaire tâche pas trouvés');
+            }
+        }
+        
+        // Attendre que tout soit chargé
+        setTimeout(initSuggestionForm, 500);
+        setTimeout(initSuggestionTacheForm, 500);
+    </script>
+</body>

@@ -74,6 +74,22 @@ if (isset($_GET['plante_id']) && !empty($_GET['plante_id'])) {
 }
 
 ?>
+<?php
+// Récupérer les stats depuis la base
+$totalPlantes = count($listePlantes); // toutes les plantes
+$today = date('Y-m-d');
+$plantesToday = 0;
+foreach($listePlantes as $p){
+    if($p['date_ajout'] === $today) $plantesToday++;
+}
+
+// Pour les tâches
+$totalTaches = count($listeTaches); // toutes les tâches
+$tachesToday = 0;
+foreach($listeTaches as $t){
+    if($t['date_dosage'] === $today) $tachesToday++;
+}
+?>
 
 
 <!DOCTYPE html>
@@ -171,14 +187,74 @@ if (isset($_GET['success'])) {
     $successMsg = "Plante ajoutée avec succès !";
 }
 ?>
+<div class="container-fluid pt-4 px-4">
+    <div class="row justify-content-center g-3 mb-4">
+        <!-- Total Plantes -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="d-flex align-items-center p-3 rounded shadow-sm" 
+                 style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
+                <img src="../image/plant.png" width="36" height="36" class="me-3" alt="Plante">
+                <div>
+                    <h6 class="mb-0" style="font-size: 0.85rem; color: #aaa;">Total Plantes</h6>
+                    <h4 class="mb-0" style="font-size: 1.2rem; color: #000;"><?= $totalPlantes ?></h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plantes ajoutées aujourd'hui -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="d-flex align-items-center p-3 rounded shadow-sm" 
+                 style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
+                <img src="../image/day-to-plant-a-tree-reminder-daily-calendar-page-interface-symbol.png" width="36" height="36" class="me-3" alt="Plante aujourd'hui">
+                <div>
+                    <h6 class="mb-0" style="font-size: 0.85rem; color: #aaa;">Plantes aujourd'hui</h6>
+                    <h4 class="mb-0" style="font-size: 1.2rem; color: #000;"><?= $plantesToday ?></h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Tâches -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="d-flex align-items-center p-3 rounded shadow-sm" 
+                 style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
+                <img src="../image/clipboard.png" width="36" height="36" class="me-3" alt="Tâches">
+                <div>
+                    <h6 class="mb-0" style="font-size: 0.85rem; color: #aaa;">Total Tâches</h6>
+                    <h4 class="mb-0" style="font-size: 1.2rem; color: #000;"><?= $totalTaches ?></h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tâches prévues aujourd'hui -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="d-flex align-items-center p-3 rounded shadow-sm" 
+                 style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
+                <img src="../image/search.png" width="36" height="36" class="me-3" alt="Tâches aujourd'hui">
+                <div>
+                    <h6 class="mb-0" style="font-size: 0.85rem; color: #aaa;">Tâches aujourd'hui</h6>
+                    <h4 class="mb-0" style="font-size: 1.2rem; color: #000;"><?= $tachesToday ?></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="container-fluid pt-4 px-4">
     <div class="bg-light text-center rounded p-4">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <h6 class="mb-0">Gestion des Plantes</h6>
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPlanteModal">
-                <i class="fa fa-plus me-2"></i>Ajouter Plante
-            </button>
+            <div>
+                <button type="button" class="btn btn-warning me-2" id="btnSuggestions" title="Voir les suggestions de plantes">
+                    <i class="fa fa-lightbulb me-2"></i>Suggestions <span class="badge bg-danger" id="badgeSuggestions">0</span>
+                </button>
+                <button type="button" class="btn btn-info me-2" id="btnSuggestionsTaches" title="Voir les suggestions de tâches">
+                    <i class="fa fa-tasks me-2"></i>Tâches <span class="badge bg-danger" id="badgeSuggestionsTaches">0</span>
+                </button>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPlanteModal">
+                    <i class="fa fa-plus me-2"></i>Ajouter Plante
+                </button>
+            </div>
         </div>
         
 
@@ -295,13 +371,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("addPlanteForm");
     const errorDiv = document.getElementById("addError");
     const fields = form.querySelectorAll("input[name], select[name]");
-    let isSubmitting = false;
-
+    
     function checkField(input) {
         const msg = input.parentElement.querySelector(".error-msg");
         let error = "";
 
-        if (input.value.trim() === "") {
+        if (input.value.trim() === "" && input.tagName !== "SELECT") {
             error = "Ce champ est obligatoire.";
         } else {
             switch (input.name) {
@@ -324,10 +399,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 case "idUtilisateur": 
                     if (Number(input.value) <= 0) 
                         error = "L'ID utilisateur doit être positif."; 
-                    break;
-                case "etat_sante":
-                    if (input.value.trim() === "") 
-                        error = "État de santé requis.";
                     break;
             }
         }
@@ -355,8 +426,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     form.addEventListener("submit", (e) => {
-        if (isSubmitting) return;
-
         let valid = true;
         fields.forEach(input => {
             if (!checkField(input)) valid = false;
@@ -369,20 +438,16 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         } else {
             errorDiv.style.display = "none";
-            isSubmitting = true;
         }
     });
-<?php if ($errorMsg): ?>
-    var addPlanteModal = new bootstrap.Modal(document.getElementById('addPlanteModal'));
-    addPlanteModal.show();
-<?php endif; ?>
 
-    // Ouvrir modal si erreur serveur ou en édition
-    <?php if($errorMsg || $editPlante): ?>
+    // Ouvrir modal si erreur serveur
+    <?php if ($errorMsg || $editPlante): ?>
         var addPlanteModal = new bootstrap.Modal(document.getElementById('addPlanteModal'));
         addPlanteModal.show();
     <?php endif; ?>
 });
+
 </script>
 
 
@@ -1060,6 +1125,381 @@ document.addEventListener("DOMContentLoaded", () => {
 
     new bootstrap.Modal(document.getElementById("editTacheModal")).show();
 });
+
+// Gestion des suggestions
+function loadSuggestions() {
+    fetch('suggestionAPI.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'action=count'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('badgeSuggestions').textContent = data.count;
+            if (data.count > 0) {
+                document.getElementById('badgeSuggestions').style.display = 'inline';
+            }
+        }
+    });
+}
+
+document.getElementById('btnSuggestions').addEventListener('click', function() {
+    showSuggestionsModal();
+});
+
+function showSuggestionsModal() {
+    fetch('suggestionAPI.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'action=list&filter=En attente'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            let tableRows = '';
+            
+            if (data.suggestions.length === 0) {
+                tableRows = '<tr><td colspan="8" class="text-center text-muted py-4">Aucune suggestion en attente</td></tr>';
+            } else {
+                data.suggestions.forEach(s => {
+                    tableRows += `
+                        <tr>
+                            <td>${s.nom_plante}</td>
+                            <td>${s.id_suggestion}</td>
+                            <td>${s.id_utilisateur}</td>
+                            <td>${s.date_suggestion}</td>
+                            <td>${s.type_plante}</td>
+                            <td><span class="badge bg-info">${s.statut}</span></td>
+                            <td>
+                                <div style="max-width: 300px; word-wrap: break-word;">
+                                    ${s.description || 'N/A'}
+                                </div>
+                                ${s.image ? `<br><img src="${s.image}" alt="Plante" style="max-width: 80px; margin-top: 5px;">` : ''}
+                            </td>
+                            <td>
+                                <button class="btn btn-success btn-sm" onclick="acceptSuggestion(${s.id_suggestion})" title="Accepter">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="rejectSuggestion(${s.id_suggestion})" title="Rejeter">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            let html = `
+                <div class="table-responsive">
+                    <table class="table text-start align-middle table-bordered table-hover mb-0">
+                        <thead class="table-warning">
+                            <tr class="text-dark">
+                                <th>Nom</th>
+                                <th>ID</th>
+                                <th>Utilisateur</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Statut</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            // Créer une modale temporaire
+            let modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'suggestionsModal';
+            modal.setAttribute('tabindex', '-1');
+            modal.innerHTML = `
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning">
+                            <h5 class="modal-title">💡 Suggestions de Plantes (${data.suggestions.length})</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                            ${html}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            let bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+            
+            modal.addEventListener('hidden.bs.modal', function() {
+                modal.remove();
+            });
+        }
+    });
+}
+
+function acceptSuggestion(id) {
+    if (!confirm('Accepter cette suggestion et créer la plante?')) return;
+    
+    fetch('suggestionAPI.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `action=accept&id_suggestion=${id}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) {
+            loadSuggestions();
+            showSuggestionsModal();
+        }
+    });
+}
+
+function rejectSuggestion(id) {
+    if (!confirm('Rejeter cette suggestion?')) return;
+    
+    fetch('suggestionAPI.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `action=reject&id_suggestion=${id}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) {
+            loadSuggestions();
+            showSuggestionsModal();
+        }
+    });
+}
+
+// Charger les suggestions au démarrage
+loadSuggestions();
+
+// ===== SUGGESTIONS DE TÂCHES =====
+
+// Charger les suggestions de tâches
+function loadSuggestionsTaches() {
+    fetch('suggestionTacheAPI.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=list&filter=En attente'
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log('Suggestions de tâches reçues:', data);
+        const badge = document.getElementById('badgeSuggestionsTaches');
+        if (data.suggestions) {
+            badge.textContent = data.suggestions.length;
+        }
+    });
+}
+
+// Afficher le modal de suggestions de tâches
+function showSuggestionsTachesModal() {
+    fetch('suggestionTacheAPI.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=list&filter=Toutes'
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log('Réponse complète:', data);
+        
+        // Créer le modal dynamiquement
+        let modal = document.getElementById('suggestionsTachesModal');
+        if (modal) modal.remove();
+        
+        modal = document.createElement('div');
+        modal.id = 'suggestionsTachesModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = '-1';
+        modal.setAttribute('aria-hidden', 'true');
+        
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title">📋 Suggestions de Tâches (${data.suggestions ? data.suggestions.length : 0})</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-hover table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Quantité</th>
+                                    <th>Mode</th>
+                                    <th>Date Dosage</th>
+                                    <th>Prochaine Exécution</th>
+                                    <th>Priorité</th>
+                                    <th>Utilisateur</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.suggestions && data.suggestions.length > 0 ? data.suggestions.map(s => `
+                                    <tr>
+                                        <td><strong>${s.type_dosage}</strong></td>
+                                        <td>${s.quantite}</td>
+                                        <td>${s.mode_dosage || 'N/A'}</td>
+                                        <td>${s.date_dosage ? new Date(s.date_dosage).toLocaleDateString('fr-FR') : 'N/A'}</td>
+                                        <td>${s.prochaineExecution ? new Date(s.prochaineExecution).toLocaleString('fr-FR') : 'N/A'}</td>
+                                        <td>
+                                            ${s.priorite === 'Élevée' ? '<span class="badge bg-danger">↑ Élevée</span>' :
+                                              s.priorite === 'Moyen' ? '<span class="badge bg-warning text-dark">= Moyen</span>' :
+                                              '<span class="badge bg-success">↓ Faible</span>'}
+                                        </td>
+                                        <td>${s.utilisateur_nom || 'Utilisateur #' + s.id_utilisateur}</td>
+                                        <td>
+                                            ${s.statut === 'En attente' ? '<span class="badge bg-secondary">En attente</span>' :
+                                              s.statut === 'Acceptée' ? '<span class="badge bg-success">Acceptée</span>' :
+                                              '<span class="badge bg-danger">Rejetée</span>'}
+                                        </td>
+                                        <td>
+                                            ${s.statut === 'En attente' ? `
+                                                <button class="btn btn-sm btn-success" onclick="acceptSuggestionTache(${s.id_suggestion})">
+                                                    <i class="fa fa-check"></i> Accepter
+                                                </button>
+                                                <button class="btn btn-sm btn-danger ms-1" onclick="rejectSuggestionTache(${s.id_suggestion})">
+                                                    <i class="fa fa-times"></i> Rejeter
+                                                </button>
+                                            ` : '<span class="text-muted small">Traitée</span>'}
+                                        </td>
+                                    </tr>
+                                `).join('') : '<tr><td colspan="9" class="text-center text-muted">Aucune suggestion</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+    });
+}
+
+// Accepter une suggestion de tâche
+function acceptSuggestionTache(idSuggestion) {
+    // Créer un modal pour choisir la plante
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'selectPlanteModal';
+    modal.tabIndex = '-1';
+    
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">🪴 Sélectionner une plante</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label fw-bold">Plante associée à cette tâche:</label>
+                    <select id="selectPlante" class="form-select" required>
+                        <option value="">-- Choisir une plante --</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-success" onclick="confirmAcceptTache(${idSuggestion})">Accepter</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Charger les plantes
+    fetch('getPlantes.php')
+        .then(res => res.json())
+        .then(plantes => {
+            const select = document.getElementById('selectPlante');
+            plantes.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id_plante;
+                opt.textContent = p.nom_plante + ' (ID: ' + p.id_plante + ')';
+                select.appendChild(opt);
+            });
+        })
+        .catch(err => console.error('Erreur:', err));
+    
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    modal.addEventListener('hidden.bs.modal', () => modal.remove());
+}
+
+function confirmAcceptTache(idSuggestion) {
+    const idPlante = document.getElementById('selectPlante').value;
+    
+    if (!idPlante) {
+        alert('⚠️ Sélectionnez une plante');
+        return;
+    }
+    
+    fetch('suggestionTacheAPI.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `action=accept&id_suggestion=${idSuggestion}&id_plante=${idPlante}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) {
+            const modalEl = document.getElementById('selectPlanteModal');
+            if (modalEl) {
+                const bsModal = bootstrap.Modal.getInstance(modalEl);
+                if (bsModal) bsModal.hide();
+            }
+            loadSuggestionsTaches();
+            showSuggestionsTachesModal();
+        }
+    });
+}
+
+// Rejeter une suggestion de tâche
+function rejectSuggestionTache(idSuggestion) {
+    if (confirm('Êtes-vous sûr de vouloir rejeter cette suggestion?')) {
+        fetch('suggestionTacheAPI.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `action=reject&id_suggestion=${idSuggestion}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if (data.success) {
+                loadSuggestionsTaches();
+                showSuggestionsTachesModal();
+            }
+        });
+    }
+}
+
+// Événement click pour le bouton suggestions tâches
+document.addEventListener('DOMContentLoaded', function() {
+    const btnSuggestionsTaches = document.getElementById('btnSuggestionsTaches');
+    if (btnSuggestionsTaches) {
+        btnSuggestionsTaches.addEventListener('click', showSuggestionsTachesModal);
+    }
+    
+    // Charger le nombre de suggestions de tâches
+    loadSuggestionsTaches();
+    setInterval(loadSuggestionsTaches, 5000); // Rafraîchir toutes les 5 secondes
+});
+
 </script>
 
 

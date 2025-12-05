@@ -136,5 +136,42 @@ public function getTachesByPlante($id_plante){
         return [];
     }
 }
+public function getTachesByUser($id_user){
+    $db = config::getConnexion();
+    try {
+        $query = $db->prepare("
+            SELECT t.*, p.nom_plante 
+            FROM tache t
+            INNER JOIN plante p ON t.id_plante = p.id_plante
+            WHERE p.id_user = :id_user
+            ORDER BY t.prochaineExecution ASC
+        ");
+        $query->bindValue(':id_user', $id_user, PDO::PARAM_INT);
+        $query->execute();
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        echo 'Erreur : '.$e->getMessage();
+        return [];
+    }
 }
+
+}
+/*public function listTachesAvecPlante() {
+    $db = config::getConnexion();
+
+    try {
+        $req = $db->query('
+            SELECT t.*, p.nom_plante, p.type_plante
+            FROM tache t
+            JOIN plante p ON t.id_plante = p.id_plante
+            ORDER BY t.prochaineExecution ASC
+        ');
+
+        return $req->fetchAll(PDO::FETCH_ASSOC);
+
+    } catch (Exception $e) {
+        echo 'Erreur lors de la jointure : ' . $e->getMessage();
+    }
+}
+*/
 ?>

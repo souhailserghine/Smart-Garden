@@ -61,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Ajout plante
     try {
         $plante = new Plante(null, $nom, $date, $humidite, $eau, $etat, $user);
+
         $pl->ajouterPlante($plante);
 
         $_SESSION['successMsg'] = "Plante ajoutée avec succès !";
