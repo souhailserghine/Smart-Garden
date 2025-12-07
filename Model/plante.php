@@ -8,10 +8,12 @@ class plante
     private $niveau_humidite;
     private $besoin_eau;
     private $etat_sante;
+    private $temperature;
+    private $image;
     private $idUtilisateur;
 
     // Constructeur
-    public function __construct($id_plante, $nom_plante, $date_ajout, $niveau_humidite, $besoin_eau, $etat_sante, $idUtilisateur)
+    public function __construct($id_plante, $nom_plante, $date_ajout, $niveau_humidite, $besoin_eau, $etat_sante, $temperature, $image, $idUtilisateur)
     {
         $this->id_plante = $id_plante;
         $this->nom_plante = $nom_plante;
@@ -19,6 +21,8 @@ class plante
         $this->niveau_humidite = $niveau_humidite;
         $this->besoin_eau = $besoin_eau;
         $this->etat_sante = $etat_sante;
+        $this->temperature = $temperature;
+        $this->image = $image;
         $this->idUtilisateur = $idUtilisateur;
     }
     public function getIdPlante()
@@ -65,6 +69,22 @@ class plante
     public function setEtatSante($etat_sante)
     {
         $this->etat_sante = $etat_sante;
+    }
+    public function getTemperature()
+    {
+        return $this->temperature;
+    }
+    public function setTemperature($temperature)
+    {
+        $this->temperature = $temperature;
+    }
+    public function getImage()
+    {
+        return $this->image;
+    }
+    public function setImage($image)
+    {
+        $this->image = $image;
     }
     public function getIdUtilisateur()
     {

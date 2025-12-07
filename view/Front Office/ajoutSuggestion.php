@@ -22,6 +22,10 @@ try {
         $nomPlante = $_POST['nom_plante'] ?? '';
         $typePlante = $_POST['type_plante'] ?? '';
         $description = $_POST['description'] ?? '';
+        $temperature = isset($_POST['temperature']) ? (float)$_POST['temperature'] : 20.0;
+        $besoin_eau = isset($_POST['besoin_eau']) ? (int)$_POST['besoin_eau'] : 500;
+        $niveau_humidite = isset($_POST['niveau_humidite']) ? (int)$_POST['niveau_humidite'] : 60;
+        $etat_sante = $_POST['etat_sante'] ?? 'Bon état';
         $idUtilisateur = $_SESSION['idUtilisateur'];
         
         if (empty($nomPlante) || empty($typePlante)) {
@@ -45,7 +49,7 @@ try {
             }
         }
         
-        $result = $suggestionC->addSuggestion($idUtilisateur, $nomPlante, $typePlante, $description, $imagePath);
+        $result = $suggestionC->addSuggestion($idUtilisateur, $nomPlante, $typePlante, $description, $imagePath, $temperature, $besoin_eau, $niveau_humidite, $etat_sante);
         echo json_encode($result);
         
     } elseif ($action === 'list') {

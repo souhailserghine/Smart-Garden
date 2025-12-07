@@ -104,6 +104,9 @@ foreach($mesPlantes as $p) {
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
     <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
     
+    <!-- Toast Notification System -->
+    <script src="./assets/js/toast-notification.js"></script>
+    
     <style>
         /* Chatbot styles */
         .chatbot-container {
@@ -281,7 +284,35 @@ foreach($mesPlantes as $p) {
     </style>
 </head>
 
-<body class="newsfeed">
+<body class="newsfeed" style="background: transparent;">
+    <!-- Subtle Background Pattern & Decorations -->
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 1; z-index: -1; background: linear-gradient(135deg, rgba(245,247,250,0.98) 0%, rgba(232,240,247,0.98) 100%); pointer-events: none;"></div>
+    
+    <!-- Animated Gradient Blobs -->
+    <div style="position: fixed; top: -50px; right: -50px; width: 350px; height: 350px; background: radial-gradient(circle, rgba(46, 204, 113, 0.08) 0%, transparent 70%); border-radius: 50%; z-index: -1; pointer-events: none; animation: float 6s ease-in-out infinite;"></div>
+    <div style="position: fixed; bottom: -100px; left: -100px; width: 450px; height: 450px; background: radial-gradient(circle, rgba(52, 152, 219, 0.08) 0%, transparent 70%); border-radius: 50%; z-index: -1; pointer-events: none; animation: float-reverse 8s ease-in-out infinite;"></div>
+    
+    <!-- SVG Pattern Overlay -->
+    <svg style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0.03;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+        <defs>
+            <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#000" stroke-width="0.5"/>
+            </pattern>
+        </defs>
+        <rect width="1200" height="800" fill="url(#grid-pattern)"/>
+    </svg>
+    
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-20px) translateX(-10px); }
+        }
+        @keyframes float-reverse {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(20px) translateX(10px); }
+        }
+    </style>
+    
     <!--
     <div class="spinner d-flex align-items-center justify-content-center" id="loader">
         <div class="row">
@@ -679,48 +710,48 @@ foreach($mesPlantes as $p) {
                             <div class="row g-3 mb-4">
                                 <!-- Total Plantes -->
                                 <div class="col-12 col-sm-6 col-md-3">
-                                    <div class="d-flex align-items-center p-3 rounded-3 shadow-sm" 
-                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
-                                        <img src="../image/plant.png" width="40" height="40" class="me-3" alt="Plante">
-                                        <div>
-                                            <h6 class="mb-0" style="font-size: 0.85rem; color: #999;">Total Plantes</h6>
-                                            <h4 class="mb-0" style="font-size: 1.5rem; color: #333;"><?= $totalPlantes ?></h4>
+                                    <div class="d-flex align-items-center p-4 rounded-3 shadow-sm" 
+                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); gap: 20px;">
+                                        <img src="../image/plant.png" width="50" height="50" class="flex-shrink-0" alt="Plante" style="object-fit: contain;">
+                                        <div style="flex-grow: 1;">
+                                            <h6 class="mb-2" style="font-size: 0.85rem; color: #999; font-weight: 500;">Total Plantes</h6>
+                                            <h4 class="mb-0" style="font-size: 1.8rem; color: #2ecc71; font-weight: bold;"><?= $totalPlantes ?></h4>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Plantes ajoutées aujourd'hui -->
                                 <div class="col-12 col-sm-6 col-md-3">
-                                    <div class="d-flex align-items-center p-3 rounded-3 shadow-sm" 
-                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
-                                        <img src="../image/day-to-plant-a-tree-reminder-daily-calendar-page-interface-symbol.png" width="40" height="40" class="me-3" alt="Plante aujourd'hui">
-                                        <div>
-                                            <h6 class="mb-0" style="font-size: 0.85rem; color: #999;">Plantes aujourd'hui</h6>
-                                            <h4 class="mb-0" style="font-size: 1.5rem; color: #333;"><?= $plantesToday ?></h4>
+                                    <div class="d-flex align-items-center p-4 rounded-3 shadow-sm" 
+                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); gap: 20px;">
+                                        <img src="../image/day-to-plant-a-tree-reminder-daily-calendar-page-interface-symbol.png" width="50" height="50" class="flex-shrink-0" alt="Plante aujourd'hui" style="object-fit: contain;">
+                                        <div style="flex-grow: 1;">
+                                            <h6 class="mb-2" style="font-size: 0.85rem; color: #999; font-weight: 500;">Plantes aujourd'hui</h6>
+                                            <h4 class="mb-0" style="font-size: 1.8rem; color: #2ecc71; font-weight: bold;"><?= $plantesToday ?></h4>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Total Tâches -->
                                 <div class="col-12 col-sm-6 col-md-3">
-                                    <div class="d-flex align-items-center p-3 rounded-3 shadow-sm" 
-                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
-                                        <img src="../image/clipboard.png" width="40" height="40" class="me-3" alt="Tâches">
-                                        <div>
-                                            <h6 class="mb-0" style="font-size: 0.85rem; color: #999;">Total Tâches</h6>
-                                            <h4 class="mb-0" style="font-size: 1.5rem; color: #333;"><?= $totalTaches ?></h4>
+                                    <div class="d-flex align-items-center p-4 rounded-3 shadow-sm" 
+                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); gap: 20px;">
+                                        <img src="../image/clipboard.png" width="50" height="50" class="flex-shrink-0" alt="Tâches" style="object-fit: contain;">
+                                        <div style="flex-grow: 1;">
+                                            <h6 class="mb-2" style="font-size: 0.85rem; color: #999; font-weight: 500;">Total Tâches</h6>
+                                            <h4 class="mb-0" style="font-size: 1.8rem; color: #2ecc71; font-weight: bold;"><?= $totalTaches ?></h4>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Tâches prévues aujourd'hui -->
                                 <div class="col-12 col-sm-6 col-md-3">
-                                    <div class="d-flex align-items-center p-3 rounded-3 shadow-sm" 
-                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
-                                        <img src="../image/search.png" width="40" height="40" class="me-3" alt="Tâches aujourd'hui">
-                                        <div>
-                                            <h6 class="mb-0" style="font-size: 0.85rem; color: #999;">Tâches aujourd'hui</h6>
-                                            <h4 class="mb-0" style="font-size: 1.5rem; color: #333;"><?= $tachesToday ?></h4>
+                                    <div class="d-flex align-items-center p-4 rounded-3 shadow-sm" 
+                                         style="background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); gap: 20px;">
+                                        <img src="../image/search.png" width="50" height="50" class="flex-shrink-0" alt="Tâches aujourd'hui" style="object-fit: contain;">
+                                        <div style="flex-grow: 1;">
+                                            <h6 class="mb-2" style="font-size: 0.85rem; color: #999; font-weight: 500;">Tâches aujourd'hui</h6>
+                                            <h4 class="mb-0" style="font-size: 1.8rem; color: #2ecc71; font-weight: bold;"><?= $tachesToday ?></h4>
                                         </div>
                                     </div>
                                 </div>
@@ -728,7 +759,96 @@ foreach($mesPlantes as $p) {
                         </div>
                         <!-- Statistiques End -->
 
-                        <!-- Mes Plantes Section -->
+                        <!-- Suggestions de Tâches Start -->
+                        <div class="container-fluid pt-4 px-0">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.95) 0%, rgba(52, 152, 219, 0.95) 100%); border-radius: 15px; padding: 25px; color: white; box-shadow: 0 8px 25px rgba(46, 204, 113, 0.2); backdrop-filter: blur(10px);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <h5 class="mb-2" style="font-weight: 700; font-size: 1.2rem;">💡 Suggestion du moment</h5>
+                                                <p class="mb-0" id="taskSuggestion" style="font-size: 1.05rem; font-weight: 500; min-height: 30px;">Chargement des suggestions...</p>
+                                            </div>
+                                            <button class="btn btn-light btn-sm rounded-pill px-4" onclick="loadNextSuggestion()" style="font-weight: 600;">
+                                                <i class="bx bx-refresh me-2"></i>Suivant
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Suggestions de Tâches End -->
+
+                        <script>
+                        // Suggestions dynamiques de tâches
+                        const taskSuggestions = [
+                            { icon: '💧', text: 'Arroser vos plantes - Elles ont besoin d\'eau!' },
+                            { icon: '🌱', text: 'Ajouter une nouvelle plante à votre collection' },
+                            { icon: '✂️', text: 'Tailler les feuilles mortes et les branches' },
+                            { icon: '🍃', text: 'Rempoter une plante qui devient trop grande' },
+                            { icon: '🌞', text: 'Vérifier l\'exposition au soleil de vos plantes' },
+                            { icon: '🔍', text: 'Inspecter les feuilles pour détecter des maladies' },
+                            { icon: '🧴', text: 'Nettoyer les feuilles avec un chiffon humide' },
+                            { icon: '📊', text: 'Vérifier l\'humidité du sol de chaque plante' },
+                            { icon: '🎯', text: 'Ajuster la température pour vos plantes' },
+                            { icon: '📋', text: 'Créer un planning d\'entretien régulier' },
+                            { icon: '🌿', text: 'Ajouter du compost pour fertiliser le sol' },
+                            { icon: '💪', text: 'Déplacer une plante vers un meilleur endroit' },
+                            { icon: '🏥', text: 'Traiter une plante présentant des signes de faiblesse' },
+                            { icon: '📱', text: 'Mettre à jour l\'état de santé de vos plantes' },
+                            { icon: '🎨', text: 'Documenter la croissance de vos plantes avec une photo' }
+                        ];
+
+                        let currentSuggestionIndex = Math.floor(Math.random() * taskSuggestions.length);
+
+                        function displaySuggestion() {
+                            const suggestion = taskSuggestions[currentSuggestionIndex];
+                            document.getElementById('taskSuggestion').innerHTML = 
+                                '<span style="font-size: 1.3rem; margin-right: 10px;">' + suggestion.icon + '</span>' + suggestion.text;
+                        }
+
+                        function loadNextSuggestion() {
+                            currentSuggestionIndex = (currentSuggestionIndex + 1) % taskSuggestions.length;
+                            displaySuggestion();
+                            // Petite animation
+                            const elem = document.getElementById('taskSuggestion');
+                            elem.style.animation = 'none';
+                            setTimeout(() => {
+                                elem.style.animation = 'fadeIn 0.3s ease-in';
+                            }, 10);
+                        }
+
+                        // Afficher une suggestion au chargement
+                        document.addEventListener('DOMContentLoaded', () => {
+                            displaySuggestion();
+                            // Change suggestion toutes les 30 secondes
+                            setInterval(() => {
+                                loadNextSuggestion();
+                            }, 30000);
+                            
+                            // Afficher les notifications flash s'il y en a
+                            <?php if (isset($_SESSION['successMsg'])): ?>
+                                toastManager.success('✓ Succès!', '<?= addslashes($_SESSION['successMsg']) ?>');
+                                <?php unset($_SESSION['successMsg']); ?>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($_SESSION['errorMsg'])): ?>
+                                toastManager.error('✕ Erreur!', '<?= addslashes($_SESSION['errorMsg']) ?>');
+                                <?php unset($_SESSION['errorMsg']); ?>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($_SESSION['infoMsg'])): ?>
+                                toastManager.info('ℹ Info', '<?= addslashes($_SESSION['infoMsg']) ?>');
+                                <?php unset($_SESSION['infoMsg']); ?>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($_SESSION['warningMsg'])): ?>
+                                toastManager.warning('⚠ Attention', '<?= addslashes($_SESSION['warningMsg']) ?>');
+                                <?php unset($_SESSION['warningMsg']); ?>
+                            <?php endif; ?>
+                        });
+                        </script>
+
                          <div class="container-fluid shadow-sm rounded-4 p-4 mt-4 mb-4">
 
                         
@@ -924,6 +1044,27 @@ foreach($mesPlantes as $p) {
                         <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Le nom de la plante que vous souhaitez suggérer</small>
                     </div>
                     
+                    <!-- Type de plante -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-category' style="color: #667eea; margin-right: 8px; font-size: 1.1rem;"></i>Type de plante <span class="text-danger ms-1">*</span>
+                        </label>
+                        <input type="text" class="form-control" name="type_plante" 
+                               placeholder="Succulente, Orchidée, Fougère..." required
+                               style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem; background: white;">
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Catégorie ou famille de la plante</small>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-align-left' style="color: #667eea; margin-right: 8px; font-size: 1.1rem;"></i>Description
+                        </label>
+                        <textarea class="form-control" name="description" rows="3" placeholder="Décrivez les caractéristiques, les soins nécessaires..."
+                               style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem; background: white; resize: vertical;"></textarea>
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Informations supplémentaires sur la plante</small>
+                    </div>
+                    
                     <!-- Niveau d'humidité avec slider -->
                     <div class="mb-5">
                         <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center; margin-bottom: 12px;">
@@ -975,6 +1116,30 @@ foreach($mesPlantes as $p) {
                                 <span style="font-size: 0.9rem; color: #333; font-weight: 500;">✗ Mauvais</span>
                             </label>
                         </div>
+                    </div>
+                    
+                    <!-- Température -->
+                    <div class="mb-5">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-thermometer' style="color: #667eea; margin-right: 8px; font-size: 1.1rem;"></i>Température idéale (°C)
+                        </label>
+                        <div class="input-group" style="border-radius: 10px; overflow: hidden;">
+                            <input type="number" class="form-control" name="temperature" 
+                                   min="0" max="50" step="0.5" value="20" placeholder="20"
+                                   style="border: 2px solid #e0e0e0; border-radius: 10px 0 0 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem;">
+                            <span class="input-group-text" style="border: 2px solid #e0e0e0; border-radius: 0 10px 10px 0; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); color: #667eea; font-weight: 600; border-left: none;">°C</span>
+                        </div>
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">Température moyenne pour cette plante</small>
+                    </div>
+                    
+                    <!-- Image -->
+                    <div class="mb-3">
+                        <label class="form-label fw-600" style="color: #333; font-size: 0.95rem; display: flex; align-items: center;">
+                            <i class='bx bx-image' style="color: #667eea; margin-right: 8px; font-size: 1.1rem;"></i>Photo de la plante
+                        </label>
+                        <input type="file" class="form-control" name="image" accept="image/*"
+                               style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 15px; transition: all 0.3s ease; font-size: 0.95rem; background: white;">
+                        <small class="text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">JPG, PNG (max 5MB)</small>
                     </div>
                 </form>
             </div>
@@ -1354,7 +1519,8 @@ foreach($mesPlantes as $p) {
 <style>
     /* Background dégradé uniquement sur le contenu principal */
     body {
-        background-color: #f8f9fa !important;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f7 100%) !important;
+        background-attachment: fixed !important;
     }
     
     /* Wrapper principal avec gradient */
@@ -1918,31 +2084,39 @@ foreach($mesPlantes as $p) {
             // Scroll to bottom
             chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
             
-            // Send to server
-            const formData = new FormData();
-            formData.append('message', message);
-            
-            fetch('chatbotAI.php', {
+            // Send to OpenAI API via our endpoint
+            fetch('../../chatgpt_api.php', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
             })
             .then(response => response.json())
             .then(data => {
                 // Remove loading indicator
                 loadingDiv.remove();
                 
-                // Add AI response
-                const aiMessageDiv = document.createElement('div');
-                aiMessageDiv.className = 'chatbot-message';
-                aiMessageDiv.innerHTML = `<div class="message-bubble ai">${formatMessage(data.response)}</div>`;
-                chatbotMessages.appendChild(aiMessageDiv);
+                if (data.success) {
+                    // Add AI response
+                    const aiMessageDiv = document.createElement('div');
+                    aiMessageDiv.className = 'chatbot-message';
+                    aiMessageDiv.innerHTML = `<div class="message-bubble ai">${escapeHtml(data.message)}</div>`;
+                    chatbotMessages.appendChild(aiMessageDiv);
+                } else {
+                    // Add error message
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'chatbot-message';
+                    errorDiv.innerHTML = `<div class="message-bubble ai">❌ ${escapeHtml(data.message)}</div>`;
+                    chatbotMessages.appendChild(errorDiv);
+                }
                 
                 // Scroll to bottom
                 chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
             })
             .catch(error => {
                 console.error('Erreur:', error);
-                loadingDiv.innerHTML = `<div class="message-bubble ai">❌ Une erreur est survenue. Réessayez.</div>`;
+                loadingDiv.innerHTML = `<div class="message-bubble ai">❌ Erreur de connexion. Réessayez.</div>`;
             });
         }
         
@@ -2190,7 +2364,11 @@ foreach($mesPlantes as $p) {
                         submitSuggestionTacheBtn.innerHTML = '<i class="bx bx-check me-2"></i>Soumettre';
                         
                         if (data.success) {
-                            alert('✅ ' + data.message);
+                            if (typeof toastManager !== 'undefined') {
+                                toastManager.success(data.message);
+                            } else {
+                                alert('✅ ' + data.message);
+                            }
                             suggestionTacheForm.reset();
                             
                             // Fermer le modal
@@ -2200,7 +2378,11 @@ foreach($mesPlantes as $p) {
                             const backdrop = document.querySelector('.modal-backdrop');
                             if (backdrop) backdrop.remove();
                         } else {
-                            alert('❌ ' + (data.message || 'Erreur inconnue'));
+                            if (typeof toastManager !== 'undefined') {
+                                toastManager.error(data.message || 'Erreur inconnue');
+                            } else {
+                                alert('❌ ' + (data.message || 'Erreur inconnue'));
+                            }
                         }
                     })
                     .catch(error => {

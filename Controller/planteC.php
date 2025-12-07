@@ -10,8 +10,8 @@ class planteC {
 
     try {  
         $req = $db->prepare('
-            INSERT INTO plante (nom_plante, date_ajout, niveau_humidite, besoin_eau, etat_sante, idUtilisateur)
-            VALUES (:nom, :date, :niveau_humidite, :besoin_eau, :etat_sante, :idUser)
+            INSERT INTO plante (nom_plante, date_ajout, niveau_humidite, besoin_eau, etat_sante, temperature, image, idUtilisateur)
+            VALUES (:nom, :date, :niveau_humidite, :besoin_eau, :etat_sante, :temperature, :image, :idUser)
         ');
 
         $req->execute([
@@ -20,6 +20,8 @@ class planteC {
             'niveau_humidite' => $plante->getNiveauHumidite(),
             'besoin_eau' => $plante->getBesoinEau(),
             'etat_sante' => $plante->getEtatSante(),
+            'temperature' => $plante->getTemperature(),
+            'image' => $plante->getImage(),
             'idUser' => $plante->getIdUtilisateur()
         ]);
     } catch (Exception $e) {
@@ -49,7 +51,9 @@ class planteC {
                 date_ajout = :date, 
                 niveau_humidite = :niveau_humidite, 
                 besoin_eau = :besoin_eau,
-                etat_sante = :etat_sante
+                etat_sante = :etat_sante,
+                temperature = :temperature,
+                image = :image
             WHERE id_plante = :id
         ');
 
@@ -59,6 +63,8 @@ class planteC {
             'niveau_humidite' => $plante->getNiveauHumidite(),
             'besoin_eau' => $plante->getBesoinEau(),
             'etat_sante' => $plante->getEtatSante(),
+            'temperature' => $plante->getTemperature(),
+            'image' => $plante->getImage(),
             'id' => $id
         ]);
 

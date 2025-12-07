@@ -11,10 +11,10 @@ if (!class_exists('suggestionC')) {
         }
         
         // Ajouter une suggestion
-        public function addSuggestion($idUtilisateur, $nomPlante, $typeType, $description, $imagePath = null) {
+        public function addSuggestion($idUtilisateur, $nomPlante, $typeType, $description, $imagePath = null, $temperature = 20.0, $besoin_eau = 500, $niveau_humidite = 60, $etat_sante = 'Bon état') {
             try {
-                $query = "INSERT INTO suggestionplante (id_utilisateur, nom_plante, type_plante, description, image, date_suggestion, statut) 
-                          VALUES (?, ?, ?, ?, ?, NOW(), 'En attente')";
+                $query = "INSERT INTO suggestionplante (id_utilisateur, nom_plante, type_plante, description, image, temperature, besoin_eau, niveau_humidite, etat_sante, date_suggestion, statut) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'En attente')";
                 
                 $stmt = $this->connexion->prepare($query);
                 
@@ -22,7 +22,7 @@ if (!class_exists('suggestionC')) {
                     return ['success' => false, 'message' => 'Erreur de préparation: ' . $this->connexion->error];
                 }
                 
-                $stmt->bind_param('issss', $idUtilisateur, $nomPlante, $typeType, $description, $imagePath);
+                $stmt->bind_param('issssdiis', $idUtilisateur, $nomPlante, $typeType, $description, $imagePath, $temperature, $besoin_eau, $niveau_humidite, $etat_sante);
                 
                 if ($stmt->execute()) {
                     return ['success' => true, 'message' => 'Suggestion ajoutée avec succès!'];

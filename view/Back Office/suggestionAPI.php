@@ -55,10 +55,11 @@ try {
             $niveauHumidite = (int)$suggestion['niveau_humidite'];
             $besoinEau = (int)$suggestion['besoin_eau'];
             $etatSante = $connexion->real_escape_string($suggestion['etat_sante']);
+            $temperature = (float)($suggestion['temperature'] ?? 20.0);
             
-            // INSERT dans plante: nom_plante, etat_sante, niveau_humidite, besoin_eau, idUtilisateur, date_ajout
-            $insertQuery = "INSERT INTO plante (nom_plante, etat_sante, niveau_humidite, besoin_eau, idUtilisateur, date_ajout) 
-                           VALUES ('$nomPlante', '$etatSante', $niveauHumidite, $besoinEau, $idUtilisateur, NOW())";
+            // INSERT dans plante avec temperature
+            $insertQuery = "INSERT INTO plante (nom_plante, etat_sante, niveau_humidite, besoin_eau, temperature, idUtilisateur, date_ajout) 
+                           VALUES ('$nomPlante', '$etatSante', $niveauHumidite, $besoinEau, $temperature, $idUtilisateur, NOW())";
             
             if ($connexion->query($insertQuery)) {
                 // Mettre à jour le statut

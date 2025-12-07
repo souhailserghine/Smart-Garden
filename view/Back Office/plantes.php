@@ -121,6 +121,9 @@ foreach($listeTaches as $t){
 
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+    
+    <!-- Toast Notification System -->
+    <script src="../Front Office/assets/js/toast-notification.js"></script>
 </head>
 
 <body>
@@ -269,6 +272,8 @@ if (isset($_GET['success'])) {
                         <th>Niveau Humidité</th>
                         <th>Besoin Eau</th>
                         <th>État Santé</th>
+                        <th>Température</th>
+                        <th>Image</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -282,7 +287,18 @@ if (isset($_GET['success'])) {
                         <td><?= $plante['niveau_humidite']; ?></td>
                         <td><?= $plante['besoin_eau']; ?></td>
                         <td><?= htmlspecialchars($plante['etat_sante']); ?></td>
+                        <td><?= $plante['temperature'] ?? 'N/A'; ?> °C</td>
                         <td>
+                            <?php if (!empty($plante['image'])): ?>
+                                <img src="<?= htmlspecialchars($plante['image']); ?>" alt="<?= htmlspecialchars($plante['nom_plante']); ?>" style="max-width: 40px; max-height: 40px; border-radius: 4px;">
+                            <?php else: ?>
+                                <span class="text-muted">-</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-info btn-sm" title="Voir" onclick="viewPlante(<?= $plante['id_plante']; ?>)">
+                                <i class="fa fa-eye"></i>
+                            </button>
                             <a href="plantes.php?edit=<?= $plante['id_plante']; ?>" class="btn btn-warning btn-sm" title="Modifier">
                                 <i class="fa fa-edit"></i>
                             </a>
@@ -307,7 +323,7 @@ if (isset($_GET['success'])) {
                 <h5 class="modal-title"><i class="fa fa-plus"></i> Ajouter une Plante</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="addPlanteForm" method="POST" action="ajout.php">
+            <form id="addPlanteForm" method="POST" action="ajout.php" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div id="addError" class="alert alert-danger" style="<?= $errorMsg ? 'display:block;' : 'display:none;' ?>">
                         <?= htmlspecialchars($errorMsg) ?>
@@ -354,6 +370,16 @@ if (isset($_GET['success'])) {
                             <label class="form-label">ID Utilisateur</label>
                             <input type="number" class="form-control" name="idUtilisateur" value="<?= htmlspecialchars($formData['idUtilisateur'] ?? '') ?>">
                             <small class="error-msg"></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Température (°C)</label>
+                            <input type="number" step="0.1" class="form-control" name="temperature" value="<?= htmlspecialchars($formData['temperature'] ?? '20') ?>">
+                            <small class="error-msg"></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Image de la plante</label>
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                            <small class="text-muted">Format: JPG, PNG. Max 5MB</small>
                         </div>
                     </div>
                 </div>
@@ -461,7 +487,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <h5 class="modal-title"><i class="fa fa-edit"></i> Modifier la Plante</h5>
                 <a href="plantes.php" class="btn-close"></a>
             </div>
-            <form id="editPlanteForm" method="POST" action="modifierPlante.php">
+            <form id="editPlanteForm" method="POST" action="modifierPlante.php" enctype="multipart/form-data">
                 <input type="hidden" name="id_plante" value="<?php echo $editPlante['id_plante']; ?>">
                 <div class="modal-body">
                     <div id="editError" class="text-danger mb-3"></div>
@@ -496,9 +522,19 @@ document.addEventListener("DOMContentLoaded", () => {
                             <div class="error-msg"></div>
                         </div>
                         <div class="col-md-6 mb-3">
+                            <label class="form-label">Température (°C)</label>
+                            <input type="number" step="0.1" class="form-control" name="temperature" value="<?php echo $editPlante['temperature'] ?? '20'; ?>" >
+                            <div class="error-msg"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">ID Utilisateur</label>
                             <input type="number" class="form-control" name="idUtilisateur" value="<?php echo $editPlante['idUtilisateur']; ?>" >
                             <div class="error-msg"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Image de la plante</label>
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                            <small class="text-muted">Laisser vide pour garder l'image actuelle</small>
                         </div>
                     </div>
                 </div>
@@ -889,24 +925,32 @@ document.addEventListener("DOMContentLoaded", () => {
         addTacheModal.show();
         errorDiv.textContent = "<?= $errorMsg ?>";
         errorDiv.style.display = "block";
+        
+        // Afficher une notification toast erreur
+        if (typeof toastManager !== 'undefined') {
+            toastManager.error("<?= addslashes($errorMsg) ?>");
+        }
     <?php endif; ?>
 
     // --- Affichage message succès (toast) ---
     <?php if (!empty($successMsg)): ?>
-        // Créer un toast simple Bootstrap
-        const toastDiv = document.createElement('div');
-        toastDiv.className = 'toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3';
-        toastDiv.role = 'alert';
-        toastDiv.ariaLive = 'assertive';
-        toastDiv.ariaAtomic = 'true';
-        toastDiv.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body"><?= $successMsg ?></div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>`;
-        document.body.appendChild(toastDiv);
-        const toast = new bootstrap.Toast(toastDiv, { delay: 3000 });
-        toast.show();
+        if (typeof toastManager !== 'undefined') {
+            toastManager.success("<?= addslashes($successMsg) ?>");
+        } else {
+            const toastDiv = document.createElement('div');
+            toastDiv.className = 'toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3';
+            toastDiv.role = 'alert';
+            toastDiv.ariaLive = 'assertive';
+            toastDiv.ariaAtomic = 'true';
+            toastDiv.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body"><?= $successMsg ?></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>`;
+            document.body.appendChild(toastDiv);
+            const toast = new bootstrap.Toast(toastDiv, { delay: 3000 });
+            toast.show();
+        }
 
         // Optionnel: rafraîchir la page pour voir la nouvelle tâche
         setTimeout(() => { window.location.reload(); }, 1000);
@@ -1034,6 +1078,77 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 </div>
 <?php endif; ?>
+
+<!-- VIEW PLANTE MODAL -->
+<div class="modal fade" id="viewPlanteModal" tabindex="-1" aria-labelledby="viewPlanteLabelModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewPlanteLabelModal"><i class="fa fa-leaf"></i> Détails de la Plante</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Nom de la Plante</label>
+                        <p id="viewPlanteNom" class="form-control-plaintext">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">ID Plante</label>
+                        <p id="viewPlanteId" class="form-control-plaintext">-</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">ID Utilisateur</label>
+                        <p id="viewPlanteUserId" class="form-control-plaintext">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Date d'ajout</label>
+                        <p id="viewPlanteDate" class="form-control-plaintext">-</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Niveau d'Humidité</label>
+                        <p id="viewPlanteHumidite" class="form-control-plaintext">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Besoin en Eau</label>
+                        <p id="viewPlanteEau" class="form-control-plaintext">-</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">État de Santé</label>
+                        <p id="viewPlanteSante" class="form-control-plaintext">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Température</label>
+                        <p id="viewPlanteTemperature" class="form-control-plaintext">-</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Image</label>
+                        <div id="viewPlanteImageContainer" class="mt-2">
+                            <img id="viewPlanteImage" src="" alt="Plante" style="max-width: 200px; max-height: 200px; border-radius: 4px; display: none;">
+                            <p id="viewPlanteImageNotFound" class="form-control-plaintext">Aucune image</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -1499,6 +1614,58 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSuggestionsTaches();
     setInterval(loadSuggestionsTaches, 5000); // Rafraîchir toutes les 5 secondes
 });
+
+// ========== VIEW PLANTE MODAL ==========
+function viewPlante(id) {
+    fetch('getPlanteDetails.php?id=' + id)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const plante = data.plante;
+                document.getElementById('viewPlanteNom').textContent = htmlEscape(plante.nom_plante);
+                document.getElementById('viewPlanteId').textContent = plante.id_plante;
+                document.getElementById('viewPlanteUserId').textContent = plante.idUtilisateur;
+                document.getElementById('viewPlanteDate').textContent = plante.date_ajout;
+                document.getElementById('viewPlanteHumidite').textContent = plante.niveau_humidite + ' %';
+                document.getElementById('viewPlanteEau').textContent = plante.besoin_eau + ' ml/jour';
+                document.getElementById('viewPlanteSante').textContent = plante.etat_sante;
+                document.getElementById('viewPlanteTemperature').textContent = plante.temperature + ' °C';
+                
+                // Handle image display
+                const imageImg = document.getElementById('viewPlanteImage');
+                const imageNotFound = document.getElementById('viewPlanteImageNotFound');
+                
+                if (plante.image && plante.image.trim() !== '') {
+                    imageImg.src = htmlEscape(plante.image);
+                    imageImg.style.display = 'block';
+                    imageNotFound.style.display = 'none';
+                } else {
+                    imageImg.style.display = 'none';
+                    imageNotFound.style.display = 'block';
+                }
+                
+                const viewPlanteModal = new bootstrap.Modal(document.getElementById('viewPlanteModal'));
+                viewPlanteModal.show();
+            } else {
+                alert('Erreur: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors du chargement des données');
+        });
+}
+
+function htmlEscape(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
 
 </script>
 
