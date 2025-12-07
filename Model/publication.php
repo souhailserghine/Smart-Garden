@@ -7,7 +7,7 @@ class Publication {
     private $idUtilisateur;
     private $images;
     private $videos;
-    // NOUVELLES PROPRIÉTÉS POUR LA MODÉRATION
+    
     private $statutModeration;
     private $raisonModeration;
     private $dateModeration;
@@ -34,7 +34,7 @@ class Publication {
     public function getIdUtilisateur() { return $this->idUtilisateur; }
     public function getImages() { return $this->images; }
     public function getVideos() { return $this->videos; }
-    // NOUVEAUX GETTERS
+    
     public function getStatutModeration() { return $this->statutModeration; }
     public function getRaisonModeration() { return $this->raisonModeration; }
     public function getDateModeration() { return $this->dateModeration; }
@@ -45,7 +45,7 @@ class Publication {
     public function setNbLikes($nbLikes) { $this->nbLikes = $nbLikes; }
     public function setImages($images) { $this->images = $images; }
     public function setVideos($videos) { $this->videos = $videos; }
-    // NOUVEAUX SETTERS
+    
     public function setStatutModeration($statutModeration) { $this->statutModeration = $statutModeration; }
     public function setRaisonModeration($raisonModeration) { $this->raisonModeration = $raisonModeration; }
     public function setDateModeration($dateModeration) { $this->dateModeration = $dateModeration; }
