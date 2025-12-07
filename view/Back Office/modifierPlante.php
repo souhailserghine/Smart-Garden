@@ -76,6 +76,7 @@ try {
     $planteC->modifierPlante($p, $_POST['id_plante']);
 
     // Redirige vers la liste
+    $_SESSION['successMsg'] = "Plante modifiée avec succès !";
     header('Location: plantes.php');
     exit;
 

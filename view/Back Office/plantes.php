@@ -471,6 +471,37 @@ document.addEventListener("DOMContentLoaded", () => {
     <?php if ($errorMsg || $editPlante): ?>
         var addPlanteModal = new bootstrap.Modal(document.getElementById('addPlanteModal'));
         addPlanteModal.show();
+        
+        // Afficher une notification toast erreur
+        <?php if (!empty($errorMsg)): ?>
+            if (typeof toastManager !== 'undefined') {
+                toastManager.error("<?= addslashes($errorMsg) ?>");
+            }
+        <?php endif; ?>
+    <?php endif; ?>
+    
+    // --- Affichage message succès (toast) pour plante ---
+    <?php if (!empty($successMsg)): ?>
+        if (typeof toastManager !== 'undefined') {
+            toastManager.success("<?= addslashes($successMsg) ?>");
+        } else {
+            const toastDiv = document.createElement('div');
+            toastDiv.className = 'toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3';
+            toastDiv.role = 'alert';
+            toastDiv.ariaLive = 'assertive';
+            toastDiv.ariaAtomic = 'true';
+            toastDiv.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body"><?= $successMsg ?></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>`;
+            document.body.appendChild(toastDiv);
+            const toast = new bootstrap.Toast(toastDiv, { delay: 3000 });
+            toast.show();
+        }
+
+        // Optionnel: rafraîchir la page pour voir la nouvelle plante
+        setTimeout(() => { window.location.reload(); }, 1000);
     <?php endif; ?>
 });
 
@@ -617,6 +648,36 @@ document.addEventListener("DOMContentLoaded", () => {
     // Ouvrir modal automatiquement si $editPlante existe
     var editPlanteModal = new bootstrap.Modal(document.getElementById('editPlanteModal'));
     editPlanteModal.show();
+    
+    // --- Affichage message succès/erreur (toast) pour édition plante ---
+    <?php if (!empty($successMsg)): ?>
+        if (typeof toastManager !== 'undefined') {
+            toastManager.success("<?= addslashes($successMsg) ?>");
+        } else {
+            const toastDiv = document.createElement('div');
+            toastDiv.className = 'toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3';
+            toastDiv.role = 'alert';
+            toastDiv.ariaLive = 'assertive';
+            toastDiv.ariaAtomic = 'true';
+            toastDiv.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body"><?= $successMsg ?></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>`;
+            document.body.appendChild(toastDiv);
+            const toast = new bootstrap.Toast(toastDiv, { delay: 3000 });
+            toast.show();
+        }
+
+        // Optionnel: rafraîchir la page pour voir les modifications
+        setTimeout(() => { window.location.reload(); }, 1000);
+    <?php endif; ?>
+    
+    <?php if (!empty($errorMsg)): ?>
+        if (typeof toastManager !== 'undefined') {
+            toastManager.error("<?= addslashes($errorMsg) ?>");
+        }
+    <?php endif; ?>
 });
 </script>
 <?php endif; ?>
@@ -1239,6 +1300,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     new bootstrap.Modal(document.getElementById("editTacheModal")).show();
+    
+    // --- Affichage message succès/erreur (toast) pour édition tâche ---
+    <?php if (!empty($successMsg)): ?>
+        if (typeof toastManager !== 'undefined') {
+            toastManager.success("<?= addslashes($successMsg) ?>");
+        } else {
+            const toastDiv = document.createElement('div');
+            toastDiv.className = 'toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3';
+            toastDiv.role = 'alert';
+            toastDiv.ariaLive = 'assertive';
+            toastDiv.ariaAtomic = 'true';
+            toastDiv.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body"><?= $successMsg ?></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>`;
+            document.body.appendChild(toastDiv);
+            const toast = new bootstrap.Toast(toastDiv, { delay: 3000 });
+            toast.show();
+        }
+
+        // Optionnel: rafraîchir la page pour voir les modifications
+        setTimeout(() => { window.location.reload(); }, 1000);
+    <?php endif; ?>
+    
+    <?php if (!empty($errorMsg)): ?>
+        if (typeof toastManager !== 'undefined') {
+            toastManager.error("<?= addslashes($errorMsg) ?>");
+        }
+    <?php endif; ?>
 });
 
 // Gestion des suggestions
