@@ -254,7 +254,7 @@ if ($_POST) {
                                 </div>
                             <?php endif; ?>
 
-                            <form action="ajout.php" method="POST" enctype="multipart/form-data">
+                            <form action="ajout.php" method="POST" enctype="multipart/form-data" novalidate>
                                 <div class="form-group">
                                     <label for="contenuTexte" class="font-weight-bold">Contenu :</label>
                                     <textarea name="contenuTexte" id="contenuTexte" class="form-control" rows="6" placeholder="Quoi de neuf ?" required></textarea>
@@ -330,7 +330,7 @@ if ($_POST) {
     <script src="./assets/js/jquery/jquery-3.3.1.min.js"></script>
     <script src="./assets/js/popper/popper.min.js"></script>
     <script src="./assets/js/bootstrap/bootstrap.min.js"></script>
-
+    <script src="./assets/js/pulication-validation.js"></script>
     <script>
         $("#menu-toggle").click(function(e) {
             e.preventDefault();
