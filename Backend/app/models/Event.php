@@ -1,5 +1,5 @@
 <?php
-// models/Event.php - VERSION CORRECTED
+
 class Event
 {
     private $id_event;
@@ -25,7 +25,7 @@ class Event
         $this->longitude = $longitude;
     }
 
-    // Getters
+  
     public function getIdEvent() { return $this->id_event; }
     public function getTypeEvent() { return $this->type_event; }
     public function getDateEvent() { return $this->date_event; }
@@ -36,7 +36,7 @@ class Event
     public function getLatitude() { return $this->latitude; }
     public function getLongitude() { return $this->longitude; }
 
-    // Setters - ADD ALL MISSING SETTERS
+
     public function setIdEvent($v) { $this->id_event = $v; }
     public function setTypeEvent($v) { $this->type_event = $v; }
     public function setDateEvent($v) { $this->date_event = $v; }

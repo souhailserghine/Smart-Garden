@@ -1,11 +1,9 @@
 <?php
-// view/Backend/app/controllers/ReservationController.php
 
 include_once __DIR__ . '/../core/config.php';
 
 class ReservationController
 {
-    // RÉSERVER UN ÉVÉNEMENT AVEC INFOS PERSONNELLES
     public function addReservation()
     {
         header('Content-Type: application/json');
@@ -26,7 +24,6 @@ class ReservationController
         $email = $input['email'] ?? '';
         $telephone = $input['telephone'] ?? '';
 
-        // VALIDATION DES CHAMPS OBLIGATOIRES
         if (!$event_id || !is_numeric($event_id)) {
             echo json_encode(["status" => "error", "message" => "ID événement requis"]);
             return;
@@ -37,7 +34,6 @@ class ReservationController
             return;
         }
 
-        // Validation email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             echo json_encode(["status" => "error", "message" => "Format d'email invalide"]);
             return;
@@ -46,7 +42,6 @@ class ReservationController
         try {
             $db = config::getConnexion();
 
-            // Vérifier si déjà réservé
             $check = $db->prepare("SELECT id_reservation FROM reservation WHERE id_event = ? AND idUtilisateur = ?");
             $check->execute([$event_id, $user_id]);
             if ($check->fetch()) {
@@ -54,7 +49,6 @@ class ReservationController
                 return;
             }
 
-            // Insérer la réservation avec TOUTES les informations
             $stmt = $db->prepare("INSERT INTO reservation (id_event, idUtilisateur, nom, prenom, email, telephone, date_reservation) VALUES (?, ?, ?, ?, ?, ?, NOW())");
             $stmt->execute([$event_id, $user_id, $nom, $prenom, $email, $telephone]);
 
@@ -64,7 +58,6 @@ class ReservationController
         }
     }
 
-    // ANNULER UNE RÉSERVATION (pour l'utilisateur)
     public function cancelUserReservation()
     {
         header('Content-Type: application/json');
@@ -111,7 +104,7 @@ class ReservationController
         }
     }
 
-    // Récupérer les événements réservés par un user
+   
     public function getReservedByUser()
     {
         header('Content-Type: application/json');
@@ -141,7 +134,6 @@ class ReservationController
         }
     }
 
-    // ADMIN : Toutes les réservations
     public function getAllReservations()
     {
         header('Content-Type: application/json');
@@ -169,7 +161,6 @@ class ReservationController
         }
     }
 
-    // ADMIN : Modifier une réservation
     public function updateReservation()
     {
         header('Content-Type: application/json');
@@ -207,7 +198,6 @@ class ReservationController
         }
     }
 
-    // ADMIN : Supprimer une réservation (par ID réservation)
     public function deleteReservation()
     {
         header('Content-Type: application/json');

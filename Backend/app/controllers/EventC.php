@@ -1,5 +1,4 @@
 <?php
-// controllers/EventC.php - VERSION COMPLÉTÉE
 
 include_once __DIR__ . '/../core/config.php';
 include_once __DIR__ . '/../models/Event.php';
@@ -101,17 +100,15 @@ class EventC
     {
         $db = config::getConnexion();
         
-        // Total événements
         $sql = "SELECT COUNT(*) as total FROM evenement";
         $req = $db->query($sql);
         $total = $req->fetch(PDO::FETCH_ASSOC)['total'];
         
-        // Événements à venir
         $sql = "SELECT COUNT(*) as upcoming FROM evenement WHERE date_event >= CURDATE()";
         $req = $db->query($sql);
         $upcoming = $req->fetch(PDO::FETCH_ASSOC)['upcoming'];
         
-        // Événements passés
+        
         $sql = "SELECT COUNT(*) as past FROM evenement WHERE date_event < CURDATE()";
         $req = $db->query($sql);
         $past = $req->fetch(PDO::FETCH_ASSOC)['past'];

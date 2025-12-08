@@ -1,11 +1,9 @@
 <?php
-// view/Backend/app/controllers/CategoryController.php
 
 include_once __DIR__ . '/../core/config.php';
 
 class CategoryController
 {
-    // Récupérer toutes les catégories
     public function getAllCategories()
     {
         $db = config::getConnexion();
@@ -18,7 +16,6 @@ class CategoryController
         }
     }
 
-    // Ajouter une catégorie
     public function addCategory()
     {
         header('Content-Type: application/json');
@@ -42,7 +39,6 @@ class CategoryController
         }
     }
 
-    // Récupérer une catégorie
     public function getOneCategory()
     {
         header('Content-Type: application/json');
@@ -70,7 +66,6 @@ class CategoryController
         }
     }
 
-    // Supprimer une catégorie
     public function deleteCategory()
     {
         header('Content-Type: application/json');
@@ -95,7 +90,6 @@ class CategoryController
         }
     }
 
-    // Mettre à jour une catégorie
     public function updateCategory()
     {
         header('Content-Type: application/json');
