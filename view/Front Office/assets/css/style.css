@@ -2089,3 +2089,48 @@ img.settings-icon {
     z-index: 1050;
 }
 
+/* Modal z-index management */
+.modal {
+    z-index: 1060 !important;
+}
+
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+
+.modal-dialog {
+    z-index: 1061 !important;
+    pointer-events: auto !important;
+}
+
+.modal-content {
+    pointer-events: auto !important;
+    z-index: 1062 !important;
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+    pointer-events: auto !important;
+}
+
+/* All form elements in modals must be interactive */
+.modal input,
+.modal textarea,
+.modal select,
+.modal button {
+    pointer-events: auto !important;
+}
+
+/* Ensure card content doesn't overflow modals */
+.card {
+    position: relative;
+    z-index: 1;
+}
+
+/* Suggestion card absolute positioning should not interfere */
+.suggestion-card .suggestion-card-body {
+    z-index: 2;
+}
+
+
