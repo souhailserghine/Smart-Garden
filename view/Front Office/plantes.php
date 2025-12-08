@@ -673,7 +673,31 @@ foreach($mesPlantes as $p) {
 
                 </nav>
                 <div class="row newsfeed-right-side-content mt-3">
-                    <div class="col-md-12 second-section" id="page-content-wrapper">
+                    <div class="col-md-2 newsfeed-left-side sticky-top shadow-sm" id="sidebar-wrapper">
+                        <div class="card newsfeed-user-card h-100">
+                            <ul class="list-group list-group-flush newsfeed-left-sidebar">
+                                <li class="list-group-item">
+                                    <h6>Menu</h6>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <a href="profile.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/newsfeed.png" alt="profile"> Profile</a>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <a href="publications.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/message.png" alt="publications"> Publications</a>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center sd-active">
+                                    <a href="plantes.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/group.png" alt="plantes"> Plantes</a>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <a href="evenements.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/event.png" alt="evenements"> Evenements</a>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <a href="capteurs.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/saved.png" alt="capteurs"> Capteurs</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-10 second-section" id="page-content-wrapper">
                         
 
                         <!-- Statistiques Start -->
@@ -1444,80 +1468,66 @@ foreach($mesPlantes as $p) {
 
 <div id="calendar" style="max-width: 900px; margin: 40px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);"></div>
 
-<!-- Modal Statistiques Avancées -->
+<!-- Modal Statistiques Avancées - Version Optimisée -->
 <div class="modal fade" id="statsAdvancedModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="background: rgba(255,255,255,0.98);">
-            <div class="modal-header border-0 bg-gradient p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <h5 class="modal-title text-white fw-bold">
-                    <i class='bx bx-bar-chart-alt-2' style="font-size: 1.5rem; margin-right: 10px;"></i>
-                    Statistiques Avancées
+    <div class="modal-dialog modal-lg" style="max-height: 90vh; display: flex; align-items: flex-start; margin-top: 30px;">
+        <div class="modal-content" style="border: none; background: white; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;">
+            <div class="modal-header" style="border-bottom: 1px solid #e0e0e0; padding: 15px 20px; flex-shrink: 0;">
+                <h5 class="modal-title" style="font-weight: 600; color: #333;">
+                    <i class='bx bx-bar-chart-alt-2' style="margin-right: 8px;"></i>Statistiques
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4">
-                <div class="row g-4">
+            <div class="modal-body" style="padding: 20px; overflow-y: auto; flex: 1;">
+                <div class="row g-3">
                     <!-- État des plantes -->
                     <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100" style="background: rgba(255,255,255,0.8);">
-                            <div class="card-body">
-                                <h6 class="card-title mb-3 text-dark">État de santé des plantes</h6>
-                                <canvas id="chartetatPlantes" height="300"></canvas>
-                            </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                            <h6 style="margin-bottom: 15px; color: #333; font-size: 0.95rem; font-weight: 600;">État de santé</h6>
+                            <canvas id="chartetatPlantes" style="max-width: 100%; height: 250px;"></canvas>
                         </div>
                     </div>
                     
                     <!-- Priorité des tâches -->
                     <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100" style="background: rgba(255,255,255,0.8);">
-                            <div class="card-body">
-                                <h6 class="card-title mb-3 text-dark">Tâches par priorité</h6>
-                                <canvas id="chartePriorite" height="300"></canvas>
-                            </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                            <h6 style="margin-bottom: 15px; color: #333; font-size: 0.95rem; font-weight: 600;">Priorité des tâches</h6>
+                            <canvas id="chartePriorite" style="max-width: 100%; height: 250px;"></canvas>
                         </div>
                     </div>
-                </div>
 
-                <div class="row g-4 mt-2">
                     <!-- Statut des tâches -->
                     <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100" style="background: rgba(255,255,255,0.8);">
-                            <div class="card-body">
-                                <h6 class="card-title mb-3 text-dark">Statut des tâches</h6>
-                                <canvas id="charteStatutTaches" height="300"></canvas>
-                            </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                            <h6 style="margin-bottom: 15px; color: #333; font-size: 0.95rem; font-weight: 600;">Statut des tâches</h6>
+                            <canvas id="charteStatutTaches" style="max-width: 100%; height: 250px;"></canvas>
                         </div>
                     </div>
 
                     <!-- Résumé rapide -->
                     <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                            <div class="card-body">
-                                <h6 class="card-title mb-3">Résumé Rapide</h6>
-                                <div class="mb-3">
-                                    <small class="text-light opacity-75">Plantes en bon état</small>
-                                    <p class="mb-2"><strong style="font-size: 1.5rem;"><?= $plantes_etat_bon ?></strong> / <?= $totalPlantes ?></p>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: <?= ($totalPlantes > 0) ? ($plantes_etat_bon / $totalPlantes * 100) : 0 ?>%"></div>
-                                    </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                            <h6 style="margin-bottom: 15px; color: #333; font-size: 0.95rem; font-weight: 600;">Résumé Rapide</h6>
+                            <div style="font-size: 0.9rem;">
+                                <div style="margin-bottom: 12px;">
+                                    <small style="color: #666; display: block; margin-bottom: 4px;">Plantes en bon état</small>
+                                    <strong style="font-size: 1.3rem; color: #28a745;"><?= $plantes_etat_bon ?></strong> / <?= $totalPlantes ?>
                                 </div>
-                                <div class="mb-3">
-                                    <small class="text-light opacity-75">Tâches complètées</small>
-                                    <p class="mb-2"><strong style="font-size: 1.5rem;"><?= $tachesCompletees ?></strong> / <?= $totalTaches ?></p>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: <?= ($totalTaches > 0) ? ($tachesCompletees / $totalTaches * 100) : 0 ?>%"></div>
-                                    </div>
+                                <div style="margin-bottom: 12px;">
+                                    <small style="color: #666; display: block; margin-bottom: 4px;">Tâches complètées</small>
+                                    <strong style="font-size: 1.3rem; color: #28a745;"><?= $tachesCompletees ?></strong> / <?= $totalTaches ?>
                                 </div>
-                                <hr style="border-color: rgba(255,255,255,0.3);">
-                                <small class="text-light opacity-75">Tâches haute priorité</small>
-                                <p><strong style="font-size: 1.3rem;"><?= $taches_priorite_haute ?></strong></p>
+                                <div>
+                                    <small style="color: #666; display: block; margin-bottom: 4px;">Priorité haute</small>
+                                    <strong style="font-size: 1.3rem; color: #dc3545;"><?= $taches_priorite_haute ?></strong>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 p-4" style="background: #f8f9fa;">
-                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Fermer</button>
+            <div class="modal-footer" style="border-top: 1px solid #e0e0e0; padding: 12px 20px; flex-shrink: 0;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 6px; padding: 8px 16px;">Fermer</button>
             </div>
         </div>
     </div>
@@ -1529,31 +1539,26 @@ foreach($mesPlantes as $p) {
         background-attachment: fixed !important;
     }
     
-    /* Wrapper principal avec gradient */
+    /* Wrapper principal - Simple */
     .wrapper {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
-        background-attachment: fixed !important;
-        min-height: 100vh !important;
+        background: #f5f7fa;
+        min-height: 100vh;
     }
     
-    /* Modal */
+    /* Modal simple */
     .modal-content {
-        border-radius: 15px !important;
-        border: none !important;
-        background: rgba(255, 255, 255, 0.98) !important;
-        color: #333 !important;
+        border: none;
+        background: white;
+        color: #333;
+        border-radius: 8px;
     }
     
     .detail-card {
-        transition: all 0.3s ease !important;
-        background: linear-gradient(135deg, #f8f9fa, #f0f2ff) !important;
-        border-radius: 12px !important;
-        color: #333 !important;
-    }
-    
-    .detail-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+        background: #f8f9fa;
+        border-radius: 6px;
+        color: #333;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
     }
     
     .detail-card small {
