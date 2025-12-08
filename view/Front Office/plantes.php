@@ -673,36 +673,7 @@ foreach($mesPlantes as $p) {
 
                 </nav>
                 <div class="row newsfeed-right-side-content mt-3">
-                    <div class="col-md-2 newsfeed-left-side sticky-top shadow-sm" id="sidebar-wrapper">
-                        <div class="card newsfeed-user-card h-100">
-                            <ul class="list-group list-group-flush newsfeed-left-sidebar">
-                                <li class="list-group-item">
-                                    <h6>Home</h6>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="profile.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/newsfeed.png" alt="profile"> Profile</a>
-                                    <a href="#" class="newsfeedListicon"><i class='bx bx-dots-horizontal-rounded'></i></a>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="publications.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/message.png" alt="publications"> Publications</a>
-                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center sd-active">
-                                    <a href="plantes.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/group.png" alt="plantes"> Plantes</a>
-                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="evenements.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/event.png" alt="evenements"> Evenements</a>
-                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="capteurs.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/saved.png" alt="capteurs"> Capteurs</a>
-                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-md-10 second-section" id="page-content-wrapper">
+                    <div class="col-md-12 second-section" id="page-content-wrapper">
                         
 
                         <!-- Statistiques Start -->
@@ -849,81 +820,116 @@ foreach($mesPlantes as $p) {
                         });
                         </script>
 
-                         <div class="container-fluid shadow-sm rounded-4 p-4 mt-4 mb-4">
+                         <!-- Mes Plantes Section -->
+                        <div class="container-fluid shadow-sm rounded-4 p-4 mt-4 mb-4">
+                            <div class="mb-4 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 class="mb-2"><i class='bx bx-leaf me-2' style="color: #2575fc;"></i>Mes Plantes</h4>
+                                    <p class="text-muted small">Consultez vos plantes et leurs informations.</p>
+                                </div>
+                                <div>
+                                    <button class="btn btn-success rounded-pill px-4 me-2" id="btnSuggestionPlante" title="Suggérer une plante">
+                                        <i class='bx bx-plus me-2'></i>Suggérer une plante
+                                    </button>
+                                    <button class="btn btn-info rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#statsAdvancedModal">
+                                        <i class='bx bx-bar-chart-alt-2 me-2'></i>Statistiques
+                                    </button>
+                                </div>
+                            </div>
 
-                        
-    <div class="mb-4 d-flex justify-content-between align-items-center">
-        <div>
-            <h4 class="mb-2"><i class='bx bx-leaf me-2' style="color: #2575fc;"></i>Mes Plantes</h4>
-            <p class="text-muted small">Consultez vos plantes et leurs informations.</p>
-        </div>
-        <div>
-            <button class="btn btn-success rounded-pill px-4 me-2" id="btnSuggestionPlante" title="Suggérer une plante">
-                <i class='bx bx-plus me-2'></i>Suggérer une plante
-            </button>
-            <button class="btn btn-info rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#statsAdvancedModal">
-                <i class='bx bx-bar-chart-alt-2 me-2'></i>Statistiques
-            </button>
-        </div>
-    </div>
+                            <!-- Grille de Cartes Plantes -->
+                            <div class="row g-4">
+                                <?php if (count($mesPlantes) == 0): ?>
+                                    <div class="col-12 text-center py-5">
+                                        <i class="bx bx-leaf" style="font-size: 4rem; color: #cfd8e0;"></i>
+                                        <p class="text-muted mt-3 mb-0">Vous n'avez pas encore de plantes</p>
+                                        <button class="btn btn-success btn-sm mt-3 rounded-pill" id="btnAddFirstPlante">
+                                            <i class='bx bx-plus me-1'></i>Ajouter une plante
+                                        </button>
+                                    </div>
+                                <?php else: ?>
+                                    <?php foreach($mesPlantes as $plante): ?>
+                                        <?php
+                                            $hum = $plante['niveau_humidite'];
+                                            $humColor = ($hum > 70) ? '#28a745' : (($hum > 40) ? '#ffc107' : '#dc3545');
+                                            
+                                            if ($plante['etat_sante'] == 'Bon état') {
+                                                $etatBadgeColor = 'bg-primary';
+                                                $etatIcon = 'bx-check-circle';
+                                                $etatText = 'Bon';
+                                            } else if ($plante['etat_sante'] == 'Moyen') {
+                                                $etatBadgeColor = 'bg-warning text-dark';
+                                                $etatIcon = 'bx-minus';
+                                                $etatText = 'Moyen';
+                                            } else {
+                                                $etatBadgeColor = 'bg-danger';
+                                                $etatIcon = 'bx-x-circle';
+                                                $etatText = 'Mauvais';
+                                            }
+                                        ?>
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                            <div class="card h-100 shadow-sm rounded-4" style="border: none; transition: all 0.3s ease; cursor: pointer; overflow: hidden;">
+                                                <!-- Image Section -->
+                                                <div style="height: 200px; background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+                                                    <?php if (!empty($plante['image'])): ?>
+                                                        <img src="<?= htmlspecialchars($plante['image']) ?>" alt="<?= htmlspecialchars($plante['nom_plante']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                                                    <?php else: ?>
+                                                        <div style="text-align: center;">
+                                                            <i class='bx bx-leaf' style="font-size: 3rem; color: #2ecc71;"></i>
+                                                            <p class="text-muted small mt-2 mb-0">Pas d'image</p>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    <!-- Badge État -->
+                                                    <span class="badge <?= $etatBadgeColor ?>" style="position: absolute; top: 10px; right: 10px;">
+                                                        <i class='bx <?= $etatIcon ?>'></i> <?= $etatText ?>
+                                                    </span>
+                                                </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover table-sm align-middle mb-0" style="border-radius: 12px; overflow: hidden;">
-            <thead style="background-color: #e0f0ff; color: #1a1a1a; font-weight: 600;">
-                <tr>
-                    <th scope="col" class="text-center">#</th>
-                    <th scope="col">Nom</th>
-                    <th scope="col">Date d'ajout</th>
-                    <th scope="col" class="text-center">Humidité</th>
-                    <th scope="col" class="text-center">Eau</th>
-                    <th scope="col" class="text-center">État</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                if (count($mesPlantes) == 0) {
-                    echo '<tr><td colspan="6" class="text-center py-5">';
-                    echo '<div>';
-                    echo '<i class="bx bx-leaf" style="font-size: 3rem; color: #cfd8e0;"></i>';
-                    echo '<p class="text-muted mt-3 mb-0">Vous n\'avez pas encore de plantes</p>';
-                    echo '</div>';
-                    echo '</td></tr>';
-                } else {
-                    $idx = 1;
-                    foreach($mesPlantes as $plante) {
-                        $hum = $plante['niveau_humidite'];
-                        $humColor = ($hum > 70) ? 'bg-success text-dark' : (($hum > 40) ? 'bg-warning text-dark' : 'bg-danger text-white');
+                                                <!-- Contenu Carte -->
+                                                <div class="card-body pt-4 pb-3">
+                                                    <h5 class="card-title mb-3" style="color: #1a1a1a; font-weight: 600;">
+                                                        <?= htmlspecialchars($plante['nom_plante']) ?>
+                                                    </h5>
 
-                        if ($plante['etat_sante'] == 'Bon état') {
-                            $etatBadge = '<span class="badge bg-primary"><i class="bx bx-check-circle"></i> Bon</span>';
-                        } else if ($plante['etat_sante'] == 'Moyen') {
-                            $etatBadge = '<span class="badge bg-warning text-dark"><i class="bx bx-minus"></i> Moyen</span>';
-                        } else {
-                            $etatBadge = '<span class="badge bg-danger"><i class="bx bx-x-circle"></i> Mauvais</span>';
-                        }
+                                                    <!-- Température -->
+                                                    <div class="d-flex align-items-center mb-3" style="font-size: 0.9rem;">
+                                                        <i class='bx bx-thermometer' style="color: #ff6b6b; font-size: 1.1rem; margin-right: 8px;"></i>
+                                                        <span style="color: #666;">Température: <strong><?= $plante['temperature'] ?? '20' ?>°C</strong></span>
+                                                    </div>
 
-                        echo '<tr class="align-middle border-bottom">';
-                        echo '<td class="text-center text-muted small">'.$idx.'</td>';
-                        echo '<td><strong class="text-dark">'.htmlspecialchars($plante['nom_plante']).'</strong></td>';
-                        echo '<td><small class="text-muted">'.htmlspecialchars($plante['date_ajout']).'</small></td>';
-                        echo '<td class="text-center"><span class="badge '.$humColor.'">'.$hum.'%</span></td>';
-                        echo '<td class="text-center"><small class="text-muted">'.$plante['besoin_eau'].' ml</small></td>';
-                        echo '<td class="text-center">'.$etatBadge.'</td>';
-                        echo '</tr>';
-                        $idx++;
-                    }
-                }
-                ?>
-            </tbody>
-        </table>
-    </div>
-</div>
+                                                    <!-- Humidité -->
+                                                    <div class="d-flex align-items-center mb-3" style="font-size: 0.9rem;">
+                                                        <i class='bx bx-water' style="color: <?= $humColor ?>; font-size: 1.1rem; margin-right: 8px;"></i>
+                                                        <span style="color: #666;">Humidité: <strong style="color: <?= $humColor ?>"><?= $hum ?>%</strong></span>
+                                                    </div>
 
-<style>
-    table.table-hover tbody tr:hover {
-        background-color: rgba(37, 117, 252, 0.1);
-    }
-</style>
+                                                    <!-- Eau -->
+                                                    <div class="d-flex align-items-center mb-3" style="font-size: 0.9rem;">
+                                                        <i class='bx bx-droplet' style="color: #3498db; font-size: 1.1rem; margin-right: 8px;"></i>
+                                                        <span style="color: #666;">Eau: <strong><?= $plante['besoin_eau'] ?> ml</strong></span>
+                                                    </div>
+
+                                                    <!-- Date d'ajout -->
+                                                    <div class="d-flex align-items-center mb-3" style="font-size: 0.85rem; color: #999;">
+                                                        <i class='bx bx-calendar' style="margin-right: 8px;"></i>
+                                                        <span><?= date('d/m/Y', strtotime($plante['date_ajout'])) ?></span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Boutons Actions -->
+                                                <div class="card-footer bg-transparent border-top" style="padding: 12px 16px;">
+                                                    <div class="d-grid gap-2">
+                                                        <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="afficherPlante(<?= htmlspecialchars(json_encode($plante)) ?>)">
+                                                            <i class='bx bx-show me-1'></i>Voir détails
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
 
 <!-----Plantees------->
 
