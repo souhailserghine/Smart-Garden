@@ -1532,66 +1532,6 @@ foreach($mesPlantes as $p) {
         </div>
     </div>
 </div>
-<style>
-    /* Background dégradé uniquement sur le contenu principal */
-    body {
-        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f7 100%) !important;
-        background-attachment: fixed !important;
-    }
-    
-    /* Wrapper principal - Simple */
-    .wrapper {
-        background: #f5f7fa;
-        min-height: 100vh;
-    }
-    
-    /* Modal simple */
-    .modal-content {
-        border: none;
-        background: white;
-        color: #333;
-        border-radius: 8px;
-    }
-    
-    .detail-card {
-        background: #f8f9fa;
-        border-radius: 6px;
-        color: #333;
-        padding: 12px;
-        border: 1px solid #e0e0e0;
-    }
-    
-    .detail-card small {
-        color: #666 !important;
-    }
-    
-    .detail-card p {
-        color: #333 !important;
-    }
-    
-    .btn-gradient {
-        color: white;
-        border: none;
-        transition: all 0.2s;
-    }
-    
-    .btn-gradient:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.25);
-    }
-
-    /* Table hover */
-    table.table-hover tbody tr:hover {
-        background-color: rgba(37, 117, 252, 0.1);
-    }
-
-    /* Modal gradient header */
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #6a11cb, #2575fc);
-    }
-    
-</style>
-
 
     <!-- Core -->
     <script src="./assets/js/jquery/jquery-3.3.1.min.js"></script>
