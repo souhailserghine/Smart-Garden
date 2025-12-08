@@ -1536,186 +1536,6 @@ foreach($mesPlantes as $p) {
         min-height: 100vh !important;
     }
     
-    /* Sidebar reste normal */
-    .sidebar {
-        background: white !important;
-        z-index: 1000;
-    }
-    
-    /* Contenu principal */
-    #content {
-        background: transparent !important;
-    }
-    
-    /* Tables et sections */
-    .table-responsive {
-        background: rgba(255, 255, 255, 0.98) !important;
-        border-radius: 15px !important;
-        padding: 25px !important;
-        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
-        backdrop-filter: blur(10px) !important;
-        margin-bottom: 30px !important;
-    }
-    
-    .table {
-        margin-bottom: 0 !important;
-        color: #333 !important;
-    }
-    
-    .table thead {
-        background: linear-gradient(135deg, #667eea, #764ba2) !important;
-    }
-    
-    .table thead th {
-        color: white !important;
-        font-weight: 600 !important;
-        border: none !important;
-        padding: 15px !important;
-    }
-    
-    .table tbody tr {
-        transition: all 0.3s ease !important;
-        border-bottom: 1px solid #e0e0e0 !important;
-    }
-    
-    .table tbody tr:hover {
-        background-color: #f5f7ff !important;
-        transform: scale(1.01);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1) !important;
-    }
-    
-    .table tbody td {
-        padding: 15px !important;
-        color: #333 !important;
-        vertical-align: middle !important;
-    }
-    
-    /* Boutons */
-    .btn-success {
-        background: linear-gradient(135deg, #667eea, #764ba2) !important;
-        border: none !important;
-        border-radius: 8px !important;
-        color: white !important;
-        transition: all 0.3s ease !important;
-        font-weight: 500 !important;
-    }
-    
-    .btn-success:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4) !important;
-        color: white !important;
-    }
-    
-    .btn-warning, .btn-info {
-        border-radius: 6px !important;
-        transition: all 0.3s ease !important;
-        border: none !important;
-        color: white !important;
-        font-weight: 500 !important;
-    }
-    
-    .btn-warning:hover, .btn-info:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
-        color: white !important;
-    }
-    
-    .btn-danger {
-        border-radius: 6px !important;
-        transition: all 0.3s ease !important;
-        border: none !important;
-        color: white !important;
-    }
-    
-    .btn-danger:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4) !important;
-    }
-    
-    /* Badges */
-    .badge {
-        border-radius: 20px !important;
-        padding: 8px 14px !important;
-        font-weight: 600 !important;
-        font-size: 0.85rem !important;
-    }
-    
-    /* Calendrier FullCalendar */
-    #calendar {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-        background: rgba(255, 255, 255, 0.98) !important;
-        border-radius: 15px !important;
-        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
-        backdrop-filter: blur(10px) !important;
-        color: #333 !important;
-    }
-    
-    .fc-button-primary {
-        background-color: #667eea !important;
-        border-color: #667eea !important;
-        border-radius: 8px !important;
-        padding: 8px 16px !important;
-        transition: all 0.3s ease !important;
-        color: white !important;
-    }
-    
-    .fc-button-primary:hover {
-        background-color: #764ba2 !important;
-        border-color: #764ba2 !important;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4) !important;
-    }
-    
-    .fc-button-primary.fc-button-active {
-        background-color: #764ba2 !important;
-        border-color: #764ba2 !important;
-    }
-    
-    .fc-daygrid-day:hover {
-        background-color: #f5f7ff !important;
-        cursor: pointer;
-    }
-    
-    .fc-event {
-        border-radius: 8px !important;
-        border: none !important;
-        cursor: pointer !important;
-        transition: all 0.3s ease !important;
-        padding: 4px 8px !important;
-    }
-    
-    .fc-event:hover {
-        transform: scale(1.05);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
-    }
-    
-    .fc-col-header-cell {
-        background-color: #f8f9fa !important;
-        color: #667eea !important;
-        font-weight: 600 !important;
-        padding: 12px 4px !important;
-    }
-    
-    .fc-daygrid-day-number {
-        padding: 8px !important;
-        font-weight: 500 !important;
-        color: #333 !important;
-    }
-    
-    .fc-daygrid-day-frame {
-        min-height: 120px !important;
-    }
-    
-    .fc-toolbar-title {
-        font-size: 1.5rem !important;
-        color: #333 !important;
-        font-weight: 700 !important;
-    }
-    
-    .fc-daygrid-day-bg {
-        background: white !important;
-    }
-    
     /* Modal */
     .modal-content {
         border-radius: 15px !important;
@@ -1743,13 +1563,13 @@ foreach($mesPlantes as $p) {
     .detail-card p {
         color: #333 !important;
     }
-
-
-    }
+    
+    .btn-gradient {
         color: white;
         border: none;
         transition: all 0.2s;
     }
+    
     .btn-gradient:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 15px rgba(0,0,0,0.25);
@@ -1802,51 +1622,43 @@ foreach($mesPlantes as $p) {
         document.getElementById('detailDerniere').textContent = tache.derniereExecution || 'N/A';
         document.getElementById('detailProchaine').textContent = tache.prochaineExecution || 'N/A';
         
-        // Ouvrir le modal
         const modal = new bootstrap.Modal(document.getElementById('tacheDetailModal'));
         modal.show();
     }
 
-    // Créer les graphiques
+    // Créer les graphiques - Optimisé
     function createCharts() {
-        console.log('createCharts appelée');
-        console.log('Chart disponible:', typeof Chart);
-        
-        if (chartsCreated) {
-            console.log('Graphiques déjà créés');
+        if (chartsCreated || typeof Chart === 'undefined') {
             return;
         }
         
-        // Attendre que Chart soit chargé
-        if (typeof Chart === 'undefined') {
-            console.log('Chart.js n\'est pas encore chargé');
-            return;
-        }
-        
-        // Données PHP
         const plantesBonEtat = <?= $plantes_etat_bon ?>;
         const plantesMoyenEtat = <?= $plantes_etat_moyen ?>;
         const plantessMauvaisEtat = <?= $plantes_etat_mauvais ?>;
-        
         const tachesPrioriteHaute = <?= $taches_priorite_haute ?>;
         const tachesPrioriteMoyenne = <?= $taches_priorite_moyenne ?>;
         const tachesPrioriteBasse = <?= $taches_priorite_basse ?>;
-        
         const tachesCompletees = <?= $tachesCompletees ?>;
         const tachesEnCours = <?= $tachesEnCours ?>;
 
-        console.log('Création des graphiques avec données:', { plantesBonEtat, tachesCompletees });
-
-        // Détruire les graphiques précédents s'ils existent
+        // Détruire les graphiques précédents
         Object.values(chartInstances).forEach(chart => {
-            if (chart) chart.destroy();
+            if (chart) try { chart.destroy(); } catch(e) {}
         });
+        chartInstances = {};
 
-        // Graphique État des plantes
+        // Options communes - Optimisées
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: true,
+            animation: {
+                duration: 0  // Désactiver les animations pour plus de fluidité
+            }
+        };
+
         try {
             const ctxEtat = document.getElementById('chartetatPlantes');
             if (ctxEtat) {
-                console.log('Création graphique État des plantes');
                 chartInstances.etat = new Chart(ctxEtat, {
                     type: 'doughnut',
                     data: {
@@ -1858,26 +1670,14 @@ foreach($mesPlantes as $p) {
                             borderWidth: 2
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        }
-                    }
+                    options: {...commonOptions, plugins: {legend: {position: 'bottom'}}}
                 });
             }
-        } catch(e) {
-            console.error('Erreur graphique État:', e);
-        }
+        } catch(e) {}
 
-        // Graphique Priorité des tâches
         try {
             const ctxPriorite = document.getElementById('chartePriorite');
             if (ctxPriorite) {
-                console.log('Création graphique Priorité');
                 chartInstances.priorite = new Chart(ctxPriorite, {
                     type: 'doughnut',
                     data: {
@@ -1889,26 +1689,14 @@ foreach($mesPlantes as $p) {
                             borderWidth: 2
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        }
-                    }
+                    options: {...commonOptions, plugins: {legend: {position: 'bottom'}}}
                 });
             }
-        } catch(e) {
-            console.error('Erreur graphique Priorité:', e);
-        }
+        } catch(e) {}
 
-        // Graphique Statut des tâches
         try {
             const ctxStatut = document.getElementById('charteStatutTaches');
             if (ctxStatut) {
-                console.log('Création graphique Statut');
                 chartInstances.statut = new Chart(ctxStatut, {
                     type: 'bar',
                     data: {
@@ -1923,65 +1711,34 @@ foreach($mesPlantes as $p) {
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            }
-                        }
+                        ...commonOptions,
+                        plugins: {legend: {display: false}},
+                        scales: {y: {beginAtZero: true, ticks: {stepSize: 1}}}
                     }
                 });
             }
-        } catch(e) {
-            console.error('Erreur graphique Statut:', e);
-        }
+        } catch(e) {}
         
         chartsCreated = true;
-        console.log('Graphiques créés avec succès');
     }
 
     function initializeStatsModal() {
-        // Écouter l'ouverture du modal stats
         const btnStats = document.querySelector('[data-bs-target="#statsAdvancedModal"]');
         const statsModal = document.getElementById('statsAdvancedModal');
-        console.log('Bouton stats trouvé:', btnStats ? 'Oui' : 'Non');
-        console.log('Modal trouvée:', statsModal ? 'Oui' : 'Non');
-        console.log('Bootstrap disponible:', typeof bootstrap !== 'undefined' ? 'Oui' : 'Non');
         
         if (btnStats && statsModal && typeof bootstrap !== 'undefined') {
             btnStats.addEventListener('click', function(e) {
-                console.log('Bouton stats cliqué - affichage du modal');
                 e.preventDefault();
-                
-                // Créer une nouvelle instance de modal à chaque fois
-                let modalInstance = new bootstrap.Modal(statsModal);
-                console.log('Instance modal créée - affichage...');
-                
-                // Afficher le modal
+                const modalInstance = new bootstrap.Modal(statsModal);
                 modalInstance.show();
-                
-                // Créer les graphiques après affichage
                 setTimeout(createCharts, 350);
             });
-        } else if (!btnStats || !statsModal) {
-            console.log('Éléments DOM manquants');
         } else {
-            console.log('Bootstrap pas encore disponible, nouvelle tentative...');
             setTimeout(initializeStatsModal, 500);
         }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM chargé');
         setTimeout(initializeStatsModal, 100);
     
         // Calendrier FullCalendar
@@ -1999,7 +1756,6 @@ foreach($mesPlantes as $p) {
                 eventClick: function(info) {
                     const event = info.event;
                     const props = event.extendedProps;
-                    
                     document.getElementById('detailType').textContent = props.type || 'N/A';
                     document.getElementById('detailQuantite').textContent = props.quantite + ' ' + props.mode || 'N/A';
                     document.getElementById('detailMode').textContent = props.mode || 'N/A';
@@ -2008,7 +1764,6 @@ foreach($mesPlantes as $p) {
                     document.getElementById('detailStatut').textContent = (props.complete == 1) ? '✓ Complètée' : '◯ En attente';
                     document.getElementById('detailDerniere').textContent = props.derniere_execution || 'N/A';
                     document.getElementById('detailProchaine').textContent = props.prochaine_execution || 'N/A';
-                    
                     const modal = new bootstrap.Modal(document.getElementById('tacheDetailModal'));
                     modal.show();
                 }
