@@ -2085,7 +2085,7 @@ foreach($mesPlantes as $p) {
             chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
             
             // Send to OpenAI API via our endpoint
-            fetch('../../chatgpt_api.php', {
+            fetch('../external/chatgpt_api.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
