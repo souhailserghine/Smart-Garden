@@ -1470,64 +1470,64 @@ foreach($mesPlantes as $p) {
 
 <!-- Modal Statistiques Avancées - Version Optimisée -->
 <div class="modal fade" id="statsAdvancedModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg" style="max-height: 90vh; display: flex; align-items: flex-start; margin-top: 30px;">
-        <div class="modal-content" style="border: none; background: white; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;">
-            <div class="modal-header" style="border-bottom: 1px solid #e0e0e0; padding: 15px 20px; flex-shrink: 0;">
-                <h5 class="modal-title" style="font-weight: 600; color: #333;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
                     <i class='bx bx-bar-chart-alt-2' style="margin-right: 8px;"></i>Statistiques
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="padding: 20px; overflow-y: auto; flex: 1;">
+            <div class="modal-body">
                 <div class="row g-3">
                     <!-- État des plantes -->
                     <div class="col-md-6">
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                            <h6 style="margin-bottom: 15px; color: #333; font-size: 0.95rem; font-weight: 600;">État de santé</h6>
-                            <canvas id="chartetatPlantes" style="max-width: 100%; height: 250px;"></canvas>
+                        <div class="stats-card">
+                            <h6>État de santé</h6>
+                            <canvas id="chartetatPlantes"></canvas>
                         </div>
                     </div>
                     
                     <!-- Priorité des tâches -->
                     <div class="col-md-6">
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                            <h6 style="margin-bottom: 15px; color: #333; font-size: 0.95rem; font-weight: 600;">Priorité des tâches</h6>
-                            <canvas id="chartePriorite" style="max-width: 100%; height: 250px;"></canvas>
+                        <div class="stats-card">
+                            <h6>Priorité des tâches</h6>
+                            <canvas id="chartePriorite"></canvas>
                         </div>
                     </div>
 
                     <!-- Statut des tâches -->
                     <div class="col-md-6">
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                            <h6 style="margin-bottom: 15px; color: #333; font-size: 0.95rem; font-weight: 600;">Statut des tâches</h6>
-                            <canvas id="charteStatutTaches" style="max-width: 100%; height: 250px;"></canvas>
+                        <div class="stats-card">
+                            <h6>Statut des tâches</h6>
+                            <canvas id="charteStatutTaches"></canvas>
                         </div>
                     </div>
 
                     <!-- Résumé rapide -->
                     <div class="col-md-6">
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                            <h6 style="margin-bottom: 15px; color: #333; font-size: 0.95rem; font-weight: 600;">Résumé Rapide</h6>
-                            <div style="font-size: 0.9rem;">
-                                <div style="margin-bottom: 12px;">
-                                    <small style="color: #666; display: block; margin-bottom: 4px;">Plantes en bon état</small>
-                                    <strong style="font-size: 1.3rem; color: #28a745;"><?= $plantes_etat_bon ?></strong> / <?= $totalPlantes ?>
+                        <div class="stats-card">
+                            <h6>Résumé Rapide</h6>
+                            <div class="stats-summary">
+                                <div class="stat-item">
+                                    <small>Plantes en bon état</small>
+                                    <strong><?= $plantes_etat_bon ?></strong> / <?= $totalPlantes ?>
                                 </div>
-                                <div style="margin-bottom: 12px;">
-                                    <small style="color: #666; display: block; margin-bottom: 4px;">Tâches complètées</small>
-                                    <strong style="font-size: 1.3rem; color: #28a745;"><?= $tachesCompletees ?></strong> / <?= $totalTaches ?>
+                                <div class="stat-item">
+                                    <small>Tâches complètées</small>
+                                    <strong><?= $tachesCompletees ?></strong> / <?= $totalTaches ?>
                                 </div>
-                                <div>
-                                    <small style="color: #666; display: block; margin-bottom: 4px;">Priorité haute</small>
-                                    <strong style="font-size: 1.3rem; color: #dc3545;"><?= $taches_priorite_haute ?></strong>
+                                <div class="stat-item">
+                                    <small>Priorité haute</small>
+                                    <strong><?= $taches_priorite_haute ?></strong>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer" style="border-top: 1px solid #e0e0e0; padding: 12px 20px; flex-shrink: 0;">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 6px; padding: 8px 16px;">Fermer</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
             </div>
         </div>
     </div>
@@ -1728,15 +1728,12 @@ foreach($mesPlantes as $p) {
     }
 
     function initializeStatsModal() {
-        const btnStats = document.querySelector('[data-bs-target="#statsAdvancedModal"]');
         const statsModal = document.getElementById('statsAdvancedModal');
         
-        if (btnStats && statsModal && typeof bootstrap !== 'undefined') {
-            btnStats.addEventListener('click', function(e) {
-                e.preventDefault();
-                const modalInstance = new bootstrap.Modal(statsModal);
-                modalInstance.show();
-                setTimeout(createCharts, 350);
+        if (statsModal && typeof bootstrap !== 'undefined') {
+            // Use Bootstrap's modal event for proper keyboard handling
+            statsModal.addEventListener('shown.bs.modal', function() {
+                createCharts();
             });
         } else {
             setTimeout(initializeStatsModal, 500);
