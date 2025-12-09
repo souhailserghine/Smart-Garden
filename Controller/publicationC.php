@@ -12,27 +12,32 @@ class PublicationC {
     return $req->execute();
 }
 
-    public function addPublication($publication){
+    public function addPublication($publication) {
+    try {
         $db = config::getConnexion();
-        try {
-            $req = $db->prepare("
-                INSERT INTO publication (contenuTexte, datePublication, nbLikes, idUtilisateur)
-                VALUES (:contenuTexte, NOW(), :nbLikes, :idUtilisateur)
-            ");
-
-            $req->execute([
-                'contenuTexte' => $publication->getContenuTexte(),
-                'nbLikes'      => $publication->getNbLikes(),
-                'idUtilisateur'=> $publication->getIdUtilisateur()
-            ]);
-
-            return $db->lastInsertId();
-
-        } catch(Exception $e){
-            error_log("Erreur: " . $e->getMessage());
-            return false;
-        }
+        
+        // MODIFIER LA REQUÊTE POUR INCLURE datePublication
+        $sql = "INSERT INTO publication (contenuTexte, datePublication, idUtilisateur, nbLikes, images, videos) 
+                VALUES (:contenuTexte, :datePublication, :idUtilisateur, :nbLikes, :images, :videos)";
+        
+        $query = $db->prepare($sql);
+        
+        // MODIFIER L'EXECUTION POUR INCLURE LA DATE
+        $query->execute([
+            'contenuTexte' => $publication->getContenuTexte(),
+            'datePublication' => $publication->getDatePublication(), // AJOUTER CETTE LIGNE
+            'idUtilisateur' => $publication->getIdUtilisateur(),
+            'nbLikes' => $publication->getNbLikes(),
+            'images' => $publication->getImages(),
+            'videos' => $publication->getVideos()
+        ]);
+        
+        return true;
+    } catch (Exception $e) {
+        echo 'Erreur: ' . $e->getMessage();
+        return false;
     }
+}
 
     public function deletePublication($id){
         $db = config::getConnexion();
@@ -70,6 +75,18 @@ class PublicationC {
         $db = config::getConnexion();
         $req = $db->query("SELECT * FROM publication ORDER BY datePublication DESC");
         return $req->fetchAll();
+    }
+
+    public function listePublicationsTrieesParLikes() {
+    try {
+        $sql = "SELECT * FROM publication ORDER BY nbLikes DESC, datePublication DESC";
+        $db = config::getConnexion();
+        $query = $db->prepare($sql);
+        $query->execute();
+        return $query->fetchAll();
+    } catch (PDOException $e) {
+        die('Erreur: ' . $e->getMessage());
+    }
     }
 
     public function getPublication($id){
