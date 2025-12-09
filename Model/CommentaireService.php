@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/Commentaire.php';
+include '/../config.php';
+include '/Commentaire.php';
 
 class CommentaireService {
     private $db;
@@ -9,7 +9,6 @@ class CommentaireService {
         $this->db = config::getConnexion();
     }
 
-    // Validation complète sans HTML5
     public function validateCommentaireData($commentaire) {
         $errors = [];
         

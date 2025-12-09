@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/publication.php';
+include '/../config.php';
+include '/publication.php';
 
 class PublicationService {
     private $db;
@@ -225,7 +225,7 @@ class PublicationService {
             throw new Exception("La publication spécifiée n'existe pas.");
         }
         
-        // Supprimer d'abord les commentaires associés (si nécessaire)
+        // Supprimer d'abord les commentaires associés 
         $sqlDeleteComments = "DELETE FROM commentaire WHERE idPublication = :id";
         $stmtComments = $this->db->prepare($sqlDeleteComments);
         $stmtComments->execute([':id' => $idPublication]);
