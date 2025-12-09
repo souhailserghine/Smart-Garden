@@ -1,26 +1,25 @@
 <?php
+session_start();
 include '../../controller/PublicationC.php';
 include '../../controller/CommentaireC.php';
-
 
 $publicationC = new PublicationC();
 $commentaireC = new CommentaireC();
 
-$publications = $publicationC->listePublications();
+// Récupérer TOUTES les publications
+$allPublications = $publicationC->listePublicationsTrieesParLikes();
 
-session_start();
 $idUtilisateur = isset($_SESSION['idUtilisateur']) ? $_SESSION['idUtilisateur'] : 1;
 $postsLiked = isset($_SESSION['postsLiked']) ? $_SESSION['postsLiked'] : [];
 
 // Récupérer le nombre de commentaires pour chaque publication
 $commentCounts = [];
 $allComments = [];
-$allMedias = []; // AJOUT: Tableau pour stocker les médias de chaque publication
+$allMedias = [];
 
-foreach ($publications as $pub) {
+foreach ($allPublications as $pub) {
     $commentCounts[$pub['idPublication']] = $commentaireC->getNombreCommentaires($pub['idPublication']);
     $allComments[$pub['idPublication']] = $commentaireC->getCommentairesByPublication($pub['idPublication']);
-    
 }
 ?>
 
@@ -43,170 +42,580 @@ foreach ($publications as $pub) {
     <link href="https://vjs.zencdn.net/7.4.1/video-js.css" rel="stylesheet">
     <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
     <style>
-        .header-section {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+        /* AJOUT: Style pour les publications futures */
+        .publication-future {
+            opacity: 0.7;
+            position: relative;
+            border-left: 6px solid #ffc107 !important;
         }
+        
+        .publication-future::before {
+            content: "⏰ PLANIFIÉE";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            z-index: 1;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+        }
+        
+        .future-date-info {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #856404;
+        }
+        
+        .future-date-info i {
+            font-size: 18px;
+        }
+        
+        .publication-future .publication-content {
+            filter: blur(1px);
+        }
+        
+        .publication-future .like-btn,
+        .publication-future .comment-btn {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        
+        .publication-future .publication-actions {
+            opacity: 0.7;
+        }
+
+        /* Styles améliorés pour les publications */
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+            margin-bottom: 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-section h1 {
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header-section .btn-custom {
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+            padding: 10px 25px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: none;
+        }
+        
+        .header-section .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        
+        .header-section .btn-secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        }
+        
+        .header-section .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
         .publication-card {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            padding: 0;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            border: none;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .publication-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+        
+        .publication-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px 0 0 20px;
+        }
+        
+        .publication-content {
+            padding: 25px 30px 15px;
+        }
+        
+        .publication-content p {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #2d3748;
             margin-bottom: 20px;
-            border-left: 4px solid #007bff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
+        .publication-meta {
+            padding: 15px 30px;
+            background: linear-gradient(to right, #f8fafc, #f1f5f9);
+            border-top: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+            position: relative;
+        }
+        
+        .publication-meta .col-md-6 {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+        
         .publication-actions {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
+            padding: 20px 30px;
+            background: #ffffff;
+            border-radius: 0 0 20px 20px;
         }
-        .btn-custom {
-            padding: 5px 15px;
-            font-size: 14px;
-        }
+        
         .like-btn, .comment-btn {
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            padding: 5px 10px;
-            border-radius: 20px;
+            font-size: 18px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 8px 16px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
         }
-        .like-btn:hover, .comment-btn:hover {
-            transform: scale(1.1);
-            background-color: #f8f9fa;
+        
+        .like-btn {
+            position: relative;
+            overflow: hidden;
         }
+        
+        .like-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(231, 76, 60, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .like-btn:active::before {
+            width: 200px;
+            height: 200px;
+        }
+        
         .like-btn.liked {
             color: #e74c3c;
-            background-color: #ffeaea;
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.05));
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.15);
+            transform: scale(1.05);
         }
+        
         .like-btn:not(.liked) {
-            color: #6c757d;
+            color: #64748b;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
         }
+        
+        .like-btn:hover:not(.liked) {
+            color: #e74c3c;
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.05));
+            border-color: rgba(231, 76, 60, 0.2);
+            transform: translateY(-2px);
+        }
+        
         .comment-btn {
-            color: #6c757d;
+            color: #64748b;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            margin-left: 10px;
         }
+        
         .comment-btn:hover {
-            color: #007bff;
-            background-color: #e7f3ff;
+            color: #3b82f6;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+            border-color: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
         }
+        
         .like-count, .comment-count {
-            margin-left: 5px;
-            font-weight: bold;
+            margin-left: 8px;
+            font-weight: 700;
+            font-size: 16px;
         }
+        
+        .like-btn.liked .like-count {
+            color: #e74c3c;
+        }
+        
+        .comment-btn:hover .comment-count {
+            color: #3b82f6;
+        }
+        
         .comment-section {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
+            margin-top: 20px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
             display: none;
+            animation: fadeIn 0.3s ease;
         }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         .comment-form {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
-        .comment-list {
-            max-height: 200px;
-            overflow-y: auto;
+        
+        .comment-form .input-group {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
         }
-        .comment-item {
-            padding: 10px;
-            margin-bottom: 10px;
+        
+        .comment-form .input-group:focus-within {
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .comment-form input {
+            border: none;
+            padding: 15px 20px;
+            font-size: 15px;
             background: white;
-            border-radius: 8px;
-            border-left: 3px solid #007bff;
         }
-        .comment-author {
-            font-weight: bold;
-            color: #007bff;
+        
+        .comment-form input:focus {
+            outline: none;
+            box-shadow: none;
         }
-        .comment-date {
-            font-size: 12px;
-            color: #6c757d;
+        
+        .comment-form .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border: none;
+            padding: 15px 25px;
+            border-radius: 0 12px 12px 0;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
-        .comment-text {
-            margin-top: 5px;
+        
+        .comment-form .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            transform: scale(1.02);
         }
-        .comment-header {
-            margin-bottom: 5px;
+        
+        .comment-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
         }
-        .comment-actions {
-            opacity: 0.7;
+        
+        /* Scrollbar personnalisée pour la liste des commentaires */
+        .comment-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .comment-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .comment-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 10px;
+        }
+        
+        .comment-item {
+            padding: 20px;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .comment-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .comment-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+            opacity: 0;
             transition: opacity 0.3s ease;
         }
-        .comment-item:hover .comment-actions {
+        
+        .comment-item:hover::before {
             opacity: 1;
         }
-        .comment-actions .btn {
-            padding: 2px 6px;
-            margin-left: 3px;
-            font-size: 12px;
+        
+        .comment-author {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
         }
-        .edit-comment-input {
+        
+        .comment-author::before {
+            content: '👤';
+            margin-right: 8px;
             font-size: 14px;
         }
         
-        /* AJOUT: Styles pour les médias des publications */
-        .publication-media {
-            margin: 15px 0;
-        }
-        .media-gallery {
+        .comment-date {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 4px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .media-item {
-            flex: 0 0 calc(50% - 5px);
-            max-width: 300px;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-        }
-        .media-item img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            border-radius: 8px;
-        }
-        .media-item img:hover {
-            transform: scale(1.03);
-        }
-        .media-item video {
-            width: 100%;
-            height: 200px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-        .media-type-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            z-index: 1;
-        }
-        .media-count-badge {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: #007bff;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            z-index: 1;
+            align-items: center;
         }
         
-        /* Modal pour afficher les médias en grand */
+        .comment-date::before {
+            content: '🕒';
+            margin-right: 6px;
+            font-size: 12px;
+        }
+        
+        .comment-text {
+            margin-top: 12px;
+            color: #475569;
+            line-height: 1.6;
+            font-size: 15px;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #f1f5f9;
+        }
+        
+        .comment-header {
+            margin-bottom: 8px;
+        }
+        
+        .comment-actions {
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+        
+        .comment-item:hover .comment-actions {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .comment-actions .btn {
+            padding: 6px 12px;
+            margin-left: 8px;
+            font-size: 13px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-comment-input {
+            font-size: 14px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-comment-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid #3b82f6;
+            color: #3b82f6;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-outline-danger {
+            border: 2px solid #ef4444;
+            color: #ef4444;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-danger:hover {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        }
+        
+        .badge {
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        
+        .badge-info {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        }
+        
+        .badge-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: #000;
+        }
+        
+        /* Styles pour les médias */
+        .publication-media {
+            margin: 25px 0;
+        }
+        
+        .media-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .media-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            aspect-ratio: 1/1;
+        }
+        
+        .media-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .media-item img,
+        .media-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.5s ease;
+            border-radius: 12px;
+        }
+        
+        .media-item img:hover,
+        .media-item video:hover {
+            transform: scale(1.08);
+        }
+        
+        .media-type-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.6));
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 2;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .media-count-badge {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            z-index: 2;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .media-count-badge:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        /* Modal amélioré */
         .media-modal {
             display: none;
             position: fixed;
@@ -215,48 +624,84 @@ foreach ($publications as $pub) {
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.95);
+            background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(0,0,0,0.85));
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            backdrop-filter: blur(10px);
+            animation: modalFadeIn 0.3s ease;
         }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                backdrop-filter: blur(0);
+            }
+            to {
+                opacity: 1;
+                backdrop-filter: blur(10px);
+            }
+        }
+        
         .modal-content {
             max-width: 90%;
             max-height: 80%;
-            border-radius: 5px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
         .modal-video {
             width: 90%;
             max-height: 80%;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
+        
         .close-modal {
             position: absolute;
-            top: 20px;
+            top: 25px;
             right: 30px;
             color: white;
-            font-size: 40px;
+            font-size: 35px;
             cursor: pointer;
             z-index: 10001;
-            background: rgba(0,0,0,0.5);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.8), rgba(220, 38, 38, 0.8));
             width: 50px;
             height: 50px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255,255,255,0.2);
         }
+        
         .close-modal:hover {
-            background: rgba(255,0,0,0.7);
+            transform: rotate(90deg) scale(1.1);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4);
         }
+        
         .modal-nav {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
             color: white;
-            font-size: 40px;
+            font-size: 35px;
             cursor: pointer;
-            background: rgba(0,0,0,0.5);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(29, 78, 216, 0.8));
             width: 60px;
             height: 60px;
             border-radius: 50%;
@@ -264,25 +709,93 @@ foreach ($publications as $pub) {
             align-items: center;
             justify-content: center;
             z-index: 10001;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255,255,255,0.2);
+            opacity: 0.8;
         }
+        
+        .modal-nav:hover {
+            opacity: 1;
+            transform: translateY(-50%) scale(1.1);
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 5px 25px rgba(59, 130, 246, 0.4);
+        }
+        
         .prev-modal {
             left: 30px;
         }
+        
         .next-modal {
             right: 30px;
         }
-        .modal-nav:hover {
-            background: rgba(0,123,255,0.7);
-        }
+        
         .modal-info {
             color: white;
             text-align: center;
-            margin-top: 20px;
-            font-size: 18px;
+            margin-top: 25px;
+            font-size: 20px;
+            font-weight: 600;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
+        
         .modal-counter {
-            color: #aaa;
+            color: #cbd5e1;
             margin-top: 10px;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+        
+        /* Alerts améliorés */
+        .alert {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            animation: slideDown 0.4s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-left: 5px solid #047857;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border-left: 5px solid #b91c1c;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            border-left: 5px solid #0e7490;
+            text-align: center;
+        }
+        
+        .alert .close {
+            color: white;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+            position: relative;
+            top: -2px;
+        }
+        
+        .alert .close:hover {
+            opacity: 1;
+            transform: scale(1.2);
         }
     </style>
 </head>
@@ -435,7 +948,12 @@ foreach ($publications as $pub) {
                         <?php if (isset($_GET['success'])): ?>
                             <div class="alert alert-success alert-dismissible fade show">
                                 <?php 
-                                if ($_GET['success'] == 1) echo "Publication ajoutée avec succès!";
+                                if ($_GET['success'] == 1) {
+                                    echo "Publication ajoutée avec succès!";
+                                    if (isset($_GET['planifiee'])) {
+                                        echo " (Planifiée)";
+                                    }
+                                }
                                 if ($_GET['success'] == 2) echo "Publication supprimée avec succès!";
                                 if ($_GET['success'] == 3) echo "Publication modifiée avec succès!";
                                 if ($_GET['success'] == 4) echo "Modification effectuée avec succès!";
@@ -486,172 +1004,239 @@ foreach ($publications as $pub) {
                             </div>
                         <?php endif; ?>
 
-                        <?php if (empty($publications)): ?>
+                        <?php 
+                        // Séparer les publications passées et futures
+                        $dateNow = new DateTime();
+                        $publicationsPubliees = [];
+                        $publicationsPlanifiees = [];
+                        
+                        foreach ($allPublications as $pub) {
+                            $datePublication = new DateTime($pub['datePublication']);
+                            if ($datePublication <= $dateNow) {
+                                $publicationsPubliees[] = $pub;
+                            } else {
+                                $publicationsPlanifiees[] = $pub;
+                            }
+                        }
+                        
+                        $totalPublications = count($publicationsPubliees) + count($publicationsPlanifiees);
+                        ?>
+                        
+                        <?php if ($totalPublications == 0): ?>
                             <div class="alert alert-info text-center">
                                 <h4>Aucune publication pour le moment</h4>
                                 <p>Soyez le premier à partager quelque chose !</p>
                                 <a href="ajout.php" class="btn btn-primary">Créer une publication</a>
                             </div>
                         <?php else: ?>
-                            <?php foreach ($publications as $pub): 
-                                $userAlreadyLiked = in_array($pub['idPublication'], $postsLiked);
-                                $nbCommentaires = $commentCounts[$pub['idPublication']];
-                                $medias = isset($allMedias[$pub['idPublication']]) ? $allMedias[$pub['idPublication']] : [];
-                                $mediaCount = count($medias);
-                            ?>
-                                <div class="publication-card">
-                                    <div class="publication-content">
-                                        <p class="mb-2" style="font-size: 16px; line-height: 1.6;"><?= nl2br(htmlspecialchars($pub['contenuTexte'])) ?></p>
-                                        
-                                        <!-- Section pour afficher les médias -->
-                                        <?php if ($mediaCount > 0): ?>
-                                        <div class="publication-media">
-                                            <div class="media-gallery">
-                                                <?php 
-                                                $displayLimit = 4; // Limite d'affichage
-                                                $displayed = 0;
-                                                foreach ($medias as $index => $media): 
-                                                    if ($displayed >= $displayLimit) break;
-                                                    $displayed++;
-                                                ?>
-                                                    <div class="media-item" data-publication-id="<?= $pub['idPublication'] ?>" data-media-index="<?= $index ?>">
-                                                        <?php if (strpos($media['type'], 'image') !== false): ?>
-                                                            <span class="media-type-badge">📷</span>
-                                                            <img src="<?= htmlspecialchars($media['chemin']) ?>" 
-                                                                 alt="Image publication <?= $index + 1 ?>"
-                                                                 onclick="openMediaModal(<?= $pub['idPublication'] ?>, <?= $index ?>)">
-                                                        <?php elseif (strpos($media['type'], 'video') !== false): ?>
-                                                            <span class="media-type-badge">🎬</span>
-                                                            <video controls onclick="openMediaModal(<?= $pub['idPublication'] ?>, <?= $index ?>)">
-                                                                <source src="<?= htmlspecialchars($media['chemin']) ?>" type="<?= htmlspecialchars($media['type']) ?>">
-                                                                Votre navigateur ne supporte pas la vidéo.
-                                                            </video>
-                                                        <?php endif; ?>
-                                                        
-                                                        <?php if ($index === $displayLimit - 1 && $mediaCount > $displayLimit): ?>
-                                                            <div class="media-count-badge" onclick="openMediaModal(<?= $pub['idPublication'] ?>, <?= $displayLimit ?>)">
-                                                                +<?= $mediaCount - $displayLimit ?> plus
-                                                            </div>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            </div>
-                                        </div>
-                                        <?php endif; ?>
-                                        
-                                        <div class="publication-meta text-muted small">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    📅 <?= date('d/m/Y H:i', strtotime($pub['datePublication'])) ?>
-                                                </div>
-                                                <div class="col-md-6 text-right">
-                                                    👤 Utilisateur <?= $pub['idUtilisateur'] ?> 
-                                                    | 
-                                                    <form method="POST" action="like.php" style="display: inline;" novalidate>
-                                                        <input type="hidden" name="idPublication" value="<?= $pub['idPublication'] ?>">
-                                                        <input type="hidden" name="idUtilisateur" value="<?= $idUtilisateur ?>">
-                                                        <button type="submit" class="like-btn <?= $userAlreadyLiked ? 'liked' : '' ?>">
-                                                            ❤️ <span class="like-count"><?= $pub['nbLikes'] ?></span>
-                                                        </button>
-                                                    </form>
-                                                    | 
-                                                    <button type="button" class="comment-btn" onclick="toggleComments(<?= $pub['idPublication'] ?>)">
-                                                        💬 <span class="comment-count"><?= $nbCommentaires ?></span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Section commentaires (cachée par défaut) -->
-                                    <div class="comment-section" id="comments-<?= $pub['idPublication'] ?>">
-                                        <!-- Formulaire d'ajout de commentaire -->
-                                        <form method="POST" action="commenter.php" class="comment-form" novalidate>
-                                            <input type="hidden" name="idPublication" value="<?= $pub['idPublication'] ?>">
-                                            <input type="hidden" name="idUtilisateur" value="<?= $idUtilisateur ?>">
-                                            <div class="input-group">
-                                                <input type="text" name="contenuCommentaire" class="form-control" placeholder="Écrivez un commentaire..." required>
-                                                <div class="input-group-append">
-                                                    <button type="submit" class="btn btn-primary">Envoyer</button>
-                                                </div>
-                                            </div>
-                                        </form>
-
-                                        <!-- Liste des commentaires -->
-                                        <div class="comment-list">
-                                            <?php if (!empty($allComments[$pub['idPublication']])): ?>
-                                                <?php foreach ($allComments[$pub['idPublication']] as $comment): ?>
-                                                    <div class="comment-item" id="comment-<?= $comment->getIdCommentaire() ?>">
-                                                        <div class="comment-header d-flex justify-content-between align-items-center">
-                                                            <div class="comment-author">
-                                                                <?= htmlspecialchars($comment->getNom()) ?>
-                                                            </div>
-                                                            <?php if ($comment->getIdUtilisateur() == $idUtilisateur): ?>
-                                                                <div class="comment-actions">
-                                                                    <button class="btn btn-sm btn-outline-primary edit-comment-btn" 
-                                                                            onclick="enableCommentEdit(<?= $comment->getIdCommentaire() ?>)">
-                                                                        ✏️ Modifier
-                                                                    </button>
-                                                                    <button class="btn btn-sm btn-outline-danger delete-comment-btn" 
-                                                                            onclick="deleteComment(<?= $comment->getIdCommentaire() ?>)">
-                                                                        🗑️ Supprimer
-                                                                    </button>
+                            
+                            <!-- Publications publiées (visibles) -->
+                            <?php if (!empty($publicationsPubliees)): ?>
+                                <?php foreach ($publicationsPubliees as $pub): 
+                                    $userAlreadyLiked = in_array($pub['idPublication'], $postsLiked);
+                                    $nbCommentaires = isset($commentCounts[$pub['idPublication']]) ? $commentCounts[$pub['idPublication']] : 0;
+                                    $medias = isset($allMedias[$pub['idPublication']]) ? $allMedias[$pub['idPublication']] : [];
+                                    $mediaCount = count($medias);
+                                ?>
+                                    <div class="publication-card">
+                                        <div class="publication-content">
+                                            <p class="mb-2" style="font-size: 16px; line-height: 1.6;"><?= nl2br(htmlspecialchars($pub['contenuTexte'])) ?></p>
+                                            
+                                            <!-- Section pour afficher les médias -->
+                                            <?php if ($mediaCount > 0): ?>
+                                            <div class="publication-media">
+                                                <div class="media-gallery">
+                                                    <?php 
+                                                    $displayLimit = 4; // Limite d'affichage
+                                                    $displayed = 0;
+                                                    foreach ($medias as $index => $media): 
+                                                        if ($displayed >= $displayLimit) break;
+                                                        $displayed++;
+                                                    ?>
+                                                        <div class="media-item" data-publication-id="<?= $pub['idPublication'] ?>" data-media-index="<?= $index ?>">
+                                                            <?php if (strpos($media['type'], 'image') !== false): ?>
+                                                                <span class="media-type-badge">📷</span>
+                                                                <img src="<?= htmlspecialchars($media['chemin']) ?>" 
+                                                                     alt="Image publication <?= $index + 1 ?>"
+                                                                     onclick="openMediaModal(<?= $pub['idPublication'] ?>, <?= $index ?>)">
+                                                            <?php elseif (strpos($media['type'], 'video') !== false): ?>
+                                                                <span class="media-type-badge">🎬</span>
+                                                                <video controls onclick="openMediaModal(<?= $pub['idPublication'] ?>, <?= $index ?>)">
+                                                                    <source src="<?= htmlspecialchars($media['chemin']) ?>" type="<?= htmlspecialchars($media['type']) ?>">
+                                                                    Votre navigateur ne supporte pas la vidéo.
+                                                                </video>
+                                                            <?php endif; ?>
+                                                            
+                                                            <?php if ($index === $displayLimit - 1 && $mediaCount > $displayLimit): ?>
+                                                                <div class="media-count-badge" onclick="openMediaModal(<?= $pub['idPublication'] ?>, <?= $displayLimit ?>)">
+                                                                    +<?= $mediaCount - $displayLimit ?> plus
                                                                 </div>
                                                             <?php endif; ?>
                                                         </div>
-                                                        <div class="comment-date">
-                                                            <?= date('d/m/Y H:i', strtotime($comment->getDateCommentaire())) ?>
-                                                        </div>
-                                                        <div class="comment-text" id="comment-text-<?= $comment->getIdCommentaire() ?>">
-                                                            <?= nl2br(htmlspecialchars($comment->getContenuCommentaire())) ?>
-                                                        </div>
-                                                        <!-- Formulaire d'édition (caché par défaut) -->
-                                                        <div class="comment-edit-form" id="edit-form-<?= $comment->getIdCommentaire() ?>" style="display: none;">
-                                                            <form method="POST" action="update_comment.php" class="mt-2" novalidate>
-                                                                <input type="hidden" name="idCommentaire" value="<?= $comment->getIdCommentaire() ?>">
-                                                                <input type="hidden" name="idPublication" value="<?= $pub['idPublication'] ?>">
-                                                                <div class="input-group">
-                                                                    <input type="text" name="contenuCommentaire" class="form-control edit-comment-input" 
-                                                                           value="<?= htmlspecialchars($comment->getContenuCommentaire()) ?>" 
-                                                                           required>
-                                                                    <div class="input-group-append">
-                                                                        <button type="submit" class="btn btn-success btn-sm">💾 Enregistrer</button>
-                                                                        <button type="button" class="btn btn-secondary btn-sm" 
-                                                                                onclick="cancelCommentEdit(<?= $comment->getIdCommentaire() ?>)">
-                                                                            ❌ Annuler
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                            <?php endif; ?>
+                                            
+                                            <div class="publication-meta text-muted small">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        📅 <?= date('d/m/Y H:i', strtotime($pub['datePublication'])) ?>
+                                                    </div>
+                                                    <div class="col-md-6 text-right">
+                                                        👤 Utilisateur <?= $pub['idUtilisateur'] ?> 
+                                                        | 
+                                                        <form method="POST" action="like.php" style="display: inline;" novalidate>
+                                                            <input type="hidden" name="idPublication" value="<?= $pub['idPublication'] ?>">
+                                                            <input type="hidden" name="idUtilisateur" value="<?= $idUtilisateur ?>">
+                                                            <button type="submit" class="like-btn <?= $userAlreadyLiked ? 'liked' : '' ?>">
+                                                                ❤️ <span class="like-count"><?= $pub['nbLikes'] ?></span>
+                                                            </button>
+                                                        </form>
+                                                        | 
+                                                        <button type="button" class="comment-btn" onclick="toggleComments(<?= $pub['idPublication'] ?>)">
+                                                            💬 <span class="comment-count"><?= $nbCommentaires ?></span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Section commentaires (cachée par défaut) -->
+                                        <div class="comment-section" id="comments-<?= $pub['idPublication'] ?>">
+                                            <!-- Formulaire d'ajout de commentaire -->
+                                            <form method="POST" action="commenter.php" class="comment-form" novalidate>
+                                                <input type="hidden" name="idPublication" value="<?= $pub['idPublication'] ?>">
+                                                <input type="hidden" name="idUtilisateur" value="<?= $idUtilisateur ?>">
+                                                <div class="input-group">
+                                                    <input type="text" name="contenuCommentaire" class="form-control" placeholder="Écrivez un commentaire..." required>
+                                                    <div class="input-group-append">
+                                                        <button type="submit" class="btn btn-primary">Envoyer</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                            <!-- Liste des commentaires -->
+                                            <div class="comment-list">
+                                                <?php if (!empty($allComments[$pub['idPublication']])): ?>
+                                                    <?php foreach ($allComments[$pub['idPublication']] as $comment): ?>
+                                                        <div class="comment-item" id="comment-<?= $comment->getIdCommentaire() ?>">
+                                                            <div class="comment-header d-flex justify-content-between align-items-center">
+                                                                <div class="comment-author">
+                                                                    <?= htmlspecialchars($comment->getNom()) ?>
+                                                                </div>
+                                                                <?php if ($comment->getIdUtilisateur() == $idUtilisateur): ?>
+                                                                    <div class="comment-actions">
+                                                                        <button class="btn btn-sm btn-outline-primary edit-comment-btn" 
+                                                                                onclick="enableCommentEdit(<?= $comment->getIdCommentaire() ?>)">
+                                                                            ✏️ Modifier
+                                                                        </button>
+                                                                        <button class="btn btn-sm btn-outline-danger delete-comment-btn" 
+                                                                                onclick="deleteComment(<?= $comment->getIdCommentaire() ?>)">
+                                                                            🗑️ Supprimer
                                                                         </button>
                                                                     </div>
-                                                                </div>
-                                                            </form>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                            <div class="comment-date">
+                                                                <?= date('d/m/Y H:i', strtotime($comment->getDateCommentaire())) ?>
+                                                            </div>
+                                                            <div class="comment-text" id="comment-text-<?= $comment->getIdCommentaire() ?>">
+                                                                <?= nl2br(htmlspecialchars($comment->getContenuCommentaire())) ?>
+                                                            </div>
+                                                            <!-- Formulaire d'édition (caché par défaut) -->
+                                                            <div class="comment-edit-form" id="edit-form-<?= $comment->getIdCommentaire() ?>" style="display: none;">
+                                                                <form method="POST" action="update_comment.php" class="mt-2" novalidate>
+                                                                    <input type="hidden" name="idCommentaire" value="<?= $comment->getIdCommentaire() ?>">
+                                                                    <input type="hidden" name="idPublication" value="<?= $pub['idPublication'] ?>">
+                                                                    <div class="input-group">
+                                                                        <input type="text" name="contenuCommentaire" class="form-control edit-comment-input" 
+                                                                               value="<?= htmlspecialchars($comment->getContenuCommentaire()) ?>" 
+                                                                               required>
+                                                                        <div class="input-group-append">
+                                                                            <button type="submit" class="btn btn-success btn-sm">💾 Enregistrer</button>
+                                                                            <button type="button" class="btn btn-secondary btn-sm" 
+                                                                                    onclick="cancelCommentEdit(<?= $comment->getIdCommentaire() ?>)">
+                                                                                ❌ Annuler
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            <?php else: ?>
-                                                <div class="text-muted text-center">Aucun commentaire pour le moment</div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-
-                                    <div class="publication-actions">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <a href="update.php?id=<?= $pub['idPublication'] ?>" class="btn btn-outline-primary btn-sm">
-                                                    ✏️ Modifier
-                                                </a>
-                                                <a href="delete.php?id=<?= $pub['idPublication'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette publication ? Cette action supprimera aussi tous les commentaires et médias associés.')">
-                                                    🗑️ Supprimer
-                                                </a>
-                                            </div>
-                                            <div class="col-md-6 text-right">
-                                                <span class="badge badge-primary">ID: <?= $pub['idPublication'] ?></span>
-                                                <?php if ($mediaCount > 0): ?>
-                                                    <span class="badge badge-info ml-2">📁 <?= $mediaCount ?> média<?= $mediaCount > 1 ? 's' : '' ?></span>
+                                                    <?php endforeach; ?>
+                                                <?php else: ?>
+                                                    <div class="text-muted text-center">Aucun commentaire pour le moment</div>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
+
+                                        <div class="publication-actions">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <a href="update.php?id=<?= $pub['idPublication'] ?>" class="btn btn-outline-primary btn-sm">
+                                                        ✏️ Modifier
+                                                    </a>
+                                                    <a href="delete.php?id=<?= $pub['idPublication'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette publication ? Cette action supprimera aussi tous les commentaires et médias associés.')">
+                                                        🗑️ Supprimer
+                                                    </a>
+                                                </div>
+                                                <div class="col-md-6 text-right">
+                                                    <span class="badge badge-primary">ID: <?= $pub['idPublication'] ?></span>
+                                                    <?php if ($mediaCount > 0): ?>
+                                                        <span class="badge badge-info ml-2">📁 <?= $mediaCount ?> média<?= $mediaCount > 1 ? 's' : '' ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                            
+                            <!-- Publications planifiées (futures) -->
+                            <?php if (!empty($publicationsPlanifiees)): ?>
+                                <div class="alert alert-info text-center">
+                                    <h5>📅 Publications planifiées</h5>
+                                    <p>Ces publications seront visibles à la date indiquée</p>
                                 </div>
-                            <?php endforeach; ?>
+                                
+                                <?php foreach ($publicationsPlanifiees as $pub): ?>
+                                    <div class="publication-card publication-future">
+                                        <div class="publication-content">
+                                            <p class="mb-2" style="font-size: 16px; line-height: 1.6; opacity: 0.7;"><?= nl2br(htmlspecialchars($pub['contenuTexte'])) ?></p>
+                                            
+                                            <div class="future-date-info">
+                                                <i class='bx bx-time'></i>
+                                                <div>
+                                                    <strong>Publication planifiée pour le :</strong>
+                                                    <div><?= date('d/m/Y à H:i', strtotime($pub['datePublication'])) ?></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="publication-meta text-muted small" style="opacity: 0.7;">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        👤 Utilisateur <?= $pub['idUtilisateur'] ?> 
+                                                    </div>
+                                                    <div class="col-md-6 text-right">
+                                                        ❤️ <span class="like-count">0</span> likes
+                                                        | 💬 0 commentaires
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="publication-actions" style="opacity: 0.7;">
+                                            <div class="row">
+                                                <div class="col-md-12 text-center">
+                                                    <span class="badge badge-warning">⏰ EN ATTENTE</span>
+                                                    <small class="text-muted ml-2">Publication automatique</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                     <!-- ======================= FIN COLONNE CENTRALE ======================= -->
@@ -676,24 +1261,25 @@ foreach ($publications as $pub) {
                                     <div class="media-body">
                                         <strong>Publications totales</strong>
                                         <div class="text-muted small">
-                                            <?php echo isset($publications) ? count($publications) : '0' ?> publications
+                                            <?php echo $totalPublications ?> publications
                                         </div>
                                     </div>
                                 </div>
                                 <div class="media text-muted pt-2">
-                                    <i class='bx bx-image mr-3 text-success'></i>
+                                    <i class='bx bx-check-circle mr-3 text-success'></i>
                                     <div class="media-body">
-                                        <strong>Médias partagés</strong>
+                                        <strong>Publiées</strong>
                                         <div class="text-muted small">
-                                            <?php 
-                                            $totalMedias = 0;
-                                            if (isset($allMedias)) {
-                                                foreach ($allMedias as $medias) {
-                                                    $totalMedias += count($medias);
-                                                }
-                                            }
-                                            echo $totalMedias . ' média' . ($totalMedias > 1 ? 's' : '');
-                                            ?>
+                                            <?php echo count($publicationsPubliees) ?> visibles
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="media text-muted pt-2">
+                                    <i class='bx bx-time mr-3 text-warning'></i>
+                                    <div class="media-body">
+                                        <strong>Planifiées</strong>
+                                        <div class="text-muted small">
+                                            <?php echo count($publicationsPlanifiees) ?> en attente
                                         </div>
                                     </div>
                                 </div>
@@ -701,8 +1287,33 @@ foreach ($publications as $pub) {
 
                             <h5 class="card-title pb-3 mb-0 mt-4">Contacts</h5>
                             <div class="bg-white rounded contacts">
-                                <div class="media text-muted"> ... </div>
-                                <small class="d-block text-right mt-3"><a href="#">See More</a></small>
+                                <div class="media text-muted">
+                                    <img src="./assets/images/users/user-2.jpg" alt="Online user" class="online-user-image align-middle">
+                                    <div class="media-body mb-0 small lh-125">
+                                        <div class="d-flex justify-content-between align-items-center w-100">
+                                            <strong class="text-gray-dark"><a href="#" class="smFLname">Karen Minas</a></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="media text-muted pt-3">
+                                    <img src="./assets/images/users/user-3.jpg" alt="Online user" class="online-user-image">
+                                    <div class="media-body mb-0 small lh-125">
+                                        <div class="d-flex justify-content-between align-items-center w-100">
+                                            <strong class="text-gray-dark"><a href="#" class="smFLname">Hakob Minasyan</a></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="media text-muted pt-3">
+                                    <img src="./assets/images/users/user-1.jpg" alt="Online user" class="online-user-image">
+                                    <div class="media-body mb-0 small lh-125">
+                                        <div class="d-flex justify-content-between align-items-center w-100">
+                                            <strong class="text-gray-dark"><a href="#" class="smFLname">Lina Adamyan</a></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="d-block text-right mt-3">
+                                    <a href="#" style="color: #28a745; font-weight: 500;">Voir plus</a>
+                                </small>
                             </div>
                         </div>
                     </div>
