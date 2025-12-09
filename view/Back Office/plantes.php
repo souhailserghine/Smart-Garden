@@ -1,0 +1,1779 @@
+<?php
+session_start(); // Toujours en tout premier
+
+// Inclure les controllers
+require_once '../../Controller/planteC.php';
+require_once '../../Controller/tacheC.php';
+
+// Gestion des flash messages
+$successMsg = '';
+$errorMsg = '';
+
+if (isset($_SESSION['successMsg'])) {
+    $successMsg = $_SESSION['successMsg'];
+    unset($_SESSION['successMsg']);
+}
+
+if (isset($_SESSION['errorMsg'])) {
+    $errorMsg = $_SESSION['errorMsg'];
+    unset($_SESSION['errorMsg']);
+}
+
+// Création des objets controllers
+$pl = new planteC();
+$tacheController = new tacheC();
+
+// Gestion modification plante
+$editPlante = null;
+if (isset($_GET['edit'])) {
+    $editId = $_GET['edit'];
+    foreach ($pl->listPlantes() as $p) {
+        if ($p['id_plante'] == $editId) {
+            $editPlante = $p;
+            break;
+        }
+    }
+}
+
+// Gestion modification tâche
+$editTache = null;
+if (isset($_GET['editTache'])) {
+    $editTacheId = $_GET['editTache'];
+    foreach ($tacheController->listTaches() as $t) {
+        if ($t['id_dosage'] == $editTacheId) {
+            $editTache = $t;
+            break;
+        }
+    }
+}
+
+// Listes
+$listePlantes = $pl->listPlantes();
+$listeTaches = $tacheController->listTaches();
+
+// Suppression
+if (isset($_GET['deleteTache'])) {
+    $id = intval($_GET['deleteTache']);
+    $tacheController->supprimerTache($id);
+    header('Location: plantes.php');
+    exit();
+}
+
+if (isset($_GET['deletePlante'])) {
+    $id = intval($_GET['deletePlante']);
+    $pl->supprimerPlante($id);
+    header('Location: plantes.php');
+    exit();
+}
+$taches = $tacheController->listTaches(); // ou la méthode qui liste toutes les tâches
+
+// Vérifier si on a choisi une plante
+if (isset($_GET['plante_id']) && !empty($_GET['plante_id'])) {
+    $plante_id = $_GET['plante_id'];
+    $taches = $tacheController->getTachesByPlante($plante_id); // nouvelle méthode à créer
+}
+
+?>
+<?php
+// Récupérer les stats depuis la base
+$totalPlantes = count($listePlantes); // toutes les plantes
+$today = date('Y-m-d');
+$plantesToday = 0;
+foreach($listePlantes as $p){
+    if($p['date_ajout'] === $today) $plantesToday++;
+}
+
+// Pour les tâches
+$totalTaches = count($listeTaches); // toutes les tâches
+$tachesToday = 0;
+foreach($listeTaches as $t){
+    if($t['date_dosage'] === $today) $tachesToday++;
+}
+?>
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>SmartGarden</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+    
+    <!-- Toast Notification System -->
+    <script src="../Front Office/assets/js/toast-notification.js"></script>
+</head>
+
+<body>
+<div class="container-fluid position-relative bg-white d-flex p-0">
+    <!-- Spinner Start -->
+    <div id="spinner" class="bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center" style="display: none;">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Sidebar Start -->
+    <div class="sidebar pe-4 pb-3">
+        <nav class="navbar bg-light navbar-light">
+            <a href="index.html" class="navbar-brand mx-4 mb-2 mt-2">
+                <h3 style="font-size: 1.2rem;padding-left: 20px; color: #2ecc71;">
+                    <img src="img/logo-64x64.png" alt="Logo" class="me-2" style="width: 32px; height: 32px;">SmartGarden
+                </h3>
+            </a>
+            <div class="d-flex align-items-center ms-4 mb-4">
+                <div class="position-relative">
+                    <img class="rounded-circle" src="img/user.jpg" alt="" style="width: 40px; height: 40px;">
+                    <div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1"></div>
+                </div>
+                <div class="ms-3">
+                    <h6 class="mb-0">Jhon Doe</h6>
+                    <span>Admin</span>
+                </div>
+            </div>
+            <div class="navbar-nav w-100">
+                <a href="index.html" class="nav-item nav-link"><i class="fa fa-file-alt me-2"></i>Publication</a>
+                <a href="plantes.php" class="nav-item nav-link active"><i class="fa fa-leaf me-2"></i>Plantes</a>
+                <a href="evenements.html" class="nav-item nav-link"><i class="fa fa-calendar me-2"></i>Evenements</a>
+                <a href="utilisateur.html" class="nav-item nav-link"><i class="fa fa-user me-2"></i>Utilisateur</a>
+                <a href="capteurs.html" class="nav-item nav-link"><i class="fa fa-microchip me-2"></i>Capteurs</a>
+            </div>
+        </nav>
+    </div>
+    <!-- Sidebar End -->
+
+    <!-- Content Start -->
+    <div class="content">
+        <!-- Navbar Start -->
+        <nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">
+            <a href="#" class="sidebar-toggler flex-shrink-0">
+                <i class="fa fa-bars"></i>
+            </a>
+        </nav>
+        <!-- Navbar End -->
+
+        <br>
+        <!-- Plantes Management Start -->
+        <?php
+
+
+// Gestion du message d'erreur venant de ajout.php
+$errorMsg = '';
+if (isset($_GET['error'])) {
+    $errorMsg = htmlspecialchars($_GET['error']);
+}
+$successMsg = '';
+if (isset($_GET['success'])) {
+    $successMsg = "Plante ajoutée avec succès !";
+}
+?>
+<div class="container-fluid pt-4 px-4">
+    <div class="row justify-content-center g-3 mb-4">
+        <!-- Total Plantes -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="d-flex align-items-center p-3 rounded shadow-sm" 
+                 style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
+                <img src="../image/plant.png" width="36" height="36" class="me-3" alt="Plante">
+                <div>
+                    <h6 class="mb-0" style="font-size: 0.85rem; color: #aaa;">Total Plantes</h6>
+                    <h4 class="mb-0" style="font-size: 1.2rem; color: #000;"><?= $totalPlantes ?></h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plantes ajoutées aujourd'hui -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="d-flex align-items-center p-3 rounded shadow-sm" 
+                 style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
+                <img src="../image/day-to-plant-a-tree-reminder-daily-calendar-page-interface-symbol.png" width="36" height="36" class="me-3" alt="Plante aujourd'hui">
+                <div>
+                    <h6 class="mb-0" style="font-size: 0.85rem; color: #aaa;">Plantes aujourd'hui</h6>
+                    <h4 class="mb-0" style="font-size: 1.2rem; color: #000;"><?= $plantesToday ?></h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Tâches -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="d-flex align-items-center p-3 rounded shadow-sm" 
+                 style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
+                <img src="../image/clipboard.png" width="36" height="36" class="me-3" alt="Tâches">
+                <div>
+                    <h6 class="mb-0" style="font-size: 0.85rem; color: #aaa;">Total Tâches</h6>
+                    <h4 class="mb-0" style="font-size: 1.2rem; color: #000;"><?= $totalTaches ?></h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tâches prévues aujourd'hui -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="d-flex align-items-center p-3 rounded shadow-sm" 
+                 style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
+                <img src="../image/search.png" width="36" height="36" class="me-3" alt="Tâches aujourd'hui">
+                <div>
+                    <h6 class="mb-0" style="font-size: 0.85rem; color: #aaa;">Tâches aujourd'hui</h6>
+                    <h4 class="mb-0" style="font-size: 1.2rem; color: #000;"><?= $tachesToday ?></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-light text-center rounded p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h6 class="mb-0">Gestion des Plantes</h6>
+            <div>
+                <button type="button" class="btn btn-warning me-2" id="btnSuggestions" title="Voir les suggestions de plantes">
+                    <i class="fa fa-lightbulb me-2"></i>Suggestions <span class="badge bg-danger" id="badgeSuggestions">0</span>
+                </button>
+                <button type="button" class="btn btn-info me-2" id="btnSuggestionsTaches" title="Voir les suggestions de tâches">
+                    <i class="fa fa-tasks me-2"></i>Tâches <span class="badge bg-danger" id="badgeSuggestionsTaches">0</span>
+                </button>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPlanteModal">
+                    <i class="fa fa-plus me-2"></i>Ajouter Plante
+                </button>
+            </div>
+        </div>
+        
+
+        <div class="table-responsive">
+            <table class="table text-start align-middle table-bordered table-hover mb-0">
+                <thead class="table-success">
+                    <tr class="text-dark">
+                        <th>Nom</th>
+                        <th>ID</th>
+                        <th>ID Utilisateur</th>
+                        <th>Date</th>
+                        <th>Niveau Humidité</th>
+                        <th>Besoin Eau</th>
+                        <th>État Santé</th>
+                        <th>Température</th>
+                        <th>Image</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($listePlantes as $plante) { ?>
+                    <tr>
+                        <td><?= htmlspecialchars($plante['nom_plante']); ?></td>
+                        <td><?= $plante['id_plante']; ?></td>
+                        <td><?= $plante['idUtilisateur']; ?></td>
+                        <td><?= $plante['date_ajout']; ?></td>
+                        <td><?= $plante['niveau_humidite']; ?></td>
+                        <td><?= $plante['besoin_eau']; ?></td>
+                        <td><?= htmlspecialchars($plante['etat_sante']); ?></td>
+                        <td><?= $plante['temperature'] ?? 'N/A'; ?> °C</td>
+                        <td>
+                            <?php if (!empty($plante['image'])): ?>
+                                <img src="<?= htmlspecialchars($plante['image']); ?>" alt="<?= htmlspecialchars($plante['nom_plante']); ?>" style="max-width: 40px; max-height: 40px; border-radius: 4px;">
+                            <?php else: ?>
+                                <span class="text-muted">-</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-info btn-sm" title="Voir" onclick="viewPlante(<?= $plante['id_plante']; ?>)">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                            <a href="plantes.php?edit=<?= $plante['id_plante']; ?>" class="btn btn-warning btn-sm" title="Modifier">
+                                <i class="fa fa-edit"></i>
+                            </a>
+                            <a href="supprimerPlante.php?id=<?= $plante['id_plante']; ?>" class="btn btn-danger btn-sm"
+                               onclick="return confirm('Voulez-vous vraiment supprimer cette plante ?');">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Plante Modal -->
+<div class="modal fade" id="addPlanteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-light">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa fa-plus"></i> Ajouter une Plante</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addPlanteForm" method="POST" action="ajout.php" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div id="addError" class="alert alert-danger" style="<?= $errorMsg ? 'display:block;' : 'display:none;' ?>">
+                        <?= htmlspecialchars($errorMsg) ?>
+                    </div>
+                    <?php if ($successMsg): ?>
+                        <div class="alert alert-success"><?= htmlspecialchars($successMsg) ?></div>
+                    <?php endif; ?>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nom plante</label>
+                            <input type="text" class="form-control" name="nom_plante" value="<?= htmlspecialchars($formData['nom_plante'] ?? '') ?>">
+                            <small class="error-msg"></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date d'ajout</label>
+                            <input type="date" class="form-control" name="date_ajout" value="<?= htmlspecialchars($formData['date_ajout'] ?? '') ?>">
+                            <small class="error-msg"></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Niveau humidité (%)</label>
+                            <input type="number" class="form-control" name="niveau_humidite" value="<?= htmlspecialchars($formData['niveau_humidite'] ?? '') ?>">
+                            <small class="error-msg"></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Besoin en eau (ml)</label>
+                            <input type="number" class="form-control" name="besoin_eau" value="<?= htmlspecialchars($formData['besoin_eau'] ?? '') ?>">
+                            <small class="error-msg"></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">État de santé</label>
+                            <select class="form-select" name="etat_sante">
+                                <?php
+                                $etatOptions = ['Bon état', 'Moyen', 'Mauvais état'];
+                                $selectedEtat = $formData['etat_sante'] ?? '';
+                                foreach ($etatOptions as $option) {
+                                    $selectedAttr = ($option === $selectedEtat) ? 'selected' : '';
+                                    echo "<option value=\"" . htmlspecialchars($option) . "\" $selectedAttr>$option</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">ID Utilisateur</label>
+                            <input type="number" class="form-control" name="idUtilisateur" value="<?= htmlspecialchars($formData['idUtilisateur'] ?? '') ?>">
+                            <small class="error-msg"></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Température (°C)</label>
+                            <input type="number" step="0.1" class="form-control" name="temperature" value="<?= htmlspecialchars($formData['temperature'] ?? '20') ?>">
+                            <small class="error-msg"></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Image de la plante</label>
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                            <small class="text-muted">Format: JPG, PNG. Max 5MB</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("addPlanteForm");
+    const errorDiv = document.getElementById("addError");
+    const fields = form.querySelectorAll("input[name], select[name]");
+    
+    function checkField(input) {
+        const msg = input.parentElement.querySelector(".error-msg");
+        let error = "";
+
+        if (input.value.trim() === "" && input.tagName !== "SELECT") {
+            error = "Ce champ est obligatoire.";
+        } else {
+            switch (input.name) {
+                case "nom_plante": 
+                    if (input.value.trim().length < 3) 
+                        error = "Le nom doit contenir au moins 3 caractères."; 
+                    break;
+                case "date_ajout": 
+                    if (!input.value) 
+                        error = "Veuillez choisir une date."; 
+                    break;
+                case "niveau_humidite": 
+                    if (Number(input.value) < 0 || Number(input.value) > 100) 
+                        error = "L'humidité doit être entre 0 et 100."; 
+                    break;
+                case "besoin_eau": 
+                    if (Number(input.value) <= 0) 
+                        error = "Le besoin en eau doit être supérieur à 0."; 
+                    break;
+                case "idUtilisateur": 
+                    if (Number(input.value) <= 0) 
+                        error = "L'ID utilisateur doit être positif."; 
+                    break;
+            }
+        }
+
+        if (error) {
+            msg.textContent = error;
+            msg.classList.add("text-danger");
+            msg.classList.remove("text-success");
+            input.classList.add("is-invalid");
+            input.classList.remove("is-valid");
+            return false;
+        } else {
+            msg.textContent = "Valide ✔";
+            msg.classList.add("text-success");
+            msg.classList.remove("text-danger");
+            input.classList.add("is-valid");
+            input.classList.remove("is-invalid");
+            return true;
+        }
+    }
+
+    fields.forEach(input => {
+        input.addEventListener("input", () => checkField(input));
+        input.addEventListener("change", () => checkField(input));
+    });
+
+    form.addEventListener("submit", (e) => {
+        let valid = true;
+        fields.forEach(input => {
+            if (!checkField(input)) valid = false;
+        });
+
+        if (!valid) {
+            e.preventDefault();
+            errorDiv.textContent = "Veuillez corriger tous les champs en rouge.";
+            errorDiv.style.display = "block";
+            return;
+        } else {
+            errorDiv.style.display = "none";
+        }
+    });
+
+    // Ouvrir modal si erreur serveur
+    <?php if ($errorMsg || $editPlante): ?>
+        var addPlanteModal = new bootstrap.Modal(document.getElementById('addPlanteModal'));
+        addPlanteModal.show();
+        
+        // Afficher une notification toast erreur
+        <?php if (!empty($errorMsg)): ?>
+            if (typeof toastManager !== 'undefined') {
+                toastManager.error("<?= addslashes($errorMsg) ?>");
+            }
+        <?php endif; ?>
+    <?php endif; ?>
+    
+    // --- Affichage message succès (toast) pour plante ---
+    <?php if (!empty($successMsg)): ?>
+        if (typeof toastManager !== 'undefined') {
+            toastManager.success("<?= addslashes($successMsg) ?>");
+        } else {
+            const toastDiv = document.createElement('div');
+            toastDiv.className = 'toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3';
+            toastDiv.role = 'alert';
+            toastDiv.ariaLive = 'assertive';
+            toastDiv.ariaAtomic = 'true';
+            toastDiv.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body"><?= $successMsg ?></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>`;
+            document.body.appendChild(toastDiv);
+            const toast = new bootstrap.Toast(toastDiv, { delay: 3000 });
+            toast.show();
+        }
+
+        // Optionnel: rafraîchir la page pour voir la nouvelle plante
+        setTimeout(() => { window.location.reload(); }, 1000);
+    <?php endif; ?>
+});
+
+</script>
+
+
+
+        <!-- Edit Plante Modal -->
+<?php if ($editPlante): ?>
+<div class="modal fade show" id="editPlanteModal" tabindex="-1" style="display: block; background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-light">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa fa-edit"></i> Modifier la Plante</h5>
+                <a href="plantes.php" class="btn-close"></a>
+            </div>
+            <form id="editPlanteForm" method="POST" action="modifierPlante.php" enctype="multipart/form-data">
+                <input type="hidden" name="id_plante" value="<?php echo $editPlante['id_plante']; ?>">
+                <div class="modal-body">
+                    <div id="editError" class="text-danger mb-3"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nom plante</label>
+                            <input type="text" class="form-control" name="nom_plante" value="<?php echo htmlspecialchars($editPlante['nom_plante']); ?>" >
+                            <div class="error-msg"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date d'ajout</label>
+                            <input type="date" class="form-control" name="date_ajout" value="<?php echo $editPlante['date_ajout']; ?>" >
+                            <div class="error-msg"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Niveau humidité (%)</label>
+                            <input type="number" class="form-control" name="niveau_humidite" value="<?php echo $editPlante['niveau_humidite']; ?>" >
+                            <div class="error-msg"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Besoin en eau (ml)</label>
+                            <input type="number" class="form-control" name="besoin_eau" value="<?php echo $editPlante['besoin_eau']; ?>" >
+                            <div class="error-msg"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">État de santé</label>
+                            <select class="form-select" name="etat_sante">
+                                <option value="Bon état" <?php if($editPlante['etat_sante'] == 'Bon état') echo 'selected'; ?>>Bon état</option>
+                                <option value="Moyen" <?php if($editPlante['etat_sante'] == 'Moyen') echo 'selected'; ?>>Moyen</option>
+                                <option value="Mauvais état" <?php if($editPlante['etat_sante'] == 'Mauvais état') echo 'selected'; ?>>Mauvais état</option>
+                            </select>
+                            <div class="error-msg"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Température (°C)</label>
+                            <input type="number" step="0.1" class="form-control" name="temperature" value="<?php echo $editPlante['temperature'] ?? '20'; ?>" >
+                            <div class="error-msg"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">ID Utilisateur</label>
+                            <input type="number" class="form-control" name="idUtilisateur" value="<?php echo $editPlante['idUtilisateur']; ?>" >
+                            <div class="error-msg"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Image de la plante</label>
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                            <small class="text-muted">Laisser vide pour garder l'image actuelle</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="plantes.php" class="btn btn-secondary">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("editPlanteForm");
+    const errorDiv = document.getElementById("editError");
+    const fields = form.querySelectorAll("input[name], select[name]");
+    let isSubmitting = false;
+
+    function checkField(input) {
+        const msg = input.parentElement.querySelector(".error-msg");
+        let error = "";
+
+        if (input.value.trim() === "") {
+            error = "Ce champ est obligatoire.";
+        } else {
+            switch (input.name) {
+                case "nom_plante": if (input.value.trim().length < 3) error = "Le nom doit contenir au moins 3 caractères."; break;
+                case "date_ajout": if (!input.value) error = "Veuillez choisir une date."; break;
+                case "niveau_humidite": 
+                    if (Number(input.value) < 0 || Number(input.value) > 100) 
+                        error = "L'humidité doit être entre 0 et 100."; 
+                    break;
+                case "besoin_eau": if (Number(input.value) <= 0) error = "Le besoin en eau doit être > 0."; break;
+                case "idUtilisateur": if (Number(input.value) <= 0) error = "L'ID utilisateur doit être positif."; break;
+            }
+        }
+
+        if (error) {
+            msg.textContent = error;
+            msg.classList.add("text-danger");
+            msg.classList.remove("text-success");
+            input.classList.add("is-invalid");
+            input.classList.remove("is-valid");
+            return false;
+        } else {
+            msg.textContent = "Valide ✔";
+            msg.classList.add("text-success");
+            msg.classList.remove("text-danger");
+            input.classList.add("is-valid");
+            input.classList.remove("is-invalid");
+            return true;
+        }
+    }
+
+    fields.forEach(input => {
+        input.addEventListener("input", () => checkField(input));
+        input.addEventListener("change", () => checkField(input));
+    });
+
+    form.addEventListener("submit", (e) => {
+        if (isSubmitting) return;
+
+        let valid = true;
+        fields.forEach(input => {
+            if (!checkField(input)) valid = false;
+        });
+
+        if (!valid) {
+            e.preventDefault();
+            errorDiv.textContent = "Veuillez corriger les champs en rouge avant de soumettre.";
+            errorDiv.style.display = "block";
+            return;
+        } else {
+            errorDiv.style.display = "none";
+            isSubmitting = true;
+        }
+    });
+
+    // Ouvrir modal automatiquement si $editPlante existe
+    var editPlanteModal = new bootstrap.Modal(document.getElementById('editPlanteModal'));
+    editPlanteModal.show();
+    
+    // --- Affichage message succès/erreur (toast) pour édition plante ---
+    <?php if (!empty($successMsg)): ?>
+        if (typeof toastManager !== 'undefined') {
+            toastManager.success("<?= addslashes($successMsg) ?>");
+        } else {
+            const toastDiv = document.createElement('div');
+            toastDiv.className = 'toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3';
+            toastDiv.role = 'alert';
+            toastDiv.ariaLive = 'assertive';
+            toastDiv.ariaAtomic = 'true';
+            toastDiv.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body"><?= $successMsg ?></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>`;
+            document.body.appendChild(toastDiv);
+            const toast = new bootstrap.Toast(toastDiv, { delay: 3000 });
+            toast.show();
+        }
+
+        // Optionnel: rafraîchir la page pour voir les modifications
+        setTimeout(() => { window.location.reload(); }, 1000);
+    <?php endif; ?>
+    
+    <?php if (!empty($errorMsg)): ?>
+        if (typeof toastManager !== 'undefined') {
+            toastManager.error("<?= addslashes($errorMsg) ?>");
+        }
+    <?php endif; ?>
+});
+</script>
+<?php endif; ?>
+<br>    </br>
+        <!-- Tâches Management Start -->
+         <form method="GET" action="" class="d-flex justify-content-center align-items-center gap-2 mb-3">
+    <select name="plante_id" id="plante" class="form-select form-select-sm" style="max-width: 200px;">
+        <option value="">-- Toutes les plantes --</option>
+        <?php foreach ($listePlantes as $p):
+            $selected = (isset($_GET['plante_id']) && $_GET['plante_id'] == $p['id_plante']) ? 'selected' : '';
+        ?>
+            <option value="<?= $p['id_plante'] ?>" <?= $selected ?>>
+                <?= $p['nom_plante'] ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+
+    <button type="submit" class="btn btn-gradient btn-sm rounded-pill px-3 py-1">
+        <i class="fa fa-filter me-1"></i> Filtrer
+    </button>
+</form>
+
+
+<head>
+    <!-- tes liens Bootstrap / FontAwesome ici -->
+    <style>
+        .btn-gradient {
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            border: none;
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+
+
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-light text-center rounded p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h6 class="mb-0">Gestion des Dosages</h6>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTacheModal">
+                <i class="fa fa-plus me-2"></i>Ajouter Dosage
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table text-start align-middle table-bordered table-hover mb-0">
+                <thead class="table-info">
+                    <tr class="text-dark">
+                        <th>ID Dosage</th>
+                        <th>Type de Dosage</th>
+                        <th>Quantité</th>
+                        <th>Mode</th>
+                        <th>Date</th>
+                        <th>Dernière Exécution</th>
+                        <th>Prochaine Exécution</th>
+                        <th>État</th>
+                        <th>Priorité</th>
+                        <th>ID Plante</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($taches as $dosage) { ?>
+<tr>
+    <td><?php echo $dosage['id_dosage']; ?></td>
+    <td><?php echo htmlspecialchars($dosage['type_dosage']); ?></td>
+    <td><?php echo $dosage['quantite']; ?></td>
+    <td><?php echo htmlspecialchars($dosage['mode_dosage']); ?></td>
+    <td><?php echo $dosage['date_dosage']; ?></td>
+    <td><?php echo $dosage['derniereExecution']; ?></td>
+    <td><?php echo $dosage['prochaineExecution']; ?></td>
+    <td>
+        <?php 
+            if($dosage['estComplete'] == 0) echo 'Non commencé';
+            elseif($dosage['estComplete'] == 1) echo 'En cours';
+            else echo 'Complète';
+        ?>
+    </td>
+    <td>
+        <?php 
+            if($dosage['priorite'] == 1) echo 'Basse';
+            elseif($dosage['priorite'] == 2) echo 'Moyenne';
+            else echo 'Haute';
+        ?>
+    </td>
+    <td><?php echo $dosage['id_plante']; ?></td>
+    <td>
+        <a href="plantes.php?editTache=<?php echo $dosage['id_dosage']; ?>" class="btn btn-warning btn-sm" title="Modifier">
+            <i class="fa fa-edit"></i>
+        </a>
+        <a href="supprimerTache.php?id=<?php echo $dosage['id_dosage']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Voulez-vous vraiment supprimer ce dosage ?');">
+            <i class="fa fa-trash"></i>
+        </a>
+    </td>
+</tr>
+<?php } ?>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Add Dosage Modal -->
+<div class="modal fade" id="addTacheModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-light">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa fa-plus"></i> Ajouter un Dosage</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="addTacheForm" method="POST" action="ajoutT.php">
+
+                <div class="modal-body">
+                    <div id="addTacheError" style="display:none;" class="alert alert-danger"></div>
+
+                    <div class="row">
+
+                        <!-- Type de dosage -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Type de dosage</label>
+                            <select class="form-select" name="type_dosage">
+                                <option value="Arrosage">Arrosage</option>
+                                <option value="Fertilisation">Fertilisation</option>
+                                <option value="Taille">Taille</option>
+                            </select>
+                        </div>
+
+                        <!-- Quantité -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Quantité</label>
+                            <input type="number" class="form-control" name="quantite">
+                        </div>
+
+                        <!-- Mode dosage -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Mode dosage</label>
+                            <select class="form-select" name="mode_dosage">
+                                <option value="Automatique">Automatique</option>
+                                <option value="Manuel">Manuel</option>
+                                <option value="Semi-automatique">Semi-automatique</option>
+                            </select>
+                        </div>
+
+                        <!-- Date dosage -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date dosage</label>
+                            <input type="date" class="form-control" name="date_dosage">
+                        </div>
+
+                        <!-- Dernière exécution -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Dernière exécution</label>
+                            <input type="date" class="form-control" name="derniereExecution">
+                        </div>
+
+                        <!-- Prochaine exécution -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Prochaine exécution</label>
+                            <input type="date" class="form-control" name="prochaineExecution">
+                        </div>
+
+                        <!-- État -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">État</label>
+                            <select class="form-select" name="estComplete">
+                                <option value="0">Non commencé</option>
+                                <option value="1">En cours</option>
+                                <option value="2">Complète</option>
+                            </select>
+                        </div>
+
+                        <!-- Priorité -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Priorité</label>
+                            <select class="form-select" name="priorite">
+                                <option value="1">Basse</option>
+                                <option value="2">Moyenne</option>
+                                <option value="3">Haute</option>
+                            </select>
+                        </div>
+
+                        <!-- ID Plante -->
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Plante associée</label>
+                            <select name="id_plante" class="form-select">
+                                <?php foreach($listePlantes as $plante): ?>
+                                    <option value="<?= $plante['id_plante'] ?>">
+                                        <?= htmlspecialchars($plante['id_plante']) ?> - <?= htmlspecialchars($plante['nom_plante']) ?>
+                                    </option>  
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">Ajouter</button>
+                </div>
+                                
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("addTacheForm");
+    const errorDiv = document.getElementById("addTacheError");
+    const fields = form.querySelectorAll("input[name], select[name]");
+    let isSubmitting = false;
+
+    // --- Fonction de validation d’un champ ---
+    function checkField(input) {
+        let error = "";
+        const value = input.value.trim();
+
+        // Vérification obligatoire
+        if (!value) {
+            error = "Ce champ est obligatoire.";
+        } else {
+            switch(input.name) {
+                case "quantite":
+                    if (Number(value) <= 0) error = "La quantité doit être > 0.";
+                    break;
+                case "estComplete":
+                case "priorite":
+                case "id_plante":
+                    if (!Number.isInteger(Number(value)) || Number(value) < 0)
+                        error = "Valeur invalide.";
+                    break;
+                case "prochaineExecution":
+                    const derniere = form.querySelector("input[name='derniereExecution']").value;
+                    if (derniere && value <= derniere) {
+                        error = "La date prochaine exécution doit être après la dernière exécution.";
+                    }
+                    break;
+            }
+        }
+
+        // Supprimer ancien message
+        const msg = input.parentElement.querySelector(".error-msg");
+        if (msg) msg.remove();
+
+        if (error) {
+            const span = document.createElement("div");
+            span.className = "error-msg text-danger mt-1";
+            span.textContent = error;
+            input.parentElement.appendChild(span);
+            input.classList.add("is-invalid");
+            input.classList.remove("is-valid");
+            return false;
+        } else {
+            input.classList.remove("is-invalid");
+            input.classList.add("is-valid");
+            return true;
+        }
+    }
+
+    // --- Cacher la bande rouge ---
+    function hideErrorDiv() {
+        errorDiv.style.display = "none";
+        errorDiv.textContent = "";
+    }
+
+    // --- Validation en temps réel ---
+    fields.forEach(input => {
+        input.addEventListener("input", () => { checkField(input); hideErrorDiv(); });
+        input.addEventListener("change", () => { checkField(input); hideErrorDiv(); });
+    });
+
+    // --- Submit form ---
+    form.addEventListener("submit", (e) => {
+        if (isSubmitting) return;
+
+        hideErrorDiv();
+        let valid = true;
+        fields.forEach(input => {
+            if (!checkField(input)) valid = false;
+        });
+
+        if (!valid) {
+            e.preventDefault();
+            errorDiv.textContent = "Veuillez corriger les erreurs ci-dessus.";
+            errorDiv.style.display = "block";
+            return;
+        }
+
+        isSubmitting = true;
+    });
+
+    // --- Ouvrir modal si erreur serveur ---
+    <?php if (!empty($errorMsg)): ?>
+        const addTacheModal = new bootstrap.Modal(document.getElementById('addTacheModal'));
+        addTacheModal.show();
+        errorDiv.textContent = "<?= $errorMsg ?>";
+        errorDiv.style.display = "block";
+        
+        // Afficher une notification toast erreur
+        if (typeof toastManager !== 'undefined') {
+            toastManager.error("<?= addslashes($errorMsg) ?>");
+        }
+    <?php endif; ?>
+
+    // --- Affichage message succès (toast) ---
+    <?php if (!empty($successMsg)): ?>
+        if (typeof toastManager !== 'undefined') {
+            toastManager.success("<?= addslashes($successMsg) ?>");
+        } else {
+            const toastDiv = document.createElement('div');
+            toastDiv.className = 'toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3';
+            toastDiv.role = 'alert';
+            toastDiv.ariaLive = 'assertive';
+            toastDiv.ariaAtomic = 'true';
+            toastDiv.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body"><?= $successMsg ?></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>`;
+            document.body.appendChild(toastDiv);
+            const toast = new bootstrap.Toast(toastDiv, { delay: 3000 });
+            toast.show();
+        }
+
+        // Optionnel: rafraîchir la page pour voir la nouvelle tâche
+        setTimeout(() => { window.location.reload(); }, 1000);
+    <?php endif; ?>
+
+});
+</script>
+
+
+
+
+
+<!-- Edit Dosage Modal -->
+
+<?php if ($editTache): ?>
+<div class="modal fade show" id="editTacheModal" tabindex="-1" 
+     style="display:block; background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-light">
+
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa fa-edit"></i> Modifier le Dosage</h5>
+                <a href="taches.php" class="btn-close"></a>
+            </div>
+
+            <form id="editTacheForm" method="POST" action="modifierTache.php">
+                <input type="hidden" name="id_dosage" value="<?= $editTache['id_dosage'] ?>">
+
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Type dosage</label>
+                            <select class="form-select" name="type_dosage">
+                                <option value="Arrosage" <?= $editTache['type_dosage']=='Arrosage'?'selected':'' ?>>Arrosage</option>
+                                <option value="Fertilisation" <?= $editTache['type_dosage']=='Fertilisation'?'selected':'' ?>>Fertilisation</option>
+                                <option value="Taille" <?= $editTache['type_dosage']=='Taille'?'selected':'' ?>>Taille</option>
+                            </select>
+                            <div class="error-msg"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Quantité</label>
+                            <input type="number" class="form-control" name="quantite" value="<?= $editTache['quantite'] ?>">
+                            <div class="error-msg"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Mode dosage</label>
+                            <select class="form-select" name="mode_dosage">
+                                <option value="Automatique" <?= $editTache['mode_dosage']=='Automatique'?'selected':'' ?>>Automatique</option>
+                                <option value="Manuel" <?= $editTache['mode_dosage']=='Manuel'?'selected':'' ?>>Manuel</option>
+                                <option value="Semi-automatique" <?= $editTache['mode_dosage']=='Semi-automatique'?'selected':'' ?>>Semi-auto</option>
+                            </select>
+                            <div class="error-msg"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Date dosage</label>
+                            <input type="date" class="form-control" name="date_dosage"
+                                   value="<?= $editTache['date_dosage'] ?>">
+                            <div class="error-msg"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Dernière exécution</label>
+                            <input type="date" class="form-control" name="derniereExecution"
+                                   value="<?= $editTache['derniereExecution'] ?>">
+                            <div class="error-msg"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Prochaine exécution</label>
+                            <input type="date" class="form-control" name="prochaineExecution"
+                                   value="<?= $editTache['prochaineExecution'] ?>">
+                            <div class="error-msg"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>État</label>
+                            <select class="form-select" name="estComplete">
+                                <option value="0" <?= $editTache['estComplete']==0?'selected':'' ?>>Non commencé</option>
+                                <option value="1" <?= $editTache['estComplete']==1?'selected':'' ?>>En cours</option>
+                                <option value="2" <?= $editTache['estComplete']==2?'selected':'' ?>>Complète</option>
+                            </select>
+                            <div class="error-msg"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Priorité</label>
+                            <select class="form-select" name="priorite">
+                                <option value="1" <?= $editTache['priorite']==1?'selected':'' ?>>Basse</option>
+                                <option value="2" <?= $editTache['priorite']==2?'selected':'' ?>>Moyenne</option>
+                                <option value="3" <?= $editTache['priorite']==3?'selected':'' ?>>Haute</option>
+                            </select>
+                            <div class="error-msg"></div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label>Plante associée</label>
+                            <select class="form-select" name="id_plante">
+                                <?php foreach($listePlantes as $pl): ?>
+                                    <option value="<?= $pl['id_plante'] ?>"
+                                        <?= $pl['id_plante']==$editTache['id_plante']?'selected':'' ?>>
+                                        <?= $pl['id_plante'] ?> - <?= htmlspecialchars($pl['nom_plante']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="error-msg"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <a href="taches.php" class="btn btn-secondary">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                </div>
+
+                <div id="editTacheError" class="text-danger fw-bold mt-2" style="display:none;"></div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- VIEW PLANTE MODAL -->
+<div class="modal fade" id="viewPlanteModal" tabindex="-1" aria-labelledby="viewPlanteLabelModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewPlanteLabelModal"><i class="fa fa-leaf"></i> Détails de la Plante</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Nom de la Plante</label>
+                        <p id="viewPlanteNom" class="form-control-plaintext">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">ID Plante</label>
+                        <p id="viewPlanteId" class="form-control-plaintext">-</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">ID Utilisateur</label>
+                        <p id="viewPlanteUserId" class="form-control-plaintext">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Date d'ajout</label>
+                        <p id="viewPlanteDate" class="form-control-plaintext">-</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Niveau d'Humidité</label>
+                        <p id="viewPlanteHumidite" class="form-control-plaintext">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Besoin en Eau</label>
+                        <p id="viewPlanteEau" class="form-control-plaintext">-</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">État de Santé</label>
+                        <p id="viewPlanteSante" class="form-control-plaintext">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Température</label>
+                        <p id="viewPlanteTemperature" class="form-control-plaintext">-</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Image</label>
+                        <div id="viewPlanteImageContainer" class="mt-2">
+                            <img id="viewPlanteImage" src="" alt="Plante" style="max-width: 200px; max-height: 200px; border-radius: 4px; display: none;">
+                            <p id="viewPlanteImageNotFound" class="form-control-plaintext">Aucune image</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const form = document.getElementById("editTacheForm");
+    const errorDiv = document.getElementById("editTacheError");
+    const fields = form.querySelectorAll("input[name], select[name]");
+    let isSubmitting = false;
+
+    function checkField(input) {
+        const msg = input.parentElement.querySelector(".error-msg");
+        let error = "";
+        const value = input.value.trim();
+
+        if (!value) {
+            error = "Ce champ est obligatoire.";
+        } else {
+            switch (input.name) {
+
+                case "quantite":
+                    if (Number(value) <= 0)
+                        error = "La quantité doit être > 0.";
+                    break;
+
+                case "priorite":
+                    if (![1,2,3].includes(Number(value)))
+                        error = "Priorité invalide.";
+                    break;
+
+                case "estComplete":
+                    if (![0,1,2].includes(Number(value)))
+                        error = "État invalide.";
+                    break;
+
+                case "id_plante":
+                    if (Number(value) <= 0)
+                        error = "Plante invalide.";
+                    break;
+
+                case "prochaineExecution":
+                case "derniereExecution":
+                    const d1 = form.derniereExecution.value;
+                    const d2 = form.prochaineExecution.value;
+
+                    if (d1 && d2 && d2 <= d1)
+                        error = "La prochaine exécution doit être après la dernière.";
+                    break;
+            }
+        }
+
+        if (error) {
+            msg.textContent = error;
+            msg.classList.add("text-danger");
+            msg.classList.remove("text-success");
+            input.classList.add("is-invalid");
+            input.classList.remove("is-valid");
+            return false;
+        } else {
+            msg.textContent = "Valide ✔";
+            msg.classList.add("text-success");
+            msg.classList.remove("text-danger");
+            input.classList.add("is-valid");
+            input.classList.remove("is-invalid");
+            return true;
+        }
+    }
+
+    fields.forEach(input => {
+        input.addEventListener("input", () => checkField(input));
+        input.addEventListener("change", () => checkField(input));
+    });
+
+    form.addEventListener("submit", e => {
+        if (isSubmitting) return;
+
+        let valid = true;
+        fields.forEach(input => {
+            if (!checkField(input)) valid = false;
+        });
+
+        if (!valid) {
+            e.preventDefault();
+            errorDiv.textContent = "Veuillez corriger les erreurs avant de soumettre.";
+            errorDiv.style.display = "block";
+        } else {
+            errorDiv.style.display = "none";
+            isSubmitting = true;
+        }
+    });
+
+    new bootstrap.Modal(document.getElementById("editTacheModal")).show();
+    
+    // --- Affichage message succès/erreur (toast) pour édition tâche ---
+    <?php if (!empty($successMsg)): ?>
+        if (typeof toastManager !== 'undefined') {
+            toastManager.success("<?= addslashes($successMsg) ?>");
+        } else {
+            const toastDiv = document.createElement('div');
+            toastDiv.className = 'toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3';
+            toastDiv.role = 'alert';
+            toastDiv.ariaLive = 'assertive';
+            toastDiv.ariaAtomic = 'true';
+            toastDiv.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body"><?= $successMsg ?></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>`;
+            document.body.appendChild(toastDiv);
+            const toast = new bootstrap.Toast(toastDiv, { delay: 3000 });
+            toast.show();
+        }
+
+        // Optionnel: rafraîchir la page pour voir les modifications
+        setTimeout(() => { window.location.reload(); }, 1000);
+    <?php endif; ?>
+    
+    <?php if (!empty($errorMsg)): ?>
+        if (typeof toastManager !== 'undefined') {
+            toastManager.error("<?= addslashes($errorMsg) ?>");
+        }
+    <?php endif; ?>
+});
+
+// Gestion des suggestions
+function loadSuggestions() {
+    fetch('suggestionAPI.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'action=count'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('badgeSuggestions').textContent = data.count;
+            if (data.count > 0) {
+                document.getElementById('badgeSuggestions').style.display = 'inline';
+            }
+        }
+    });
+}
+
+document.getElementById('btnSuggestions').addEventListener('click', function() {
+    showSuggestionsModal();
+});
+
+function showSuggestionsModal() {
+    fetch('suggestionAPI.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'action=list&filter=En attente'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            let tableRows = '';
+            
+            if (data.suggestions.length === 0) {
+                tableRows = '<tr><td colspan="8" class="text-center text-muted py-4">Aucune suggestion en attente</td></tr>';
+            } else {
+                data.suggestions.forEach(s => {
+                    tableRows += `
+                        <tr>
+                            <td>${s.nom_plante}</td>
+                            <td>${s.id_suggestion}</td>
+                            <td>${s.id_utilisateur}</td>
+                            <td>${s.date_suggestion}</td>
+                            <td>${s.type_plante}</td>
+                            <td><span class="badge bg-info">${s.statut}</span></td>
+                            <td>
+                                <div style="max-width: 300px; word-wrap: break-word;">
+                                    ${s.description || 'N/A'}
+                                </div>
+                                ${s.image ? `<br><img src="${s.image}" alt="Plante" style="max-width: 80px; margin-top: 5px;">` : ''}
+                            </td>
+                            <td>
+                                <button class="btn btn-success btn-sm" onclick="acceptSuggestion(${s.id_suggestion})" title="Accepter">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="rejectSuggestion(${s.id_suggestion})" title="Rejeter">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            let html = `
+                <div class="table-responsive">
+                    <table class="table text-start align-middle table-bordered table-hover mb-0">
+                        <thead class="table-warning">
+                            <tr class="text-dark">
+                                <th>Nom</th>
+                                <th>ID</th>
+                                <th>Utilisateur</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Statut</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            // Créer une modale temporaire
+            let modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'suggestionsModal';
+            modal.setAttribute('tabindex', '-1');
+            modal.innerHTML = `
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning">
+                            <h5 class="modal-title">💡 Suggestions de Plantes (${data.suggestions.length})</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                            ${html}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            let bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+            
+            modal.addEventListener('hidden.bs.modal', function() {
+                modal.remove();
+            });
+        }
+    });
+}
+
+function acceptSuggestion(id) {
+    if (!confirm('Accepter cette suggestion et créer la plante?')) return;
+    
+    fetch('suggestionAPI.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `action=accept&id_suggestion=${id}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) {
+            loadSuggestions();
+            showSuggestionsModal();
+        }
+    });
+}
+
+function rejectSuggestion(id) {
+    if (!confirm('Rejeter cette suggestion?')) return;
+    
+    fetch('suggestionAPI.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `action=reject&id_suggestion=${id}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) {
+            loadSuggestions();
+            showSuggestionsModal();
+        }
+    });
+}
+
+// Charger les suggestions au démarrage
+loadSuggestions();
+
+// ===== SUGGESTIONS DE TÂCHES =====
+
+// Charger les suggestions de tâches
+function loadSuggestionsTaches() {
+    fetch('suggestionTacheAPI.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=list&filter=En attente'
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log('Suggestions de tâches reçues:', data);
+        const badge = document.getElementById('badgeSuggestionsTaches');
+        if (data.suggestions) {
+            badge.textContent = data.suggestions.length;
+        }
+    });
+}
+
+// Afficher le modal de suggestions de tâches
+function showSuggestionsTachesModal() {
+    fetch('suggestionTacheAPI.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=list&filter=Toutes'
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log('Réponse complète:', data);
+        
+        // Créer le modal dynamiquement
+        let modal = document.getElementById('suggestionsTachesModal');
+        if (modal) modal.remove();
+        
+        modal = document.createElement('div');
+        modal.id = 'suggestionsTachesModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = '-1';
+        modal.setAttribute('aria-hidden', 'true');
+        
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title">📋 Suggestions de Tâches (${data.suggestions ? data.suggestions.length : 0})</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-hover table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Quantité</th>
+                                    <th>Mode</th>
+                                    <th>Date Dosage</th>
+                                    <th>Prochaine Exécution</th>
+                                    <th>Priorité</th>
+                                    <th>Utilisateur</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.suggestions && data.suggestions.length > 0 ? data.suggestions.map(s => `
+                                    <tr>
+                                        <td><strong>${s.type_dosage}</strong></td>
+                                        <td>${s.quantite}</td>
+                                        <td>${s.mode_dosage || 'N/A'}</td>
+                                        <td>${s.date_dosage ? new Date(s.date_dosage).toLocaleDateString('fr-FR') : 'N/A'}</td>
+                                        <td>${s.prochaineExecution ? new Date(s.prochaineExecution).toLocaleString('fr-FR') : 'N/A'}</td>
+                                        <td>
+                                            ${s.priorite === 'Élevée' ? '<span class="badge bg-danger">↑ Élevée</span>' :
+                                              s.priorite === 'Moyen' ? '<span class="badge bg-warning text-dark">= Moyen</span>' :
+                                              '<span class="badge bg-success">↓ Faible</span>'}
+                                        </td>
+                                        <td>${s.utilisateur_nom || 'Utilisateur #' + s.id_utilisateur}</td>
+                                        <td>
+                                            ${s.statut === 'En attente' ? '<span class="badge bg-secondary">En attente</span>' :
+                                              s.statut === 'Acceptée' ? '<span class="badge bg-success">Acceptée</span>' :
+                                              '<span class="badge bg-danger">Rejetée</span>'}
+                                        </td>
+                                        <td>
+                                            ${s.statut === 'En attente' ? `
+                                                <button class="btn btn-sm btn-success" onclick="acceptSuggestionTache(${s.id_suggestion})">
+                                                    <i class="fa fa-check"></i> Accepter
+                                                </button>
+                                                <button class="btn btn-sm btn-danger ms-1" onclick="rejectSuggestionTache(${s.id_suggestion})">
+                                                    <i class="fa fa-times"></i> Rejeter
+                                                </button>
+                                            ` : '<span class="text-muted small">Traitée</span>'}
+                                        </td>
+                                    </tr>
+                                `).join('') : '<tr><td colspan="9" class="text-center text-muted">Aucune suggestion</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+    });
+}
+
+// Accepter une suggestion de tâche
+function acceptSuggestionTache(idSuggestion) {
+    // Créer un modal pour choisir la plante
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'selectPlanteModal';
+    modal.tabIndex = '-1';
+    
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">🪴 Sélectionner une plante</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label fw-bold">Plante associée à cette tâche:</label>
+                    <select id="selectPlante" class="form-select" required>
+                        <option value="">-- Choisir une plante --</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-success" onclick="confirmAcceptTache(${idSuggestion})">Accepter</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Charger les plantes
+    fetch('getPlantes.php')
+        .then(res => res.json())
+        .then(plantes => {
+            const select = document.getElementById('selectPlante');
+            plantes.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id_plante;
+                opt.textContent = p.nom_plante + ' (ID: ' + p.id_plante + ')';
+                select.appendChild(opt);
+            });
+        })
+        .catch(err => console.error('Erreur:', err));
+    
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    modal.addEventListener('hidden.bs.modal', () => modal.remove());
+}
+
+function confirmAcceptTache(idSuggestion) {
+    const idPlante = document.getElementById('selectPlante').value;
+    
+    if (!idPlante) {
+        alert('⚠️ Sélectionnez une plante');
+        return;
+    }
+    
+    fetch('suggestionTacheAPI.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `action=accept&id_suggestion=${idSuggestion}&id_plante=${idPlante}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) {
+            const modalEl = document.getElementById('selectPlanteModal');
+            if (modalEl) {
+                const bsModal = bootstrap.Modal.getInstance(modalEl);
+                if (bsModal) bsModal.hide();
+            }
+            loadSuggestionsTaches();
+            showSuggestionsTachesModal();
+        }
+    });
+}
+
+// Rejeter une suggestion de tâche
+function rejectSuggestionTache(idSuggestion) {
+    if (confirm('Êtes-vous sûr de vouloir rejeter cette suggestion?')) {
+        fetch('suggestionTacheAPI.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `action=reject&id_suggestion=${idSuggestion}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if (data.success) {
+                loadSuggestionsTaches();
+                showSuggestionsTachesModal();
+            }
+        });
+    }
+}
+
+// Événement click pour le bouton suggestions tâches
+document.addEventListener('DOMContentLoaded', function() {
+    const btnSuggestionsTaches = document.getElementById('btnSuggestionsTaches');
+    if (btnSuggestionsTaches) {
+        btnSuggestionsTaches.addEventListener('click', showSuggestionsTachesModal);
+    }
+    
+    // Charger le nombre de suggestions de tâches
+    loadSuggestionsTaches();
+    setInterval(loadSuggestionsTaches, 5000); // Rafraîchir toutes les 5 secondes
+});
+
+// ========== VIEW PLANTE MODAL ==========
+function viewPlante(id) {
+    fetch('getPlanteDetails.php?id=' + id)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const plante = data.plante;
+                document.getElementById('viewPlanteNom').textContent = htmlEscape(plante.nom_plante);
+                document.getElementById('viewPlanteId').textContent = plante.id_plante;
+                document.getElementById('viewPlanteUserId').textContent = plante.idUtilisateur;
+                document.getElementById('viewPlanteDate').textContent = plante.date_ajout;
+                document.getElementById('viewPlanteHumidite').textContent = plante.niveau_humidite + ' %';
+                document.getElementById('viewPlanteEau').textContent = plante.besoin_eau + ' ml/jour';
+                document.getElementById('viewPlanteSante').textContent = plante.etat_sante;
+                document.getElementById('viewPlanteTemperature').textContent = plante.temperature + ' °C';
+                
+                // Handle image display
+                const imageImg = document.getElementById('viewPlanteImage');
+                const imageNotFound = document.getElementById('viewPlanteImageNotFound');
+                
+                if (plante.image && plante.image.trim() !== '') {
+                    imageImg.src = htmlEscape(plante.image);
+                    imageImg.style.display = 'block';
+                    imageNotFound.style.display = 'none';
+                } else {
+                    imageImg.style.display = 'none';
+                    imageNotFound.style.display = 'block';
+                }
+                
+                const viewPlanteModal = new bootstrap.Modal(document.getElementById('viewPlanteModal'));
+                viewPlanteModal.show();
+            } else {
+                alert('Erreur: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors du chargement des données');
+        });
+}
+
+function htmlEscape(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+</script>
+
+
+
+
+
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+    </div>
+</div>
+
+<!-- JavaScript Libraries -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+</body>
+</html>
