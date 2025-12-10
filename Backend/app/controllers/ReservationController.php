@@ -1,62 +1,114 @@
 <?php
 
 include_once __DIR__ . '/../core/config.php';
+require_once __DIR__ . '/PHPMailer/src/Exception.php';
+require_once __DIR__ . '/PHPMailer/src/PHPMailer.php';
+require_once __DIR__ . '/PHPMailer/src/SMTP.php';
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 class ReservationController
 {
-    public function addReservation()
-    {
-        header('Content-Type: application/json');
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: POST, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type');
+public function addReservation()
+{
+    header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type');
 
-        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-            exit(0);
-        }
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
 
-        $input = json_decode(file_get_contents('php://input'), true);
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        exit(0);
+    }
 
-        $event_id = $input['id_event'] ?? null;
-        $user_id  = $input['idUtilisateur'] ?? 999;
-        $nom = $input['nom'] ?? '';
-        $prenom = $input['prenom'] ?? '';
-        $email = $input['email'] ?? '';
-        $telephone = $input['telephone'] ?? '';
+    $input = json_decode(file_get_contents('php://input'), true);
 
-        if (!$event_id || !is_numeric($event_id)) {
-            echo json_encode(["status" => "error", "message" => "ID événement requis"]);
+    $event_id = $input['id_event'] ?? null;
+    $user_id  = $input['idUtilisateur'] ?? 999;
+    $nom = $input['nom'] ?? '';
+    $prenom = $input['prenom'] ?? '';
+    $email = $input['email'] ?? '';
+    $telephone = $input['telephone'] ?? '';
+
+    if (!$event_id || !is_numeric($event_id)) {
+        echo json_encode(["status" => "error", "message" => "ID événement requis"]);
+        error_log("Reservation failed: ID événement requis");
+        return;
+    }
+
+    if (empty($nom) || empty($prenom) || empty($email)) {
+        echo json_encode(["status" => "error", "message" => "Nom, prénom et email sont obligatoires"]);
+        error_log("Reservation failed: Nom, prénom ou email manquant");
+        return;
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(["status" => "error", "message" => "Format d'email invalide"]);
+        error_log("Reservation failed: Email invalide - $email");
+        return;
+    }
+
+    try {
+        $db = config::getConnexion();
+
+        // Check if user already reserved
+        $check = $db->prepare("SELECT id_reservation FROM reservation WHERE id_event = ? AND idUtilisateur = ?");
+        $check->execute([$event_id, $user_id]);
+        if ($check->fetch()) {
+            echo json_encode(["status" => "info", "message" => "Tu as déjà réservé cet événement !"]);
+            error_log("Reservation already exists for user $user_id and event $event_id");
             return;
         }
 
-        if (empty($nom) || empty($prenom) || empty($email)) {
-            echo json_encode(["status" => "error", "message" => "Nom, prénom et email sont obligatoires"]);
-            return;
-        }
+        // Insert reservation
+        $stmt = $db->prepare("INSERT INTO reservation (id_event, idUtilisateur, nom, prenom, email, telephone, date_reservation) VALUES (?, ?, ?, ?, ?, ?, NOW())");
+        $stmt->execute([$event_id, $user_id, $nom, $prenom, $email, $telephone]);
+        error_log("Reservation inserted for user $user_id and event $event_id");
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            echo json_encode(["status" => "error", "message" => "Format d'email invalide"]);
-            return;
-        }
+        // ===== Send email using PHPMailer =====
+        $mail = new PHPMailer(true);
 
         try {
-            $db = config::getConnexion();
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'marwabouchrika55@gmail.com';
+            $mail->Password   = 'uujqctzedacplsjk'; // App password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
 
-            $check = $db->prepare("SELECT id_reservation FROM reservation WHERE id_event = ? AND idUtilisateur = ?");
-            $check->execute([$event_id, $user_id]);
-            if ($check->fetch()) {
-                echo json_encode(["status" => "info", "message" => "Tu as déjà réservé cet événement !"]);
-                return;
-            }
+            $mail->setFrom('marwabouchrika55@gmail.com', 'Smart Garden');
+            
+            // HARD-CODED recipient for testing
+            $mail->addAddress('marwabouchrika55@gmail.com', 'Marwa Bouchrika');
 
-            $stmt = $db->prepare("INSERT INTO reservation (id_event, idUtilisateur, nom, prenom, email, telephone, date_reservation) VALUES (?, ?, ?, ?, ?, ?, NOW())");
-            $stmt->execute([$event_id, $user_id, $nom, $prenom, $email, $telephone]);
+            $mail->isHTML(true);
+            $mail->Subject = 'Confirmation de réservation';
+            $mail->Body    = "Bonjour $prenom,<br><br>Votre réservation pour l'événement #$event_id a été confirmée avec succès !<br><br>Merci,<br>Smart Garden Team";
 
-            echo json_encode(["status" => "success", "message" => "Réservation confirmée avec succès !"]);
+            $mail->send();
+            error_log("Email sent successfully to marwabouchrika55@gmail.com");
         } catch (Exception $e) {
-            echo json_encode(["status" => "error", "message" => "Erreur DB : " . $e->getMessage()]);
+            error_log("Email failed: {$mail->ErrorInfo}");
+            echo json_encode([
+                "status" => "warning",
+                "message" => "Réservation confirmée, mais email non envoyé : {$mail->ErrorInfo}"
+            ]);
+            return;
         }
+
+        echo json_encode(["status" => "success", "message" => "Réservation confirmée et email envoyé !"]);
+        error_log("Reservation process complete for user $user_id");
+
+    } catch (Exception $e) {
+        error_log("Database error: " . $e->getMessage());
+        echo json_encode(["status" => "error", "message" => "Erreur DB : " . $e->getMessage()]);
     }
+}
+
+
 
     public function cancelUserReservation()
     {
