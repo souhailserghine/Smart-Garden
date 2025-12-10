@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle Publication</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; }
+        button { background: green; color: white; padding: 10px; border: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Nouvelle Publication</h2>
+        
+        <form action="ajout.php" method="POST">
+            <p>
+                <label>Titre :</label>
+                <input type="text" name="titre" placeholder="Titre de la publication" required>
+            </p>
+            
+            <p>
+                <label>Contenu :</label>
+                <textarea name="contenu" rows="5" placeholder="Contenu..." required></textarea>
+            </p>
+            
+            <input type="hidden" name="auteur_id" value="1">
+            
+            <button type="submit">Publier</button>
+            <a href="liste.php">Voir les publications</a>
+        </form>
+    </div>
+</body>
+</html>
