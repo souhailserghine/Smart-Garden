@@ -74,7 +74,7 @@ switch ($action) {
 
     case 'listCategories':
         $cc = new CategoryController();
-        $cc->getAllCategories(); // Cette méthode echo déjà le JSON
+        $cc->getAllCategories(); 
         break;
 
     case 'reserveEvent':
