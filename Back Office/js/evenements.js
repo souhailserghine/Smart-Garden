@@ -1,4 +1,4 @@
-const API = '/view/Backend/public/index.php';
+const API = '/Smart-Garden/Backend/public/index.php';
 let PER_PAGE = 10;
 let events = [], filteredEvents = [], currentPage = 1, calendar = null, chart = null;
 let map = null, marker = null;
