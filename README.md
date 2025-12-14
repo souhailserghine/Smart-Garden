@@ -155,5 +155,5 @@ Sous réserve de conserver la mention de copyright et la licence.
 
 ## 👨‍💻 Auteur
 
-* **Souhail Serghine**
+* **NovaCrew**
 
