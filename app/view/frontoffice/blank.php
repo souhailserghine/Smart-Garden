@@ -1,4 +1,4 @@
-﻿<?php require_once 'check_session.php'; ?>
+<?php require_once 'check_session.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -29,7 +29,7 @@
             <div class="col-md-12 newsfeed-right-side">
                 <nav id="navbar-main" class="navbar navbar-expand-lg shadow-sm sticky-top">
                     <ul class="navbar-nav mr-5" id="main_menu">
-                        <a class="navbar-brand nav-item mr-lg-5" href="index.php"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
+                        <a class="navbar-brand nav-item mr-lg-5" href="publications.php"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
                         
                         <form class="w-30 mx-2 my-auto d-inline form-inline mr-5">
                             <div class="input-group">
@@ -112,7 +112,7 @@
                                                 <i class='bx bx-radio-circle-marked'></i>
                                             </a>
                                             <p class="time">
-                                                Great, I’ll see you tomorrow!.
+                                                Great, I'll see you tomorrow!.
                                             </p>
                                         </div>
                                     </li>
@@ -362,7 +362,7 @@
                     <button type="button" class="btn btn-primary mr-3" id="menu-toggle"><i class='bx bx-align-left'></i></button>
                 </nav>
                 <div class="row newsfeed-right-side-content mt-3">
-                    <div class="col-md-2 newsfeed-left-side sticky-top shadow-sm" id="sidebar-wrapper">
+                    <div class="col-md-3 newsfeed-left-side sticky-top shadow-sm" id="sidebar-wrapper">
                         <div class="card newsfeed-user-card h-100">
                             <ul class="list-group list-group-flush newsfeed-left-sidebar">
                                 <li class="list-group-item">
@@ -385,7 +385,7 @@
                                     <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="capteurs.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/saved.png" alt="capteurs"> Capteurs</a>
+                                    <a href="listCategorie.php" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/saved.png" alt="capteurs"> Capteurs</a>
                                     <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
                                 </li>
                             </ul>

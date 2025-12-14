@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once '../../mailer.php';
 require_once '../../password_helpers.php';
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="icon" type="image/png" href="./assets/images/logo-16x16.png" />
-    <title>Forgot Password - SmartGarden</title>
+    <title>SmartGarden</title>
 
     <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display" rel="stylesheet">
     <link href='https://cdn.jsdelivr.net/npm/boxicons@1.9.2/css/boxicons.min.css' rel='stylesheet'>

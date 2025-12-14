@@ -1,4 +1,4 @@
-﻿<?php require_once 'check_session.php'; 
+<?php require_once 'check_session.php'; 
 
 require_once '../../controller/utilisateurController.php';
 require_once '../../controller/historiqueController.php';
@@ -21,7 +21,7 @@ $historiques = $historiqueC->afficherParUtilisateur($id);
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="icon" type="image/png" href="./assets/images/logo-16x16.png" />
     
-    <title>Activity Log - SmartGarden</title>
+    <title>SmartGarden</title>
 
     
     <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display" rel="stylesheet">
@@ -42,7 +42,7 @@ $historiques = $historiqueC->afficherParUtilisateur($id);
             <div class="col-md-12 message-right-side">
                 <nav id="navbar-main" class="navbar navbar-expand-lg shadow-sm sticky-top">
                     <ul class="navbar-nav mr-5" id="main_menu">
-                        <a class="navbar-brand nav-item mr-lg-5" href="index.php"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
+                        <a class="navbar-brand nav-item mr-lg-5" href="publications.php"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
 
                         <li class="dropdown nav-item nav-quick-links" data-toggle="tooltip" data-placement="bottom" title="Quick Links">
                             <a href="#" class="nav-link nav-links nav-icon" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class='bx bx-align-middle'></i></a>
@@ -65,7 +65,7 @@ $historiques = $historiqueC->afficherParUtilisateur($id);
                                         <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <a href="capteurs.php" class="sidebar-item"><i class='bx bx-bookmarks text-primary'></i> Capteurs</a>
+                                        <a href="listCategorie.php" class="sidebar-item"><i class='bx bx-bookmarks text-primary'></i> Capteurs</a>
                                         <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
                                     </li>
                                 </ul>
@@ -154,7 +154,7 @@ $historiques = $historiqueC->afficherParUtilisateur($id);
                                                 <i class='bx bx-radio-circle-marked'></i>
                                             </a>
                                             <p class="time">
-                                                Great, I’ll see you tomorrow!.
+                                                Great, I'll see you tomorrow!.
                                             </p>
                                         </div>
                                     </li>

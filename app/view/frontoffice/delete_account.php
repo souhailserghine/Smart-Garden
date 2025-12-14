@@ -9,5 +9,6 @@ $controller->supprimerUtilisateur($id);
 
 session_destroy();
 
-header("Location: sign-in.html");
+header("Location: sign-in.php");
 die();
+

@@ -1,4 +1,4 @@
-﻿<?php require_once 'check_session.php'; ?>
+<?php require_once 'check_session.php'; ?>
 <!DOCTYPE html>
 <html lang="en" class="no-js">
 
@@ -50,7 +50,7 @@
                             </li>
                         </ul>
                         <ul class="navbar-nav mr-5 flex-row" id="main_menu">
-                            <a class="navbar-brand nav-item mr-lg-5" href="index.php"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
+                            <a class="navbar-brand nav-item mr-lg-5" href="publications.php"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
                             
                             <form class="w-30 mx-2 my-auto d-inline form-inline mr-5 dropdown search-form">
                                 <div class="input-group" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="searchDropdown">
@@ -206,7 +206,7 @@
                                                     <i class='bx bx-radio-circle-marked'></i>
                                                 </a>
                                                 <p class="time">
-                                                    Great, I’ll see you tomorrow!.
+                                                    Great, I�ll see you tomorrow!.
                                                 </p>
                                             </div>
                                         </li>
@@ -446,7 +446,7 @@
 
                 </nav>
                 <div class="row newsfeed-right-side-content mt-3">
-                    <div class="col-md-2 newsfeed-left-side sticky-top shadow-sm" id="sidebar-wrapper">
+                    <div class="col-md-3 newsfeed-left-side sticky-top shadow-sm" id="sidebar-wrapper">
                         <div class="card newsfeed-user-card h-100">
                             <ul class="list-group list-group-flush newsfeed-left-sidebar" id="marketplace-parameters">
                                 <li class="list-group-item d-flex align-items-center justify-content-between">
@@ -496,7 +496,7 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="col-md-10 second-section" id="page-content-wrapper">
+                    <div class="col-md-9 second-section" id="page-content-wrapper">
                         <div class="mb-3">
                             <div class="btn-group d-flex top-links-fg">
                                 <a href="index.php" class="btn btn-quick-links mr-3 ql-active">

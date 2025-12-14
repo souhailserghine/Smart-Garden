@@ -2,7 +2,7 @@
 session_start();
 
 // Ensure the Historique controller is available
-require_once __DIR__ . '/../../controller/historiqueController.php';
+require_once '../../controller/historiqueController.php';
 
 // If there's no logged-in user, destroy any session and redirect to sign-in
 if (!isset($_SESSION['user_id'])) {

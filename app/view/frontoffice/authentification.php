@@ -17,6 +17,7 @@ if ($utilisateur && $controller->estVerifie($email)) {
     
     $_SESSION['logged_in'] = true;
     $_SESSION['user_id'] = $utilisateur['idUtilisateur'];
+    $_SESSION['idUtilisateur'] = $utilisateur['idUtilisateur']; // AJOUT: Pour compatibilité
     $_SESSION['user_name'] = $utilisateur['nom'];
     $_SESSION['user_email'] = $utilisateur['email'];
     $_SESSION['user_localisation'] = $utilisateur['localisation'];

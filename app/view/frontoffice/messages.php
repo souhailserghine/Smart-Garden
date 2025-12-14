@@ -1,4 +1,4 @@
-ï»¿<?php require_once 'check_session.php'; ?>
+<?php require_once 'check_session.php'; ?>
 <!DOCTYPE html>
 <html lang="en" class="no-js">
 
@@ -50,7 +50,7 @@
                             </li>
                         </ul>
                         <ul class="navbar-nav mr-5 flex-row" id="main_menu">
-                            <a class="navbar-brand nav-item mr-lg-5" href="index.php"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
+                            <a class="navbar-brand nav-item mr-lg-5" href="publications.php"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
                             
                             <form class="w-30 mx-2 my-auto d-inline form-inline mr-5">
                                 <div class="input-group">
@@ -135,7 +135,7 @@
                                                     <i class='bx bx-radio-circle-marked'></i>
                                                 </a>
                                                 <p class="time">
-                                                    Great, Iâ€™ll see you tomorrow!.
+                                                    Great, I’ll see you tomorrow!.
                                                 </p>
                                             </div>
                                         </li>
@@ -423,7 +423,7 @@
                                                 <span class="unread-messages">3</span>
                                                 <div class="meta">
                                                     <p class="name">Ruth D. Greene</p>
-                                                    <p class="preview">Great, Iâ€™ll see you tomorrow!.</p>
+                                                    <p class="preview">Great, I’ll see you tomorrow!.</p>
                                                 </div>
                                             </div>
                                         </li>

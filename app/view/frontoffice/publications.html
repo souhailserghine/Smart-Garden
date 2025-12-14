@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" type="image/png" href="./assets/images/logo-16x16.png" />
+    <title>SmartGarden - Publications</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display" rel="stylesheet">
+    <link href='https://cdn.jsdelivr.net/npm/boxicons@1.9.2/css/boxicons.min.css' rel='stylesheet'>
+
+    <!-- Styles -->
+    <link href="./assets/css/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="./assets/css/style.css" rel="stylesheet">
+    <link href="./assets/css/components.css" rel="stylesheet">
+    <link href="./assets/css/media.css" rel="stylesheet">
+    <link href="https://vjs.zencdn.net/7.4.1/video-js.css" rel="stylesheet">
+    <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
+    
+    <style>
+        .crud-actions {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .btn-crud {
+            margin: 5px;
+            padding: 8px 20px;
+        }
+        .publication-example {
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        
+        /* Styles pour le message d'inspiration */
+        .inspiration-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 40px 30px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.1);
+        }
+        
+        .inspiration-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #28a745, #20c997, #17a2b8);
+        }
+        
+        .inspiration-icon {
+            font-size: 3.5rem;
+            color: #28a745;
+            margin-bottom: 20px;
+            display: block;
+            text-align: center;
+        }
+        
+        .inspiration-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .inspiration-title::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            border-radius: 2px;
+        }
+        
+        .inspiration-text {
+            color: #495057;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .inspiration-highlight {
+            color: #28a745;
+            font-weight: 600;
+            background: rgba(40, 167, 69, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 0 3px;
+        }
+        
+        .inspiration-quote {
+            font-style: italic;
+            color: #6c757d;
+            border-left: 4px solid #20c997;
+            padding-left: 20px;
+            margin: 25px 0;
+            font-size: 1.05rem;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .action-call {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 2px dashed #dee2e6;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .action-call:hover {
+            border-color: #28a745;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.1);
+        }
+        
+        .action-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-top: 15px;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .action-btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-top: 15px;
+        }
+        
+        .action-btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+            align-items: center;
+        }
+        
+        .decoration-element {
+            position: absolute;
+            opacity: 0.1;
+            font-size: 5rem;
+            color: #28a745;
+        }
+        
+        .decoration-left {
+            top: 20px;
+            left: 20px;
+        }
+        
+        .decoration-right {
+            bottom: 20px;
+            right: 20px;
+            transform: rotate(180deg);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-icon {
+            font-size: 1.8rem;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body class="newsfeed">
+    <div class="container-fluid" id="wrapper">
+        <div class="row newsfeed-size">
+            <div class="col-md-12 newsfeed-right-side">
+                <!-- En-tête complet avec navigation -->
+                <nav id="navbar-main" class="navbar navbar-expand-lg shadow-sm sticky-top">
+                    <ul class="navbar-nav mr-5" id="main_menu">
+                        <a class="navbar-brand nav-item mr-lg-5" href="index.html"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
+                        
+                        <form class="w-30 mx-2 my-auto d-inline form-inline mr-5">
+                            <div class="input-group">
+                                <input type="text" class="form-control search-input w-75" placeholder="Search for people, companies, events and more..." aria-label="Search" aria-describedby="search-addon">
+                                <div class="input-group-append">
+                                    <button class="btn search-button" type="button"><i class='bx bx-search'></i></button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Menu Create -->
+                        <li class="nav-item dropdown d-mobile">
+                            <a href="#" class="nav-link nav-icon nav-links drop-w-tooltip" data-toggle="dropdown" data-placement="bottom" data-title="Create" role="button" aria-haspopup="true" aria-expanded="false">
+                                <img src="./assets/images/icons/navbar/create.png" alt="navbar icon">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right nav-dropdown-menu">
+                                <a href="#" class="dropdown-item" aria-describedby="createGroup">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <i class='bx bx-group post-option-icon'></i>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <span class="fs-9">Group</span>
+                                            <small id="createGroup" class="form-text text-muted">Find people with shared interests</small>
+                                        </div>
+                                    </div>
+                                </a>
+                                <a href="#" class="dropdown-item" aria-describedby="createEvent">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <i class='bx bx-calendar post-option-icon'></i>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <span class="fs-9">Event</span>
+                                            <small id="createEvent" class="form-text text-muted">bring people together with a public or private event</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </li>
+
+                        <!-- Messages -->
+                        <li class="nav-item dropdown message-drop-li">
+                            <a href="#" class="nav-link nav-links message-drop drop-w-tooltip" data-toggle="dropdown" data-placement="bottom" data-title="Messages" role="button" aria-haspopup="true" aria-expanded="false">
+                                <img src="./assets/images/icons/navbar/message.png" class="message-dropdown" alt="navbar icon"> <span class="badge badge-pill badge-primary">1</span>
+                            </a>
+                            <ul class="dropdown-menu notify-drop dropdown-menu-right nav-drop">
+                                <div class="notify-drop-title">
+                                    <div class="fs-8">Messages | <a href="#">Requests</a></div>
+                                    <div>
+                                        <a href="#" class="notify-right-icon">
+                                            Mark All as Read
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="drop-content">
+                                    <li>
+                                        <div class="col-md-3 col-sm-3 col-xs-3">
+                                            <div class="notify-img">
+                                                <img src="./assets/images/users/user-6.png" alt="notification user image">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9 col-sm-9 col-xs-9 pd-l0">
+                                            <a href="#" class="notification-user">Susan P. Jarvis</a>
+                                            <a href="#" class="notify-right-icon">
+                                                <i class='bx bx-radio-circle-marked'></i>
+                                            </a>
+                                            <p class="time">
+                                                <i class='bx bx-check'></i> This party is going to have a DJ, food, and drinks.
+                                            </p>
+                                        </div>
+                                    </li>
+                                </div>
+                                <div class="notify-drop-footer text-center">
+                                    <a href="#">See More</a>
+                                </div>
+                            </ul>
+                        </li>
+
+                        <!-- Notifications -->
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link nav-links drop-w-tooltip" data-toggle="dropdown" data-placement="bottom" data-title="Notifications" role="button" aria-haspopup="true" aria-expanded="false">
+                                <img src="./assets/images/icons/navbar/notification.png" class="notification-bell" alt="navbar icon"> <span class="badge badge-pill badge-primary">3</span>
+                            </a>
+                            <ul class="dropdown-menu notify-drop notify-mobile dropdown-menu-right nav-drop">
+                                <div class="notify-drop-title">
+                                    <div class="fs-8">Notifications <span class="badge badge-pill badge-primary ml-2">3</span></div>
+                                    <div>
+                                        <a href="#" class="notify-right-icon">
+                                            Mark All as Read
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="drop-content">
+                                    <li>
+                                        <div class="col-md-3 col-sm-3 col-xs-3">
+                                            <div class="notify-img">
+                                                <img src="./assets/images/users/user-10.png" alt="notification user image">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9 col-sm-9 col-xs-9 pd-l0">
+                                            <a href="#" class="notification-user">Sean</a> <span class="notification-type">replied to your comment</span>
+                                            <a href="#" class="notify-right-icon">
+                                                <i class='bx bx-radio-circle-marked'></i>
+                                            </a>
+                                            <p class="time">
+                                                <span class="badge badge-pill badge-primary"><i class='bx bxs-group'></i></span> 3h
+                                            </p>
+                                        </div>
+                                    </li>
+                                </div>
+                                <div class="notify-drop-footer text-center">
+                                    <a href="#">See More</a>
+                                </div>
+                            </ul>
+                        </li>
+
+                        <!-- Pages -->
+                        <li class="nav-item dropdown d-mobile">
+                            <a href="#" class="nav-link nav-links nav-icon drop-w-tooltip" data-toggle="dropdown" data-placement="bottom" data-title="Pages" role="button" aria-haspopup="true" aria-expanded="false">
+                                <img src="./assets/images/icons/navbar/flag.png" alt="navbar icon">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right nav-drop">
+                                <a class="dropdown-item" href="publications.html">Publications</a>
+                                <a class="dropdown-item" href="sign-in.html">Sign in</a>
+                                <a class="dropdown-item" href="sign-up.html">Sign up</a>
+                            </div>
+                        </li>
+
+                        <!-- Profil utilisateur -->
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link nav-links" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                <div class="menu-user-image">
+                                    <img src="./assets/images/users/user-4.jpg" class="menu-user-img ml-1" alt="Menu Image">
+                                </div>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right nav-drop">
+                                <a class="dropdown-item" href="profile.html"><i class='bx bx-user mr-2'></i> Account</a>
+                                <div role="separator" class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#"><i class='bx bx-undo mr-2'></i> Logout</a>
+                            </div>
+                        </li>
+
+                        <!-- Settings -->
+                        <li class="nav-item nav-icon">
+                            <a href="settings.html" data-toggle="tooltip" data-placement="bottom" data-title="Settings" class="nav-link"><img src="./assets/images/icons/navbar/settings.png" alt="navbar icon"></a>
+                        </li>
+                    </ul>
+                    <button type="button" class="btn btn-primary mr-3" id="menu-toggle"><i class='bx bx-align-left'></i></button>
+                </nav>
+                
+                <div class="row newsfeed-right-side-content mt-3">
+                    <div class="col-md-3 newsfeed-left-side sticky-top shadow-sm" id="sidebar-wrapper">
+                        <div class="card newsfeed-user-card h-100">
+                            <ul class="list-group list-group-flush newsfeed-left-sidebar">
+                                <li class="list-group-item">
+                                    <h6>Home</h6>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center ">
+                                    <a href="profile.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/newsfeed.png" alt="profile"> Profile</a>
+                                    <a href="#" class="newsfeedListicon"><i class='bx bx-dots-horizontal-rounded'></i></a>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center sd-active">
+                                    <a href="publications.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/message.png" alt="publications"> Publications</a>
+                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <a href="plantes.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/group.png" alt="plantes"> Plantes</a>
+                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <a href="evenements.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/event.png" alt="evenements"> Evenements</a>
+                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <a href="capteurs.html" class="sidebar-item"><img src="./assets/images/icons/left-sidebar/saved.png" alt="capteurs"> Capteurs</a>
+                                    <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 second-section" id="page-content-wrapper">
+                        <!-- Section CRUD SUPPRIMÉE -->
+
+                        <!-- Message d'inspiration remplaçant les exemples de publications -->
+                        <div class="inspiration-section">
+                            <!-- Éléments décoratifs -->
+                            <i class='bx bx-leaf decoration-element decoration-left'></i>
+                            <i class='bx bx-leaf decoration-element decoration-right'></i>
+                            
+                            <i class='bx bx-bulb inspiration-icon'></i>
+                            
+                            <h2 class="inspiration-title">
+                                Votre Espace d'Inspiration
+                            </h2>
+                            
+                            <div class="inspiration-text">
+                                Ici, chaque <span class="inspiration-highlight">idée</span> peut devenir une <span class="inspiration-highlight">inspiration</span> ✨🌼
+                            </div>
+                            
+                            <div class="inspiration-quote">
+                                Partagez vos conseils, vos astuces, vos expériences et faites fleurir la communauté SmartGarden.<br>
+                                Créez une publication, racontez une histoire, inspirez d'autres passionnés…🪴
+                            </div>
+                            
+                            <div class="inspiration-text">
+                                Votre contenu a le pouvoir de <span class="inspiration-highlight">guider</span>, d'<span class="inspiration-highlight">aider</span> et d'<span class="inspiration-highlight">enrichir</span> le jardinage de demain.🌳
+                            </div>
+                            
+                            <!-- Grille de statistiques -->
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <i class='bx bx-user-circle stat-icon'></i>
+                                    <span class="stat-number">250+</span>
+                                    <span class="stat-label">Jardiniers actifs</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class='bx bx-leaf stat-icon'></i>
+                                    <span class="stat-number">1.2k</span>
+                                    <span class="stat-label">Publications</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class='bx bx-message-rounded stat-icon'></i>
+                                    <span class="stat-number">5.7k</span>
+                                    <span class="stat-label">Échanges</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class='bx bx-like stat-icon'></i>
+                                    <span class="stat-number">8.9k</span>
+                                    <span class="stat-label">Interactions</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Appel à l'action -->
+                            <div class="action-call">
+                                <h4 class="action-title">
+                                    <i class='bx bx-seedling'></i>
+                                    Commencez à publier
+                                </h4>
+                                <p style="color: #6c757d; margin-bottom: 20px;">
+                                    Faites germer vos idées. Faites grandir SmartGarden. 🌱🌿
+                                </p>
+                                
+                                <!-- Groupe de boutons -->
+                                <div class="button-group">
+                                    <a href="ajout.php" class="action-btn">
+                                        <i class='bx bx-edit'></i>
+                                        Créer une publication
+                                    </a>
+                                    
+                                    <a href="liste.php" class="action-btn-secondary">
+                                        <i class='bx bx-list-ul'></i>
+                                        Voir la liste des publications
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Citations inspirantes -->
+                            <div style="margin-top: 30px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                                <div style="flex: 1; min-width: 200px; background: rgba(255, 255, 255, 0.8); padding: 15px; border-radius: 8px; text-align: center;">
+                                    <i class='bx bxs-quote-left' style="color: #20c997; font-size: 1.5rem; margin-bottom: 10px;"></i>
+                                    <p style="color: #495057; font-size: 0.95rem; margin: 0;">
+                                        "Le partage fait grandir la communauté"
+                                    </p>
+                                </div>
+                                <div style="flex: 1; min-width: 200px; background: rgba(255, 255, 255, 0.8); padding: 15px; border-radius: 8px; text-align: center;">
+                                    <i class='bx bxs-quote-left' style="color: #28a745; font-size: 1.5rem; margin-bottom: 10px;"></i>
+                                    <p style="color: #495057; font-size: 0.95rem; margin: 0;">
+                                        "Chaque expérience est un enseignement"
+                                    </p>
+                                </div>
+                                <div style="flex: 1; min-width: 200px; background: rgba(255, 255, 255, 0.8); padding: 15px; border-radius: 8px; text-align: center;">
+                                    <i class='bx bxs-quote-left' style="color: #17a2b8; font-size: 1.5rem; margin-bottom: 10px;"></i>
+                                    <p style="color: #495057; font-size: 0.95rem; margin: 0;">
+                                        "Ensemble, cultivons l'avenir"
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 third-section">
+                        <!-- Sidebar droit -->
+                        <div class="p-3 bg-white rounded w-shadow">
+                            <h6 class="card-title pb-3 mb-0">Gestion CRUD</h6>
+                            <div class="list-group">
+                                <a href="ajout.php" class="list-group-item list-group-item-action">
+                                    <i class='bx bx-plus mr-2'></i> Ajouter une publication
+                                </a>
+                                <a href="liste.php" class="list-group-item list-group-item-action">
+                                    <i class='bx bx-list-ul mr-2'></i> Liste des publications
+                                </a>
+                            </div>
+
+                            <h6 class="card-title pb-3 mb-0 mt-4">Statistiques</h6>
+                            <div class="bg-white rounded contacts">
+                                <div class="media text-muted pt-2">
+                                    <i class='bx bx-file mr-3 text-primary'></i>
+                                    <div class="media-body">
+                                        <strong>Publications totales</strong>
+                                        <div class="text-muted small">15 publications</div>
+                                    </div>
+                                </div>
+                                <div class="media text-muted pt-3">
+                                    <i class='bx bx-like mr-3 text-success'></i>
+                                    <div class="media-body">
+                                        <strong>Likes reçus</strong>
+                                        <div class="text-muted small">133 likes</div>
+                                    </div>
+                                </div>
+                                <div class="media text-muted pt-3">
+                                    <i class='bx bx-comment mr-3 text-info'></i>
+                                    <div class="media-body">
+                                        <strong>Commentaires</strong>
+                                        <div class="text-muted small">25 commentaires</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="card-title pb-3 mb-0 mt-4">Contacts</h5>
+                            <div class="bg-white rounded contacts">
+                                <div class="media text-muted">
+                                    <img src="./assets/images/users/user-2.jpg" alt="Online user" class="online-user-image align-middle">
+                                    <div class="media-body mb-0 small lh-125">
+                                        <div class="d-flex justify-content-between align-items-center w-100">
+                                            <strong class="text-gray-dark"><a href="#" class="smFLname">Karen Minas</a></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="media text-muted pt-3">
+                                    <img src="./assets/images/users/user-3.jpg" alt="Online user" class="online-user-image">
+                                    <div class="media-body mb-0 small lh-125">
+                                        <div class="d-flex justify-content-between align-items-center w-100">
+                                            <strong class="text-gray-dark"><a href="#" class="smFLname">Hakob Minasyan</a></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="media text-muted pt-3">
+                                    <img src="./assets/images/users/user-1.jpg" alt="Online user" class="online-user-image">
+                                    <div class="media-body mb-0 small lh-125">
+                                        <div class="d-flex justify-content-between align-items-center w-100">
+                                            <strong class="text-gray-dark"><a href="#" class="smFLname">Lina Adamyan</a></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="d-block text-right mt-3">
+                                    <a href="#">See More</a>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core -->
+    <script src="./assets/js/jquery/jquery-3.3.1.min.js"></script>
+    <script src="./assets/js/popper/popper.min.js"></script>
+    <script src="./assets/js/bootstrap/bootstrap.min.js"></script>
+    
+    <script>
+        // Toggle sidebar
+        $("#menu-toggle").click(function(e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+        });
+
+        // Animation pour les éléments de statistiques
+        $(document).ready(function() {
+            $('.stat-item').hover(
+                function() {
+                    $(this).css('transform', 'translateY(-5px)');
+                },
+                function() {
+                    $(this).css('transform', 'translateY(0)');
+                }
+            );
+            
+            // Animation pour les boutons d'action
+            $('.action-btn, .action-btn-secondary').hover(
+                function() {
+                    $(this).css('transform', 'translateY(-2px)');
+                },
+                function() {
+                    $(this).css('transform', 'translateY(0)');
+                }
+            );
+        });
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-﻿<?php require_once 'check_session.php'; ?>
+<?php require_once 'check_session.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +10,7 @@
     <meta content="" name="description">
 
     
-    <link href="img/favicon.ico" rel="icon">
+    <link rel="icon" type="image/png" href="img/logo-16x16.png" />
 
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -60,11 +60,12 @@
                     </div>
                 </div>
                 <div class="navbar-nav w-100">
-                    <a href="index.php" class="nav-item nav-link"><i class="fa fa-file-alt me-2"></i>Publication</a>
+                    <a href="backoffice.php" class="nav-item nav-link"><i class="fa fa-file-alt me-2"></i>Publication</a>
                     <a href="plantes.php" class="nav-item nav-link"><i class="fa fa-leaf me-2"></i>Plantes</a>
                     <a href="evenements.php" class="nav-item nav-link"><i class="fa fa-calendar me-2"></i>Evenements</a>
+                    <a href="reservations.php" class="nav-item nav-link"><i class="fa fa-ticket-alt me-2"></i>Réservations</a>
                     <a href="utilisateurs.php" class="nav-item nav-link"><i class="fa fa-user me-2"></i>Utilisateur</a>
-                    <a href="capteurs.php" class="nav-item nav-link active"><i class="fa fa-microchip me-2"></i>Capteurs</a>
+                    <a href="listCategorie.php" class="nav-item nav-link active"><i class="fa fa-microchip me-2"></i>Capteurs</a>
                 </div>
             </nav>
         </div>

@@ -37,7 +37,7 @@ try {
         $log = $hcontroller->ajouterHistorique($dateConnexion, '0000-00-00 00:00:00', 'login', 0, $user['idUtilisateur']);
         
         $_SESSION['logged_in'] = true;
-        $_SESSION['user_id'] = $user['idUtilisateur'];
+        $_SESSION['idUtilisateur'] = $user['idUtilisateur'];
         $_SESSION['user_name'] = $user['nom'];
         $_SESSION['user_email'] = $user['email'];
         $_SESSION['user_localisation'] = $user['localisation'];
@@ -65,7 +65,7 @@ try {
             $log = $hcontroller->ajouterHistorique($dateConnexion, '0000-00-00 00:00:00', 'login', 0, $newUser['idUtilisateur']);
             
             $_SESSION['logged_in'] = true;
-            $_SESSION['user_id'] = $newUser['idUtilisateur'];
+            $_SESSION['idUtilisateur'] = $newUser['idUtilisateur'];
             $_SESSION['user_name'] = $newUser['nom'];
             $_SESSION['user_email'] = $newUser['email'];
             $_SESSION['user_localisation'] = $newUser['localisation'];

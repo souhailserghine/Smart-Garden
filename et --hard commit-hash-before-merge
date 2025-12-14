@@ -1,0 +1,37 @@
+[33m44e6791[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32muser[m[33m)[m Merge remote-tracking branch 'origin/gestion-des-evenements-marwa-bouchrika' into user
+[33m0f36740[m Merge remote-tracking branch 'origin/test_plante' into user
+[33m06f495d[m[33m ([m[1;31morigin/test_plante[m[33m)[m fix: Fix modal form input interaction - add proper z-index and pointer-events
+[33m7e2f8af[m fix: Remove erroneous style tag that was breaking the code
+[33m8743c14[m fix: Fix modal statistics bugs - enable Escape key and remove backdrop-filter blur
+[33m654dcc8[m hotfix: Restore left navigation sidebar immediately
+[33m7361627[m[33m ([m[1;31morigin/gestion-des-evenements-marwa-bouchrika[m[33m)[m Add files via upload
+[33m72a54fc[m perf: Optimize statistics modal for smooth scrolling and better performance
+[33m091633d[m feat: Remove left sidebar and redesign plants display as card grid
+[33m8a0b9b3[m restore: Revert left sidebar to original design from v0.1
+[33m0998c2f[m Fix chatbot API path after moving files to external folder
+[33m28f61fa[m change
+[33mee57728[m Organize external files into view/external folder
+[33m2297044[m last changes
+[33m37d7a5e[m Remove env files
+[33md9cc56e[m Remove env files
+[33m4e128fd[m Add toast notifications for plant and task operations in back office
+[33m82fabaa[m Add temperature and required fields to suggestionplante table and forms
+[33mde0d6ce[m dernier avec metier
+[33m2dc61e1[m ui fixes
+[33me6d595f[m input validation events form
+[33m18dd580[m adding resrevation form
+[33me46f19f[m Crud complet
+[33mb017014[m fixes
+[33m7ce357d[m added maps api in add event moadal back office
+[33m050e31d[m  rservation back office , view edit delete
+[33m73caf8d[m fix add  reservation front office
+[33m94f7285[m  eveents front office ui fixes
+[33m0426eb7[m events by category front office
+[33m471bb36[m nv
+[33m6d258a9[m nouvelle mise
+[33mda459ef[m[33m ([m[1;31morigin/user[m[33m, [m[1;32mtest_plante[m[33m, [m[1;32mmain[m[33m)[m suivi sem2
+[33m1562bb3[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m First commit
+[33m8139f11[m plante
+[33ma57354a[m Replace old folder with new version
+[33m1393922[m Add folder to branch
+[33m23d91a7[m first commit

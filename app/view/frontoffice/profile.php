@@ -1,4 +1,28 @@
-﻿<?php require_once 'check_session.php'; ?>
+<?php 
+require_once 'check_session.php'; 
+require_once '../../controller/publicationC.php';
+require_once '../../config.php';
+
+// Get current user's publications
+$publicationC = new PublicationC();
+$currentUserId = $_SESSION['idUtilisateur'];
+
+// Debug: Afficher l'ID utilisateur
+// echo "Current User ID: " . $currentUserId . "<br>";
+
+// Get publications for this specific user
+$db = config::getConnexion();
+$query = $db->prepare("SELECT * FROM publication WHERE idUtilisateur = :userId ORDER BY datePublication DESC");
+$query->execute(['userId' => $currentUserId]);
+$userPublications = $query->fetchAll(PDO::FETCH_ASSOC);
+
+// Debug: Afficher le nombre de publications
+// echo "Nombre de publications: " . count($userPublications) . "<br>";
+// echo "<pre>";
+// print_r($userPublications);
+// echo "</pre>";
+// exit(); // Décommenter pour arrêter l'exécution ici
+?>
 <!DOCTYPE html>
 <html lang="en" class="no-js">
 
@@ -25,7 +49,7 @@
 
 <body class="profile">
     <div class="container-fluid newsfeed d-flex" id="wrapper">
-        <div class="row newsfeed-size">
+        <div class="row newsfeed-size" style="max-width: 100%; width: 100%; margin: 0;">
             <div class="col-md-12 p-0">
                 <nav id="navbar-main" class="navbar navbar-expand-lg shadow-sm sticky-top">
                     <div class="w-100 justify-content-md-center">
@@ -50,7 +74,7 @@
                             </li>
                         </ul>
                         <ul class="navbar-nav mr-5 flex-row" id="main_menu">
-                            <a class="navbar-brand nav-item mr-lg-5" href="index.php"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
+                            <a class="navbar-brand nav-item mr-lg-5" href="publications.php"><img src="./assets/images/logo-128x128.png" width="70" height="70" class="mr-3" alt="Logo"></a>
                             
                             <form class="w-30 mx-2 my-auto d-inline form-inline mr-5">
                                 <div class="input-group">
@@ -60,285 +84,6 @@
                                     </div>
                                 </div>
                             </form>
-                            <li class="nav-item s-nav dropdown d-mobile">
-                                <a href="#" class="nav-link nav-icon nav-links drop-w-tooltip" data-toggle="dropdown" data-placement="bottom" data-title="Create" role="button" aria-haspopup="true" aria-expanded="false">
-                                    <img src="./assets/images/icons/navbar/create.png" alt="navbar icon">
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right nav-dropdown-menu">
-                                    <a href="#" class="dropdown-item" aria-describedby="createGroup">
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <i class='bx bx-group post-option-icon'></i>
-                                            </div>
-                                            <div class="col-md-10">
-                                                <span class="fs-9">Group</span>
-                                                <small id="createGroup" class="form-text text-muted">Find people with shared interests</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="dropdown-item" aria-describedby="createEvent">
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <i class='bx bx-calendar post-option-icon'></i>
-                                            </div>
-                                            <div class="col-md-10">
-                                                <span class="fs-9">Event</span>
-                                                <small id="createEvent" class="form-text text-muted">bring people together with a public or private event</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </li>
-                            <li class="nav-item s-nav dropdown message-drop-li">
-                                <a href="#" class="nav-link nav-links message-drop drop-w-tooltip" data-toggle="dropdown" data-placement="bottom" data-title="Messages" role="button" aria-haspopup="true" aria-expanded="false">
-                                    <img src="./assets/images/icons/navbar/message.png" class="message-dropdown" alt="navbar icon"> <span class="badge badge-pill badge-primary">1</span>
-                                </a>
-                                <ul class="dropdown-menu notify-drop dropdown-menu-right nav-drop">
-                                    <div class="notify-drop-title">
-                                        <div class="row">
-                                            <div class="col-md-6 col-sm-6 col-xs-6 fs-8">Messages | <a href="#">Requests</a></div>
-                                            <div class="col-md-6 col-sm-6 col-xs-6 text-right">
-                                                <a href="#" class="notify-right-icon">
-                                                    Mark All as Read
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    
-                                    <div class="drop-content">
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-6.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <a href="#" class="notification-user">Susan P. Jarvis</a>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    <i class='bx bx-check'></i> This party is going to have a DJ, food, and drinks.
-                                                </p>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-5.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <a href="#" class="notification-user">Ruth D. Greene</a>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    Great, I’ll see you tomorrow!.
-                                                </p>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-7.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <a href="#" class="notification-user">Kimberly R. Hatfield</a>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    yeah, I will be there.
-                                                </p>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-8.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <a href="#" class="notification-user">Joe S. Feeney</a>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    I would really like to bring my friend Jake, if...
-                                                </p>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-9.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <a href="#" class="notification-user">William S. Willmon</a>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    Sure, what can I help you with?
-                                                </p>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-10.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <a href="#" class="notification-user">Sean S. Smith</a>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    Which of those two is best?
-                                                </p>
-                                            </div>
-                                        </li>
-                                    </div>
-                                    <div class="notify-drop-footer text-center">
-                                        <a href="#">See More</a>
-                                    </div>
-                                </ul>
-                            </li>
-                            <li class="nav-item s-nav dropdown notification">
-                                <a href="#" class="nav-link nav-links rm-drop-mobile drop-w-tooltip" data-toggle="dropdown" data-placement="bottom" data-title="Notifications" role="button" aria-haspopup="true" aria-expanded="false">
-                                    <img src="./assets/images/icons/navbar/notification.png" class="notification-bell" alt="navbar icon"> <span class="badge badge-pill badge-primary">3</span>
-                                </a>
-                                <ul class="dropdown-menu notify-drop dropdown-menu-right nav-drop">
-                                    <div class="notify-drop-title">
-                                        <div class="row">
-                                            <div class="col-md-6 col-sm-6 col-xs-6 fs-8">Notifications <span class="badge badge-pill badge-primary ml-2">3</span></div>
-                                            <div class="col-md-6 col-sm-6 col-xs-6 text-right">
-                                                <a href="#" class="notify-right-icon">
-                                                    Mark All as Read
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    
-                                    <div class="drop-content">
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-10.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <a href="#" class="notification-user">Sean</a> <span class="notification-type">replied to your comment on a post in </span><a href="#" class="notification-for">PHP</a>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    <span class="badge badge-pill badge-primary"><i class='bx bxs-group'></i></span> 3h
-                                                </p>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-7.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <a href="#" class="notification-user">Kimberly</a> <span class="notification-type">likes your comment "I would really... </span>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    <span class="badge badge-pill badge-primary"><i class='bx bxs-like'></i></span> 7h
-                                                </p>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-8.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <span class="notification-type">10 people saw your story before it disappeared. See who saw it.</span>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    <span class="badge badge-pill badge-primary"><i class='bx bx-images'></i></span> 23h
-                                                </p>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-11.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <a href="#" class="notification-user">Michelle</a> <span class="notification-type">posted in </span><a href="#" class="notification-for">Argon Social Design System</a>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    <span class="badge badge-pill badge-primary"><i class='bx bxs-quote-right'></i></span> 1d
-                                                </p>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-5.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <a href="#" class="notification-user">Karen</a> <span class="notification-type">likes your comment "Sure, here... </span>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    <span class="badge badge-pill badge-primary"><i class='bx bxs-like'></i></span> 2d
-                                                </p>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="col-md-2 col-sm-2 col-xs-2">
-                                                <div class="notify-img">
-                                                    <img src="./assets/images/users/user-12.png" alt="notification user image">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-10 col-sm-10 col-xs-10">
-                                                <a href="#" class="notification-user">Irwin</a> <span class="notification-type">posted in </span><a href="#" class="notification-for">Themeforest</a>
-                                                <a href="#" class="notify-right-icon">
-                                                    <i class='bx bx-radio-circle-marked'></i>
-                                                </a>
-                                                <p class="time">
-                                                    <span class="badge badge-pill badge-primary"><i class='bx bxs-quote-right'></i></span> 3d
-                                                </p>
-                                            </div>
-                                        </li>
-                                    </div>
-                                    <div class="notify-drop-footer text-center">
-                                        <a href="#">See More</a>
-                                    </div>
-                                </ul>
-                            </li>
-                            <li class="nav-item s-nav dropdown d-mobile">
-                                <a href="#" class="nav-link nav-links nav-icon drop-w-tooltip" data-toggle="dropdown" data-placement="bottom" data-title="Pages" role="button" aria-haspopup="true" aria-expanded="false">
-                                    <img src="./assets/images/icons/navbar/flag.png" alt="navbar icon">
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right nav-drop">
-                                    <a class="dropdown-item" href="publications.php">Publications</a>
-                                    <a class="dropdown-item" href="sign-in.php">Sign in</a>
-                                    <a class="dropdown-item" href="sign-up.php">Sign up</a>
-                                </div>
-                            </li>
                             <li class="nav-item s-nav">
                                 <a href="profile.php" class="nav-link nav-links">
                                     <div class="menu-user-image">
@@ -367,7 +112,7 @@
                     </div>
                 </nav>
                 <div class="row profile-right-side-content">
-                    <div class="user-profile">
+                    <div class="user-profile" style="max-width: 100%; width: 100%;">
                         <div class="profile-header-background">
                             <a href="#" class="profile-cover">
                                 <img src="./assets/images/users/cover/cover-1.gif" alt="Profile Header Background">
@@ -400,10 +145,8 @@
                                             <button type="button" class="btn btn-follow" id="moreMobile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class='bx bx-dots-horizontal-rounded'></i> <span class="fs-8">More</span></button>
                                             <div class="dropdown-menu dropdown-menu-right profile-ql-dropdown" aria-labelledby="moreMobile">
                                                 <a href="newsfeed.php" class="dropdown-item">Timeline</a>
-                                                <a href="about.php" class="dropdown-item">About</a>
                                                 <a href="followers.php" class="dropdown-item">Followers</a>
                                                 <a href="following.php" class="dropdown-item">Following</a>
-                                                <a href="photos.php" class="dropdown-item">Photos</a>
                                                 <a href="videos.php" class="dropdown-item">Videos</a>
                                                 <a href="check-ins.php" class="dropdown-item">Check-Ins</a>
                                                 <a href="events.php" class="dropdown-item">Events</a>
@@ -460,18 +203,10 @@
 
                                     
                                     <div class="row">
-                                        <div class="col-md-9 profile-center">
+                                        <div class="col-md-12 profile-center">
                                             <ul class="list-inline profile-links d-flex justify-content-between w-shadow rounded">
                                                 <li class="list-inline-item profile-active">
                                                     <a href="#">Timeline</a>
-                                                </li>
-                                                <li class="list-inline-item">
-                                                    <a href="#">About</a></li>
-                                                <li class="list-inline-item">
-                                                    <a href="friends.php">Friends</a>
-                                                </li>
-                                                <li class="list-inline-item">
-                                                    <a href="#">Photos</a>
                                                 </li>
                                                 <li class="list-inline-item dropdown">
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -523,235 +258,148 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="post border-bottom p-3 bg-white w-shadow">
-                                                <div class="media text-muted pt-3">
-                                                    <img src="./assets/images/users/user-4.jpg" alt="Online user" class="mr-3 post-user-image">
-                                                    <div class="media-body pb-3 mb-0 small lh-125">
-                                                        <div class="d-flex justify-content-between align-items-center w-100">
-                                                            <span class="post-type text-muted"><a href="#" class="text-gray-dark post-user-name mr-2"><?php echo $_SESSION['user_name']; ?></a> updated his cover photo.</span>
-                                                            <div class="dropdown">
-                                                                <a href="#" class="post-more-settings" role="button" data-toggle="dropdown" id="postOptions" aria-haspopup="true" aria-expanded="false">
-                                                                    <i class='bx bx-dots-horizontal-rounded'></i>
+                                            
+                                            <?php if (empty($userPublications)): ?>
+                                                <!-- No publications message -->
+                                                <div class="post border-bottom p-5 bg-white w-shadow text-center">
+                                                    <i class='bx bx-message-square-x' style="font-size: 4rem; color: #6c757d; opacity: 0.5;"></i>
+                                                    <h4 class="mt-3 text-muted">Aucune publication</h4>
+                                                    <p class="text-muted">Vous n'avez pas encore publié de contenu.</p>
+                                                    <a href="publications.php" class="btn btn-primary mt-2">
+                                                        <i class='bx bx-plus'></i> Créer votre première publication
+                                                    </a>
+                                                </div>
+                                            <?php else: ?>
+                                                <?php foreach ($userPublications as $pub): ?>
+                                                    <!-- User Publication -->
+                                                    <div class="post border-bottom p-3 bg-white w-shadow mb-3">
+                                                        <div class="media text-muted pt-3">
+                                                            <img src="./assets/images/users/user-4.jpg" alt="Online user" class="mr-3 post-user-image">
+                                                            <div class="media-body pb-3 mb-0 small lh-125">
+                                                                <div class="d-flex justify-content-between align-items-center w-100">
+                                                                    <span class="post-type text-muted">
+                                                                        <a href="#" class="text-gray-dark post-user-name mr-2"><?php echo $_SESSION['user_name']; ?></a> 
+                                                                        a publié
+                                                                    </span>
+                                                                    <div class="dropdown">
+                                                                        <a href="#" class="post-more-settings" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                            <i class='bx bx-dots-horizontal-rounded'></i>
+                                                                        </a>
+                                                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left post-dropdown-menu">
+                                                                            <a href="modifier_publication.php?id=<?= $pub['idPublication'] ?>" class="dropdown-item">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-2">
+                                                                                        <i class='bx bx-edit post-option-icon'></i>
+                                                                                    </div>
+                                                                                    <div class="col-md-10">
+                                                                                        <span class="fs-9">Modifier</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </a>
+                                                                            <a href="supprimer_publication.php?id=<?= $pub['idPublication'] ?>" class="dropdown-item" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-2">
+                                                                                        <i class='bx bx-trash post-option-icon'></i>
+                                                                                    </div>
+                                                                                    <div class="col-md-10">
+                                                                                        <span class="fs-9">Supprimer</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <span class="d-block">
+                                                                    <?php
+                                                                    $date = new DateTime($pub['datePublication']);
+                                                                    $now = new DateTime();
+                                                                    $diff = $now->diff($date);
+                                                                    
+                                                                    if ($diff->d == 0) {
+                                                                        if ($diff->h == 0) {
+                                                                            if ($diff->i == 0) {
+                                                                                echo 'à l\'instant';
+                                                                            } else {
+                                                                                echo $diff->i . ' minute' . ($diff->i > 1 ? 's' : '');
+                                                                            }
+                                                                        } else {
+                                                                            echo $diff->h . ' heure' . ($diff->h > 1 ? 's' : '');
+                                                                        }
+                                                                    } elseif ($diff->d == 1) {
+                                                                        echo 'Hier';
+                                                                    } elseif ($diff->d < 7) {
+                                                                        echo $diff->d . ' jour' . ($diff->d > 1 ? 's' : '');
+                                                                    } else {
+                                                                        echo $date->format('d/m/Y');
+                                                                    }
+                                                                    ?>
+                                                                    <i class='bx bx-globe ml-3'></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="mt-3">
+                                                            <p><?= nl2br(htmlspecialchars($pub['contenuTexte'])) ?></p>
+                                                        </div>
+                                                        
+                                                        <?php if (!empty($pub['images'])): ?>
+                                                        <div class="d-block mt-3">
+                                                            <img src="<?= htmlspecialchars($pub['images']) ?>" class="w-100 mb-3" alt="post image" style="border-radius: 8px;">
+                                                        </div>
+                                                        <?php endif; ?>
+                                                        
+                                                        <?php if (!empty($pub['videos'])): ?>
+                                                        <div class="d-block mt-3">
+                                                            <video controls class="w-100 mb-3" style="border-radius: 8px;">
+                                                                <source src="<?= htmlspecialchars($pub['videos']) ?>" type="video/mp4">
+                                                                Votre navigateur ne supporte pas la vidéo.
+                                                            </video>
+                                                        </div>
+                                                        <?php endif; ?>
+                                                        
+                                                        <div class="mb-2">
+                                                            <div class="argon-reaction">
+                                                                <span class="like-btn">
+                                                                    <a href="javascript:void(0)" class="post-card-buttons like-publication" data-id="<?= $pub['idPublication'] ?>">
+                                                                        <i class='bx bxs-like mr-2'></i> 
+                                                                        <span class="like-count-<?= $pub['idPublication'] ?>"><?= $pub['nbLikes'] ?? 0 ?></span>
+                                                                    </a>
+                                                                </span>
+                                                            </div>
+                                                            <a href="javascript:void(0)" class="post-card-buttons">
+                                                                <i class='bx bx-message-rounded mr-2'></i> Commenter
+                                                            </a>
+                                                            <div class="dropdown dropup share-dropup d-inline">
+                                                                <a href="#" class="post-card-buttons" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                    <i class='bx bx-share-alt mr-2'></i> Partager
                                                                 </a>
-                                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left post-dropdown-menu">
-                                                                    <a href="#" class="dropdown-item" aria-describedby="savePost">
+                                                                <div class="dropdown-menu post-dropdown-menu">
+                                                                    <a href="#" class="dropdown-item">
                                                                         <div class="row">
                                                                             <div class="col-md-2">
-                                                                                <i class='bx bx-bookmark-plus post-option-icon'></i>
+                                                                                <i class='bx bx-share-alt'></i>
                                                                             </div>
                                                                             <div class="col-md-10">
-                                                                                <span class="fs-9">Save post</span>
-                                                                                <small id="savePost" class="form-text text-muted">Add this to your saved items</small>
+                                                                                <span>Partager maintenant (Public)</span>
                                                                             </div>
                                                                         </div>
                                                                     </a>
-                                                                    <a href="#" class="dropdown-item" aria-describedby="hidePost">
+                                                                    <a href="#" class="dropdown-item">
                                                                         <div class="row">
                                                                             <div class="col-md-2">
-                                                                                <i class='bx bx-hide post-option-icon'></i>
+                                                                                <i class='bx bx-message'></i>
                                                                             </div>
                                                                             <div class="col-md-10">
-                                                                                <span class="fs-9">Hide post</span>
-                                                                                <small id="hidePost" class="form-text text-muted">See fewer posts like this</small>
-                                                                            </div>
-                                                                        </div>
-                                                                    </a>
-                                                                    <a href="#" class="dropdown-item" aria-describedby="snoozePost">
-                                                                        <div class="row">
-                                                                            <div class="col-md-2">
-                                                                                <i class='bx bx-time post-option-icon'></i>
-                                                                            </div>
-                                                                            <div class="col-md-10">
-                                                                                <span class="fs-9">Snooze <?php echo $_SESSION['user_name']; ?> for 30 days</span>
-                                                                                <small id="snoozePost" class="form-text text-muted">Temporarily stop seeing posts</small>
-                                                                            </div>
-                                                                        </div>
-                                                                    </a>
-                                                                    <a href="#" class="dropdown-item" aria-describedby="reportPost">
-                                                                        <div class="row">
-                                                                            <div class="col-md-2">
-                                                                                <i class='bx bx-block post-option-icon'></i>
-                                                                            </div>
-                                                                            <div class="col-md-10">
-                                                                                <span class="fs-9">Report</span>
-                                                                                <small id="reportPost" class="form-text text-muted">I'm concerned about this post</small>
+                                                                                <span>Envoyer en message</span>
                                                                             </div>
                                                                         </div>
                                                                     </a>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <span class="d-block">3 hours ago <i class='bx bx-globe ml-3'></i></span>
                                                     </div>
-                                                </div>
-                                                <div class="mt-3">
-                                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quis voluptatem veritatis harum, tenetur, quibusdam voluptatum, incidunt saepe minus maiores ea atque sequi illo veniam sint quaerat corporis totam et. Culpa?</p>
-                                                </div>
-                                                <div class="d-block mt-3">
-                                                    <img src="./assets/images/users/post/post-1.jpg" class="w-100 mb-3" alt="post image">
-                                                </div>
-                                                <div class="mb-2">
-
-                                                    
-                                                    <div class="argon-reaction">
-                                                        <span class="like-btn">
-                                                            <a href="#" class="post-card-buttons" id="reactions"><i class='bx bxs-like mr-2'></i> 67</a>
-                                                            <ul class="reactions-box dropdown-shadow">
-                                                                <li class="reaction reaction-like" data-reaction="Like"></li>
-                                                                <li class="reaction reaction-love" data-reaction="Love"></li>
-                                                                <li class="reaction reaction-haha" data-reaction="HaHa"></li>
-                                                                <li class="reaction reaction-wow" data-reaction="Wow"></li>
-                                                                <li class="reaction reaction-sad" data-reaction="Sad"></li>
-                                                                <li class="reaction reaction-angry" data-reaction="Angry"></li>
-                                                            </ul>
-                                                        </span>
-                                                    </div>
-
-                                                    <a href="javascript:void(0)" class="post-card-buttons" id="show-comments"><i class='bx bx-message-rounded mr-2'></i> 5</a>
-                                                    <div class="dropdown dropup share-dropup">
-                                                        <a href="#" class="post-card-buttons" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <i class='bx bx-share-alt mr-2'></i> Share
-                                                        </a>
-                                                        <div class="dropdown-menu post-dropdown-menu">
-                                                            <a href="#" class="dropdown-item">
-                                                                <div class="row">
-                                                                    <div class="col-md-2">
-                                                                        <i class='bx bx-share-alt'></i>
-                                                                    </div>
-                                                                    <div class="col-md-10">
-                                                                        <span>Share Now (Public)</span>
-                                                                    </div>
-                                                                </div>
-                                                            </a>
-                                                            <a href="#" class="dropdown-item">
-                                                                <div class="row">
-                                                                    <div class="col-md-2">
-                                                                        <i class='bx bx-share-alt'></i>
-                                                                    </div>
-                                                                    <div class="col-md-10">
-                                                                        <span>Share...</span>
-                                                                    </div>
-                                                                </div>
-                                                            </a>
-                                                            <a href="#" class="dropdown-item">
-                                                                <div class="row">
-                                                                    <div class="col-md-2">
-                                                                        <i class='bx bx-message'></i>
-                                                                    </div>
-                                                                    <div class="col-md-10">
-                                                                        <span>Send as Message</span>
-                                                                    </div>
-                                                                </div>
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="border-top pt-3 hide-comments" style="display: none;">
-                                                    <div class="row bootstrap snippets">
-                                                        <div class="col-md-12">
-                                                            <div class="comment-wrapper">
-                                                                <div class="panel panel-info">
-                                                                    <div class="panel-body">
-                                                                        <ul class="media-list comments-list">
-                                                                            <li class="media comment-form">
-                                                                                <a href="#" class="pull-left">
-                                                                                    <img src="./assets/images/users/user-4.jpg" alt="" class="img-circle">
-                                                                                </a>
-                                                                                <div class="media-body">
-                                                                                    <form action="" method="" role="form">
-                                                                                        <div class="row">
-                                                                                            <div class="col-md-12">
-                                                                                                <div class="input-group">
-                                                                                                    <input type="text" class="form-control comment-input" placeholder="Write a comment...">
-
-                                                                                                    <div class="input-group-btn">
-                                                                                                        <button type="button" class="btn comment-form-btn" data-toggle="tooltip" data-placement="top" title="Tooltip on top"><i class='bx bxs-smiley-happy'></i></button>
-                                                                                                        <button type="button" class="btn comment-form-btn comment-form-btn" data-toggle="tooltip" data-placement="top" title="Tooltip on top"><i class='bx bx-camera'></i></button>
-                                                                                                        <button type="button" class="btn comment-form-btn comment-form-btn" data-toggle="tooltip" data-placement="top" title="Tooltip on top"><i class='bx bx-microphone'></i></button>
-                                                                                                        <button type="button" class="btn comment-form-btn" data-toggle="tooltip" data-placement="top" title="Tooltip on top"><i class='bx bx-file-blank'></i></button>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </form>
-                                                                                </div>
-                                                                            </li>
-                                                                            <li class="media">
-                                                                                <a href="#" class="pull-left">
-                                                                                    <img src="./assets/images/users/user-2.jpg" alt="" class="img-circle">
-                                                                                </a>
-                                                                                <div class="media-body">
-                                                                                    <div class="d-flex justify-content-between align-items-center w-100">
-                                                                                        <strong class="text-gray-dark"><a href="#" class="fs-8">Karen Minas</a></strong>
-                                                                                        <a href="#"><i class='bx bx-dots-horizontal-rounded'></i></a>
-                                                                                    </div>
-                                                                                    <span class="d-block comment-created-time">30 min ago</span>
-                                                                                    <p class="fs-8 pt-2">
-                                                                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                                                                        Lorem ipsum dolor sit amet, <a href="#">#consecteturadipiscing </a>.
-                                                                                    </p>
-                                                                                    <div class="commentLR">
-                                                                                        <button type="button" class="btn btn-link fs-8">Like</button>
-                                                                                        <button type="button" class="btn btn-link fs-8">Reply</button>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </li>
-                                                                            <li class="media">
-                                                                                <a href="#" class="pull-left">
-                                                                                    <img src="https://bootdey.com/img/Content/user_2.jpg" alt="" class="img-circle">
-                                                                                </a>
-                                                                                <div class="media-body">
-                                                                                    <div class="d-flex justify-content-between align-items-center w-100">
-                                                                                        <strong class="text-gray-dark"><a href="#" class="fs-8">Lia Earnest</a></strong>
-                                                                                        <a href="#"><i class='bx bx-dots-horizontal-rounded'></i></a>
-                                                                                    </div>
-                                                                                    <span class="d-block comment-created-time">2 hours ago</span>
-                                                                                    <p class="fs-8 pt-2">
-                                                                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                                                                        Lorem ipsum dolor sit amet, <a href="#">#consecteturadipiscing </a>.
-                                                                                    </p>
-                                                                                    <div class="commentLR">
-                                                                                        <button type="button" class="btn btn-link fs-8">Like</button>
-                                                                                        <button type="button" class="btn btn-link fs-8">Reply</button>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </li>
-                                                                            <li class="media">
-                                                                                <a href="#" class="pull-left">
-                                                                                    <img src="https://bootdey.com/img/Content/user_3.jpg" alt="" class="img-circle">
-                                                                                </a>
-                                                                                <div class="media-body">
-                                                                                    <div class="d-flex justify-content-between align-items-center w-100">
-                                                                                        <strong class="text-gray-dark"><a href="#" class="fs-8">Rusty Mickelsen</a></strong>
-                                                                                        <a href="#"><i class='bx bx-dots-horizontal-rounded'></i></a>
-                                                                                    </div>
-                                                                                    <span class="d-block comment-created-time">17 hours ago</span>
-                                                                                    <p class="fs-8 pt-2">
-                                                                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                                                                        Lorem ipsum dolor sit amet, <a href="#">#consecteturadipiscing </a>.
-                                                                                    </p>
-                                                                                    <div class="commentLR">
-                                                                                        <button type="button" class="btn btn-link fs-8">Like</button>
-                                                                                        <button type="button" class="btn btn-link fs-8">Reply</button>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </li>
-                                                                            <li class="media">
-                                                                                <div class="media-body">
-                                                                                    <div class="comment-see-more text-center">
-                                                                                        <button type="button" class="btn btn-link fs-8">See More</button>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
                                         </div>
                                         <div class="col-md-3 profile-quick-media">
                                             <h6 class="text-muted timeline-title">Recent Media</h6>
@@ -918,4 +566,60 @@
     
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/components/components.js"></script>
+    
+    <script>
+        // Track liked publications in local storage
+        var likedPublications = JSON.parse(localStorage.getItem('likedPublications') || '[]');
+        
+        // Like publication handler
+        $(document).on('click', '.like-publication', function(e) {
+            e.preventDefault();
+            
+            const button = $(this);
+            const publicationId = button.data('id');
+            const likeCountSpan = button.find('.like-count-' + publicationId);
+            
+            // Check if already liked
+            if (likedPublications.includes(publicationId)) {
+                alert('Vous avez déjà aimé cette publication !');
+                return;
+            }
+            
+            // Send AJAX request to increment likes
+            $.ajax({
+                url: 'like_publication.php',
+                method: 'POST',
+                data: { idPublication: publicationId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Update like count
+                        likeCountSpan.text(response.nbLikes);
+                        
+                        // Mark as liked
+                        likedPublications.push(publicationId);
+                        localStorage.setItem('likedPublications', JSON.stringify(likedPublications));
+                        
+                        // Visual feedback
+                        button.find('i').removeClass('bx-like').addClass('bxs-like');
+                        button.css('color', '#007bff');
+                    } else {
+                        alert(response.message || 'Erreur lors du like');
+                    }
+                },
+                error: function() {
+                    alert('Erreur de connexion');
+                }
+            });
+        });
+        
+        // Mark already liked publications on page load
+        $(document).ready(function() {
+            likedPublications.forEach(function(id) {
+                var btn = $('.like-publication[data-id="' + id + '"]');
+                btn.find('i').removeClass('bx-like').addClass('bxs-like');
+                btn.css('color', '#007bff');
+            });
+        });
+    </script>
 </body></html>

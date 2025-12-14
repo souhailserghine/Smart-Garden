@@ -7,10 +7,10 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
-const char* ssid = "globalnet";
+const char* ssid = "souhail";
 const char* password = "changeme";
 
-const char* serverUrl = "http://192.168.1.3/website/app/api/save_sensor_data.php";
+const char* serverUrl = "http://10.153.98.143/website/Smart-Garden/app/api/save_sensor_data.php";
 const char* apiKey = "smartgarden2025secret";
 const int sensorId = 1;
 

@@ -91,10 +91,6 @@ if (isset($_GET['error'])) {
                             </a>
                         </div>
                         
-                        <div class="col-md-12 text-center mt-4">
-                            <p class="text-muted">Start using your fingerprint</p>
-                            <a href="#" class="btn btn-outline-primary btn-sm sign-up" data-toggle="modal" data-target="#fingerprintModal">Use Fingerprint</a>
-                        </div>
                         
                         <div class="col-md-12 text-center mt-3">
                             <p class="text-muted">Or use facial recognition</p>

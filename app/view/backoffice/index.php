@@ -1,4 +1,4 @@
-﻿<?php require_once 'check_session.php'; ?>
+<?php require_once 'check_session.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +10,7 @@
     <meta content="" name="description">
 
     
-    <link href="img/favicon.ico" rel="icon">
+    <link rel="icon" type="image/png" href="img/logo-16x16.png" />
 
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,16 +55,17 @@
                         <div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1"></div>
                     </div>
                     <div class="ms-3">
-                        <h6 class="mb-0">Jhon Doe</h6>
-                        <span>Admin</span>
+                        <h6 class="mb-0"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></h6>
+                        <span>Administrateur</span>
                     </div>
                 </div>
                 <div class="navbar-nav w-100">
-                    <a href="index.php" class="nav-item nav-link active"><i class="fa fa-file-alt me-2"></i>Publication</a>
+                    <a href="backoffice.php" class="nav-item nav-link active"><i class="fa fa-file-alt me-2"></i>Publication</a>
                     <a href="plantes.php" class="nav-item nav-link"><i class="fa fa-leaf me-2"></i>Plantes</a>
                     <a href="evenements.php" class="nav-item nav-link"><i class="fa fa-calendar me-2"></i>Evenements</a>
+                    <a href="reservations.php" class="nav-item nav-link"><i class="fa fa-ticket-alt me-2"></i>Réservations</a>
                     <a href="utilisateurs.php" class="nav-item nav-link"><i class="fa fa-user me-2"></i>Utilisateur</a>
-                    <a href="capteurs.php" class="nav-item nav-link"><i class="fa fa-microchip me-2"></i>Capteurs</a>
+                    <a href="listCategorie.php" class="nav-item nav-link"><i class="fa fa-microchip me-2"></i>Capteurs</a>
                 </div>
             </nav>
         </div>
@@ -151,7 +152,7 @@
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                             <img class="rounded-circle me-lg-2" src="img/user.jpg" alt="" style="width: 40px; height: 40px;">
-                            <span class="d-none d-lg-inline-flex">John Doe</span>
+                            <span class="d-none d-lg-inline-flex"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
                             <a href="#" class="dropdown-item">My Profile</a>

@@ -1,0 +1,267 @@
+<?php require_once 'check_session.php'; ?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="img/logo-16x16.png" />
+    <title>SmartGarden</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="./admin-css/bootstrap.min.css" rel="stylesheet">
+    <link href="./admin-css/style.css" rel="stylesheet">
+    <style>
+        .table-modern th { background: linear-gradient(135deg, #2ecc71, #27ae60) !important; color: white; }
+        .btn-edit { background-color: #f39c12; color: white; border: none; }
+        .btn-edit:hover { background-color: #e67e22; }
+        .btn-delete { background-color: #e74c3c; color: white; border: none; }
+        .btn-delete:hover { background-color: #c0392b; }
+        .badge-event { background-color: #9b59b6; }
+        .badge-user { background-color: #3498db; }
+        .stats-card { transition: all 0.3s; }
+        .stats-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid position-relative bg-white d-flex p-0">
+    <!-- Sidebar -->
+    <div class="sidebar pe-4 pb-3">
+        <nav class="navbar bg-light navbar-light">
+            <a href="backoffice.php" class="navbar-brand mx-4 mb-2 mt-2">
+                <h3 style="font-size: 1.2rem;padding-left: 20px; color: #2ecc71;">
+                    <img src="./admin-img/logo-64x64.png" alt="Logo" class="me-2" style="width: 32px; height: 32px;">SmartGarden
+                </h3>
+            </a>
+            <div class="d-flex align-items-center ms-4 mb-4">
+                <div class="position-relative">
+                    <img class="rounded-circle" src="./admin-img/user.jpg" alt="" style="width: 40px; height: 40px;">
+                    <div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1"></div>
+                </div>
+                <div class="ms-3">
+                    <h6 class="mb-0"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></h6>
+                    <span>Administrateur</span>
+                </div>
+            </div>
+            <div class="navbar-nav w-100">
+                <a href="backoffice.php" class="nav-item nav-link"><i class="fa fa-file-alt me-2"></i>Publication</a>
+                <a href="plantes.php" class="nav-item nav-link"><i class="fa fa-leaf me-2"></i>Plantes</a>
+                <a href="evenements.php" class="nav-item nav-link"><i class="fa fa-calendar me-2"></i>Evenements</a>
+                <a href="reservations.php" class="nav-item nav-link active"><i class="fa fa-ticket-alt me-2"></i>Réservations</a>
+                <a href="utilisateurs.php" class="nav-item nav-link"><i class="fa fa-user me-2"></i>Utilisateur</a>
+                <a href="listCategorie.php" class="nav-item nav-link"><i class="fa fa-microchip me-2"></i>Capteurs</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Content -->
+    <div class="content w-100">
+        <nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">
+            <a href="#" class="sidebar-toggler flex-shrink-0"><i class="fa fa-bars"></i></a>
+            <div class="navbar-nav align-items-center ms-auto">
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                        <img class="rounded-circle me-lg-2" src="./admin-img/user.jpg" alt="" style="width: 40px; height: 40px;">
+                        <span class="d-none d-lg-inline-flex"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
+                        <a href="#" class="dropdown-item">Déconnexion</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid pt-4 px-4">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h4 class="mb-0">Gestion des Réservations</h4>
+                    <small class="text-muted">Voir et gérer toutes les réservations</small>
+                </div>
+                <button id="refreshBtn" class="btn btn-outline-secondary">
+                    <i class="fa fa-sync-alt me-1"></i> Rafraîchir
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="container-fluid px-4 mb-5">
+            <div class="row g-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stats-card bg-white text-center p-4 rounded-4 shadow-lg border-0">
+                        <i class="fa fa-ticket-alt text-primary mb-3" style="font-size: 3.5rem;"></i>
+                        <h3 id="statTotal" class="text-primary fw-bold">0</h3>
+                        <p class="text-muted mb-0">Total réservations</p>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stats-card bg-white text-center p-4 rounded-4 shadow-lg border-0">
+                        <i class="fa fa-users text-success mb-3" style="font-size: 3.5rem;"></i>
+                        <h3 id="statUsers" class="text-success fw-bold">0</h3>
+                        <p class="text-muted mb-0">Utilisateurs uniques</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="container-fluid px-4">
+            <div class="bg-white rounded-4 p-4 shadow-lg">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0 fw-bold text-dark">Liste des réservations</h5>
+                    <small id="listMessage" class="text-muted fw-medium">Chargement...</small>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-modern">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Événement</th>
+                                <th>Date événement</th>
+                                <th>Client</th>
+                                <th>Email</th>
+                                <th>Localisation</th>
+                                <th>Date réservation</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservationsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Top Right -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100; margin-top: 70px;">
+    <div id="appToast" class="toast align-items-center text-white border-0 shadow-lg" role="alert">
+        <div class="d-flex">
+            <div class="toast-body fw-bold" id="toastBody">Succès !</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const API_URL = '../../api/reservations_api.php';
+
+    function showToast(message, success = true) {
+        const toastEl = document.getElementById('appToast');
+        const toastBody = document.getElementById('toastBody');
+        toastBody.textContent = message;
+        toastEl.className = `toast align-items-center text-white border-0 ${success ? 'bg-success' : 'bg-danger'} shadow-lg`;
+        new bootstrap.Toast(toastEl, { delay: 4000 }).show();
+    }
+
+    async function loadReservations() {
+        document.getElementById('listMessage').textContent = 'Chargement...';
+        document.getElementById('reservationsBody').innerHTML = '';
+
+        try {
+            console.log('Fetching from:', `${API_URL}?action=listReservations`);
+            const response = await fetch(`${API_URL}?action=listReservations`);
+            const responseText = await response.text();
+            console.log('Raw response:', responseText);
+            
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('JSON Parse Error:', parseError);
+                console.error('Response was:', responseText);
+                showToast("Erreur: réponse invalide du serveur", false);
+                document.getElementById('listMessage').textContent = 'Erreur de format de données';
+                return;
+            }
+            
+            console.log('Parsed result:', result);
+
+            if (result.status !== "success") {
+                showToast(result.message || "Erreur de chargement", false);
+                document.getElementById('listMessage').textContent = result.message || 'Erreur';
+                return;
+            }
+            
+            if (!result.data || result.data.length === 0) {
+                document.getElementById('listMessage').textContent = 'Aucune réservation trouvée';
+                document.getElementById('statTotal').textContent = '0';
+                document.getElementById('statUsers').textContent = '0';
+                return;
+            }
+
+            const reservations = result.data;
+            document.getElementById('statTotal').textContent = reservations.length;
+            const uniqueUsers = [...new Set(reservations.map(r => r.idUtilisateur).filter(Boolean))].length;
+            document.getElementById('statUsers').textContent = uniqueUsers;
+
+            let html = '';
+            reservations.forEach((r, i) => {
+                const eventTitle = r.event_title || r.type_event || 'Événement inconnu';
+                const dateEvent = r.date_event ? new Date(r.date_event).toLocaleDateString('fr-FR') : '-';
+                const dateResa = new Date(r.date_reservation).toLocaleString('fr-FR');
+                const userName = r.nom || 'Utilisateur inconnu';
+                const userEmail = r.email || '-';
+                const userLocation = r.localisation || '-';
+
+                html += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td><span class="badge badge-event">${eventTitle}</span></td>
+                        <td>${dateEvent}</td>
+                        <td><strong>${userName}</strong></td>
+                        <td>${userEmail}</td>
+                        <td>${userLocation}</td>
+                        <td>${dateResa}</td>
+                        <td class="text-center">
+                            <button onclick="deleteReservation(${r.id_reservation})" 
+                                    class="btn btn-delete btn-sm" title="Supprimer">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+
+            document.getElementById('reservationsBody').innerHTML = html;
+            document.getElementById('listMessage').textContent = `${reservations.length} réservation(s)`;
+
+        } catch (err) {
+            console.error(err);
+            showToast("Erreur de chargement des réservations", false);
+            document.getElementById('listMessage').textContent = 'Erreur de connexion';
+        }
+    }
+
+    async function deleteReservation(id) {
+        if (!confirm("Supprimer cette réservation ?")) return;
+
+        try {
+            const res = await fetch(`${API_URL}?action=deleteReservation`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_reservation: id })
+            });
+            const json = await res.json();
+
+            showToast(json.status === "success" ? "Réservation supprimée !" : json.message || "Erreur", json.status === "success");
+            if (json.status === "success") loadReservations();
+
+        } catch (err) {
+            showToast("Erreur réseau", false);
+        }
+    }
+
+    // Démarrage
+    document.addEventListener('DOMContentLoaded', () => {
+        loadReservations();
+        document.getElementById('refreshBtn').onclick = loadReservations;
+    });
+</script>
+
+</body>
+</html>
+

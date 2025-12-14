@@ -1,4 +1,4 @@
-﻿<?php require_once 'check_session.php'; ?>
+<?php require_once 'check_session.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -50,7 +50,7 @@
                                     <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="capteurs.php" class="sidebar-item"><i class='bx bx-bookmarks text-primary'></i> Capteurs</a>
+                                    <a href="listCategorie.php" class="sidebar-item"><i class='bx bx-bookmarks text-primary'></i> Capteurs</a>
                                     <span class="badge badge-primary badge-pill"><i class='bx bx-chevron-right'></i></span>
                                 </li>
                             </ul>
@@ -121,7 +121,7 @@
                                                     <i class='bx bx-radio-circle-marked'></i>
                                                 </a>
                                                 <p class="time">
-                                                    Great, I’ll see you tomorrow!.
+                                                    Great, I�ll see you tomorrow!.
                                                 </p>
                                             </div>
                                         </li>
